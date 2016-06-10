@@ -35,6 +35,7 @@ public class CellPottsModel extends SpinModel {
 	private int delta; //average length of each cell
 
 	private ArrayList<Double> area;
+	private double cellArea;
 	private ArrayList<Double> areaTarget;
 
 	//for measuring the centre of mass of the cells
@@ -52,6 +53,7 @@ public class CellPottsModel extends SpinModel {
 	private ArrayList<Double> py;
 	private ArrayList<Double> theta;
 	private double rotateDiff = 0.1;
+	
 	private List<ArrayList<Integer>> spinXPos;
 	private List<ArrayList<Integer>> spinYPos;
 
@@ -144,31 +146,33 @@ public class CellPottsModel extends SpinModel {
 		px = new ArrayList<Double>();
 		py = new ArrayList<Double>();
 		theta = new ArrayList<Double>();
-
-		//init all arrays
-		for (int i = 0; i <= q; i++){
-			area.add(0.0);
-			areaTarget.add(0.0);
-			xcm.add(0.0);
-			ycm.add(0.0);
-			xcmNew.add(0.0);
-			ycmNew.add(0.0);
-			rx.add(0.0);
-			ry.add(0.0);
-			px.add(0.0);
-			py.add(0.0);
-			theta.add(0.0);
-		}
-
+		
 		spinXPos = new ArrayList<ArrayList<Integer>>();
 		spinYPos = new ArrayList<ArrayList<Integer>>();
 
+		//init all arrays
 		for (int i = 0; i <= q; i++){
-			spinXPos.add(new ArrayList<Integer>());
-			spinYPos.add(new ArrayList<Integer>());
+			addNewCell();
 		}
 
 		rand = new Random();
+	}
+	
+	//init variables for adding new cell
+	public void addNewCell(){
+		area.add(0.0);
+		areaTarget.add(0.0);
+		xcm.add(0.0);
+		ycm.add(0.0);
+		xcmNew.add(0.0);
+		ycmNew.add(0.0);
+		rx.add(0.0);
+		ry.add(0.0);
+		px.add(0.0);
+		py.add(0.0);
+		theta.add(0.0);
+		spinXPos.add(new ArrayList<Integer>());
+		spinYPos.add(new ArrayList<Integer>());
 	}
 
 	//initialisation of the spins
@@ -183,15 +187,17 @@ public class CellPottsModel extends SpinModel {
 
 		//initialising each of the Q cells as a square with length delta
 		delta = (int) (Math.sqrt((nx*ny)/ (double) q));
+
+		cellArea = (double) (nx*ny/2) / (double) q;
 		
 		for (int i = 1; i <= q; i++){
-			areaTarget.set(i, (double) (nx*ny) / (double) q);
+			areaTarget.set(i, (double) (nx*ny/2) / (double) q);
 			area.set(i, 0.0);
 		}
 
 		int ind1, ind2, cellind;
 		for (int i = 0; i < nx; i++){
-			for (int j = 0; j < ny; j++){
+			for (int j = 0; j < ny/2; j++){
 				ind1 = i / delta;
 				ind2 = j / delta;
 				cellind = (int) (ind2 * Math.sqrt(q)) + ind1 + 1; //use q = 0 as empty cells
@@ -271,6 +277,79 @@ public class CellPottsModel extends SpinModel {
 		}
 	}
 
+	//for changing the target area to enable cell growth
+	public void updateAreaTarget(){
+		double inc = (double) (nx*ny/2) / (double) q / (double) 1000 * 2.0;
+		for (int i = 1; i <= q; i++){
+			areaTarget.set(i, areaTarget.get(i) + inc);
+		}
+	}
+	
+	public void updateArea(){
+		for (int i = 1; i <= q; i++){
+			if (area.get(i) >= cellArea * 2.0){
+				System.out.println("Cell " + i + " has area > target.");
+				//splitCell(i);
+			}
+		}
+	}
+	
+	/*public void splitCell(int cellIndex){
+		q++;
+		addNewCell();
+		
+		double [] w = getMajorAxis(cellIndex);
+		
+		ArrayList<Integer> cellXPos = spinXPos.get(cellIndex);
+		ArrayList<Integer> cellYPos = spinYPos.get(cellIndex);
+		ArrayList<Integer> newCellXPos = spinXPos.get(q);
+		ArrayList<Integer> newCellYPos = spinYPos.get(q);
+		
+		int x, y;
+		double xDiff, yDiff, value;
+		double x0 = xcm.get(cellIndex);
+		double y0 = ycm.get(cellIndex);
+		
+		if (cellXPos.size() != cellYPos.size()){
+			System.out.println("XPos != YPos");
+		}
+		
+		
+		for (int i = 0; i < cellXPos.size(); i++){
+			x = cellXPos.get(i);
+			y = cellYPos.get(i);
+			xDiff = xDiff(x + 0.5, x0);
+			yDiff = yDiff(y + 0.5, y0);
+			value = dot(xDiff, yDiff, w[0], w[1]);
+			if (value < 0){
+				newCellXPos.add(x);
+				newCellYPos.add(y);
+				area.set(q, area.get(q)+1.0);
+				
+				cellXPos.remove((Integer) x);
+				cellYPos.remove((Integer) y);
+				area.set(cellIndex, area.get(cellIndex)-1.0);
+				
+				spin[x][y] = q;
+				
+				if (notify){
+					this.setChanged();
+					this.notifyObservers(new Object [] {x,y});
+				}	
+			}
+		}
+		areaTarget.set(cellIndex, cellArea);
+		areaTarget.set(q, cellArea);
+	}
+	
+	public double [] getMajorAxis(int cellIndex){
+		double [] axis = new double [2];
+		double theta = rand.nextDouble() * 2.0 * Math.PI;
+		axis[0] = Math.cos(theta);
+		axis[1] = Math.sin(theta);
+		return axis;
+	}*/
+
 	/**
 	 * Run the model
 	 */
@@ -295,6 +374,11 @@ public class CellPottsModel extends SpinModel {
 			if (n >= nequil && n < numOfSweeps-1){
 				writeData(n);
 			}
+			if (n < numOfSweeps){
+				updateAreaTarget();
+			}
+			
+			updateArea();
 
 		}
 		//acceptRate /= (double) ((long) numOfSweeps * nx * ny);//potentially big
