@@ -151,9 +151,6 @@ public class CellPottsModel extends SpinModel {
 
 		spinPos = new ArrayList<ArrayList<Vector2D>>();
 
-		//spinXPos = new ArrayList<ArrayList<Integer>>();
-		//spinYPos = new ArrayList<ArrayList<Integer>>();
-
 		//init all arrays
 		for (int i = 0; i <= q; i++){
 			addNewCell();
@@ -176,8 +173,6 @@ public class CellPottsModel extends SpinModel {
 		py.add(0.0);
 		theta.add(0.0);
 		spinPos.add(new ArrayList<Vector2D>());
-		//spinXPos.add(new ArrayList<Integer>());
-		//spinYPos.add(new ArrayList<Integer>());
 	}
 
 	//initialisation of the spins
@@ -196,7 +191,7 @@ public class CellPottsModel extends SpinModel {
 		cellArea = (double) (nx*ny/3) / (double) q;
 
 		for (int i = 1; i <= q; i++){
-			areaTarget.set(i, (double) (nx*ny/3) / (double) q);
+			areaTarget.set(i, (double) (nx*ny/3) / (double) q * (1 + rand.nextDouble()));
 			area.set(i, 0.0);
 		}
 
@@ -212,8 +207,6 @@ public class CellPottsModel extends SpinModel {
 				spin[i][j] = cellind; 
 				area.set(spin[i][j], area.get(spin[i][j]) + 1.0);
 				spinPos.get(cellind).add(new Vector2D(i,j));
-				//spinXPos.get(cellind).add(i);
-				//spinYPos.get(cellind).add(j);
 			}
 		}
 	}
@@ -234,8 +227,6 @@ public class CellPottsModel extends SpinModel {
 					this.spin[i][j] = spin[i][j];
 					area.set(spin[i][j], area.get(spin[i][j]) + 1.0);
 					spinPos.get(spin[i][j]).add(new Vector2D(i,j));
-					//spinXPos.get(spin[i][j]).add(i);
-					//spinYPos.get(spin[i][j]).add(j);
 				}
 			}
 
@@ -305,11 +296,7 @@ public class CellPottsModel extends SpinModel {
 		addNewCell();
 
 		double [] w = getMajorAxis(cellIndex);
-
-		//ArrayList<Integer> cellXPos = spinXPos.get(cellIndex);
-		//ArrayList<Integer> cellYPos = spinYPos.get(cellIndex);
-		//ArrayList<Integer> newCellXPos = spinXPos.get(q);
-		//ArrayList<Integer> newCellYPos = spinYPos.get(q);
+		
 		ArrayList<Vector2D> cellPos = spinPos.get(cellIndex);
 		ArrayList<Vector2D> newCellPos = spinPos.get(q);
 
@@ -345,13 +332,74 @@ public class CellPottsModel extends SpinModel {
 		areaTarget.set(cellIndex, cellArea);
 		areaTarget.set(q, cellArea);
 	}
-
+	
+	/*
+	 * store the eigenvectors of the gyration tensor of a cell as 
+	 * rows in a matrix
+	 */
 	public double [] getMajorAxis(int cellIndex){
-		double [] axis = new double [2];
-		double theta = rand.nextDouble() * 2.0 * Math.PI;
-		axis[0] = Math.cos(theta);
-		axis[1] = Math.sin(theta);
-		return axis;
+		//compute eigenvalues
+		double sxx = gyrationTensor(cellIndex, 0, 0);
+		double syy = gyrationTensor(cellIndex, 1, 1);
+		double sxy = gyrationTensor(cellIndex, 0, 1);
+		double sum = sxx + syy;
+		double sqrt = Math.sqrt(sum * sum - 4.0 * (sxx * syy - sxy * sxy));
+		
+		/*
+		 * compute the largest eigenvalue as that corresponds to the eigenvector
+		 * that describes the major axis
+		 */
+		double eigenval = (sum + sqrt) / 2.0;
+		double [] eigenvec = new double [2];
+		double x, y, len;
+		x = 1.0;
+		y = (eigenval - sxx) / sxy;
+		len = Math.sqrt(mag2(x,y));
+		x /= len;
+		y /= len;
+		eigenvec[0] = x;
+		eigenvec[1] = y;
+		
+		return eigenvec;
+	}
+	
+	//return the (i,j) element of the gyration tensor
+	public double gyrationTensor(int cellIndex, int i, int j){
+		double avg = 0.0;
+		ArrayList<Vector2D> pos = spinPos.get(cellIndex);
+		int n = pos.size();
+		if (i == 0 && j == 0){
+			double x0 = xcm.get(cellIndex);
+			double dx;
+			for (int k = 0; k < n; k++){
+				dx = xDiff(pos.get(k).getX() + 0.5, x0);
+				avg += dx * dx;
+			}
+			return avg / (double) n;
+			
+		} else if (i == 1 && j == 1){
+			double y0 = ycm.get(cellIndex);
+			double dy;
+			for (int k = 0; k < n; k++){
+				dy = yDiff(pos.get(k).getY() + 0.5, y0);
+				avg += dy * dy;
+			}
+			return avg / (double) n;
+			
+		} else if (i == 0 && j == 1 || i == 1 && j == 0){
+			double x0 = xcm.get(cellIndex);
+			double y0 = ycm.get(cellIndex);
+			double dx, dy;
+			Vector2D pt;
+			for (int k = 0; k < n; k++){
+				pt = pos.get(k);
+				dx = xDiff(pt.getX() + 0.5, x0);
+				dy = yDiff(pt.getY() + 0.5, y0);
+				avg += dx * dy;
+			}
+			return avg / (double) n;
+		}
+		return 0.0;
 	}
 
 	/**
@@ -370,7 +418,7 @@ public class CellPottsModel extends SpinModel {
 
 			//only start measuring CM right before equilibrium is reached
 			
-			updateCM(n);
+			updateCM();
 
 			if (n > nequil && n < numOfSweeps){
 				updateR();
@@ -379,7 +427,9 @@ public class CellPottsModel extends SpinModel {
 				writeData(n);
 			}
 			
-			updateAreaTarget();
+			if (n > nequil){
+				updateAreaTarget();
+			}
 			updateArea();
 
 		}
@@ -457,10 +507,6 @@ public class CellPottsModel extends SpinModel {
 				spin[i][j] = newSpin;
 				spinPos.get(oldSpin).remove(new Vector2D(i,j));
 				spinPos.get(newSpin).add(new Vector2D(i,j));
-				/*spinXPos.get(oldSpin).remove(new Integer(i));
-				spinYPos.get(oldSpin).remove(new Integer(j));
-				spinXPos.get(newSpin).add(new Integer(i));
-				spinYPos.get(newSpin).add(new Integer(j));*/
 
 				acceptRate = acceptRate + 1.0;
 
@@ -593,31 +639,6 @@ public class CellPottsModel extends SpinModel {
 	 * @return a vector storing the change in the CM
 	 */
 	public double [] calculateDeltaCM(int x, int y, int spin, boolean remove){
-		/*ArrayList<Integer> xPos = spinXPos.get(spin);
-		ArrayList<Integer> yPos = spinYPos.get(spin);
-		double xcm = calculateCM(xPos, nx);
-		double ycm = calculateCM(yPos, ny);
-		double xcmNew, ycmNew;
-
-		Integer xint = new Integer(x);
-		Integer yint = new Integer(y);
-
-		if (remove){
-			xPos.remove(xint);
-			yPos.remove(yint);
-			xcmNew = calculateCM(xPos, nx);
-			ycmNew = calculateCM(yPos, ny);
-			xPos.add(xint);
-			yPos.add(yint);
-		} else {
-			xPos.add(xint);
-			yPos.add(yint);
-			xcmNew = calculateCM(xPos, nx);
-			ycmNew = calculateCM(yPos, ny);
-			xPos.remove(xint);
-			yPos.remove(yint);
-		}
-		return new double []{xDiff(xcmNew, xcm), yDiff(ycmNew, ycm)};*/
 		ArrayList<Vector2D> pos = spinPos.get(spin);
 		double [] cm = calculateCM(pos);
 		double [] cmNew;
@@ -719,7 +740,7 @@ public class CellPottsModel extends SpinModel {
 	/**
 	 * Calculate the centre of mass (CM) for all cells
 	 */
-	public void updateCM(int n){
+	public void updateCM(){
 		for (int i = 0; i <= q; i++){
 			xcm.set(i, xcmNew.get(i));
 			ycm.set(i, ycmNew.get(i));

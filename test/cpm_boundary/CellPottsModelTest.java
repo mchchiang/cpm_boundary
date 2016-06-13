@@ -428,6 +428,50 @@ public class CellPottsModelTest {
 				2.5, model.calculateCM(model.getSpinYPos(5), 6), tol);
 	}
 	
+	@Test
+	public void testCalculateCM3k(){
+		int [][] spin = new int [][]{
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,0,0,0},
+				{0,1,1,1,1,1,0,0},
+				{0,1,1,1,1,1,1,0},
+				{0,0,1,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {1.0,1.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 1, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		assertEquals("Returned wrong xcm value for spin 1",
+				3.82, model.calculateCM(model.getSpinXPos(1), 8), tol);
+	}
+	
+	@Test
+	public void testCalculateCM3l(){
+		int [][] spin = new int [][]{
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,0,0,0},
+				{0,1,1,1,1,1,0,0},
+				{0,1,1,1,1,1,1,0},
+				{0,0,1,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {1.0,1.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 1, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		assertEquals("Returned wrong ycm value for spin 1",
+				3.94, model.calculateCM(model.getSpinYPos(1), 8), tol);
+	}
+	
 	/*@Test
 	public void testCalculateDeltaCM1a(){
 		int [][] spin = new int [][]{
@@ -740,5 +784,126 @@ public class CellPottsModelTest {
 				169.0, model.mag2(5.0, 12.0), tol);
 	}
 	
+	@Test
+	public void testGyrationTensor1XX(){
+		int [][] spin = new int [][]{
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,0,0,0},
+				{0,1,1,1,1,1,0,0},
+				{0,1,1,1,1,1,1,0},
+				{0,0,1,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {1.0,1.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 1, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.updateCM();
+		model.updateCM();
+		assertEquals("return wrong gyration tensor comp xx value",
+				2.1376, model.gyrationTensor(1, 0, 0), tol);
+	}
 	
+	@Test
+	public void testGyrationTensor1YY(){
+		int [][] spin = new int [][]{
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,0,0,0},
+				{0,1,1,1,1,1,0,0},
+				{0,1,1,1,1,1,1,0},
+				{0,0,1,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {1.0,1.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 1, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.updateCM();
+		model.updateCM();
+		assertEquals("return wrong gyration tensor comp yy value",
+				1.9264, model.gyrationTensor(1, 1, 1), tol);
+	}
+
+	@Test
+	public void testGyrationTensor1XY(){
+		int [][] spin = new int [][]{
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,0,0,0},
+				{0,1,1,1,1,1,0,0},
+				{0,1,1,1,1,1,1,0},
+				{0,0,1,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {1.0,1.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 1, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.updateCM();
+		model.updateCM();
+		assertEquals("return wrong gyration tensor comp xy value",
+				0.3392, model.gyrationTensor(1, 0, 1), tol);
+	}
+	
+	@Test
+	public void testGyrationTensor1YX(){
+		int [][] spin = new int [][]{
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,0,0,0},
+				{0,1,1,1,1,1,0,0},
+				{0,1,1,1,1,1,1,0},
+				{0,0,1,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {1.0,1.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 1, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.updateCM();
+		model.updateCM();
+		assertEquals("return wrong gyration tensor comp xy value",
+				0.3392, model.gyrationTensor(1, 1, 0), tol);
+	}
+	
+	@Test
+	public void testGetMajorAxis(){
+		int [][] spin = new int [][]{
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,0,0,0},
+				{0,1,1,1,1,1,0,0},
+				{0,1,1,1,1,1,1,0},
+				{0,0,1,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {1.0,1.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 1, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.updateCM();
+		model.updateCM();
+		double [] vec = model.getMajorAxis(1);
+		assertEquals("return wrong value for major axis",
+				0.80537229, vec[0], tol);
+		assertEquals("return wrong value for major axis",
+				0.592769327, vec[1], tol);
+	}
 }

@@ -13,6 +13,17 @@ public class Vector2D {
 	public int getX(){return x;}
 	public int getY(){return y;}
 	
+	//return the ith component
+	public int get(int i){
+		if (i == 0){
+			return x;
+		} else if (i == 1){
+			return y;
+		} else {
+			return 0;
+		}
+	}
+	
 	public boolean equals(Object obj){
 		if (obj instanceof Vector2D){
 			Vector2D v = (Vector2D) obj;

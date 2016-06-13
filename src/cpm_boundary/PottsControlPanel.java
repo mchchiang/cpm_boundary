@@ -142,7 +142,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 					double rotateDiff = Double.parseDouble(txtRotateDiff.getText());
 					int seed = -1;
 					int numOfSweeps = Integer.parseInt(txtNumOfSteps.getText());
-					int nequil = 0;
+					int nequil = 500;
 					
 					btnRun.setEnabled(false);
 					//SpinReader reader = new SpinReader();
