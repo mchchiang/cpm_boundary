@@ -47,8 +47,17 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 	private JLabel lblTemp;
 	private JTextField txtTemp;
 	
+	private JLabel lblGrowthRate;
+	private JTextField txtGrowthRate;
+	
+	private JLabel lblFracOccupied;
+	private JTextField txtFracOccupied;
+	
 	private JLabel lblNumOfSteps;
 	private JTextField txtNumOfSteps;
+	
+	private JLabel lblNEquil;
+	private JTextField txtNEquil;
 	
 	private JButton btnRun;
 	
@@ -82,7 +91,16 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		lblMotility = new JLabel("Motility: ");
 		
 		txtRotateDiff = new JTextField(3);
-		lblRotateDiff = new JLabel("Rotate Diff: ");		
+		lblRotateDiff = new JLabel("Rotate Diff: ");
+		
+		txtGrowthRate = new JTextField(3);
+		lblGrowthRate = new JLabel("Growth Rate: ");
+		
+		txtNEquil = new JTextField(3);
+		lblNEquil = new JLabel("nequil: ");
+		
+		txtFracOccupied = new JTextField(3);
+		lblFracOccupied = new JLabel("Fraction occupied: ");
 		
 		txtNumOfSteps = new JTextField(3);
 		lblNumOfSteps = new JLabel("Steps: ");
@@ -103,6 +121,8 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		modelParamsPanel.add(txtMotility);
 		modelParamsPanel.add(lblRotateDiff);
 		modelParamsPanel.add(txtRotateDiff);
+		modelParamsPanel.add(lblGrowthRate);
+		modelParamsPanel.add(txtGrowthRate);
 		
 		simParamsPanel = new JPanel();
 		simParamsPanel.add(lblWidth);
@@ -111,8 +131,12 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		simParamsPanel.add(txtHeight);
 		simParamsPanel.add(lblQ);
 		simParamsPanel.add(txtQ);
+		simParamsPanel.add(lblFracOccupied);
+		simParamsPanel.add(txtFracOccupied);
 		simParamsPanel.add(lblNumOfSteps);
 		simParamsPanel.add(txtNumOfSteps);
+		simParamsPanel.add(lblNEquil);
+		simParamsPanel.add(txtNEquil);
 		simParamsPanel.add(btnRun);
 		
 		setLayout(new BorderLayout());
@@ -140,16 +164,18 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 					double beta = Double.parseDouble(txtBeta.getText());
 					double motility = Double.parseDouble(txtMotility.getText());
 					double rotateDiff = Double.parseDouble(txtRotateDiff.getText());
+					double growthRate = Double.parseDouble(txtGrowthRate.getText());
+					double fracOccupied = Double.parseDouble(txtFracOccupied.getText());
 					int seed = -1;
 					int numOfSweeps = Integer.parseInt(txtNumOfSteps.getText());
-					int nequil = 500;
+					int nequil = Integer.parseInt(txtNEquil.getText());
 					
 					btnRun.setEnabled(false);
 					//SpinReader reader = new SpinReader();
 					//reader.openReader("init_spin.dat");
 					CellPottsModel model = new CellPottsModel(
 							nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
-							seed, numOfSweeps, nequil, new DataWriter [] {}, true);
+							growthRate, fracOccupied, seed, numOfSweeps, nequil, new DataWriter [] {}, true);
 					model.initSpin();
 					//model.initSpin(reader.readSpins());
 					model.initPolarity();

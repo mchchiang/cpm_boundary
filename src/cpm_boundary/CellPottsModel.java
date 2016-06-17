@@ -23,6 +23,7 @@ public class CellPottsModel extends SpinModel {
 	private double temperature;
 	private double lambda;
 	private double motility;
+	private double growthRate;
 
 	private int numOfSweeps = 0;
 	private int nequil = 0;
@@ -33,9 +34,10 @@ public class CellPottsModel extends SpinModel {
 
 	//physical quantities of each cell
 	private int delta; //average length of each cell
-
-	private ArrayList<Double> area;
 	private double cellArea;
+	private double fracOccupied;
+	
+	private ArrayList<Double> area;
 	private ArrayList<Double> areaTarget;
 
 	//for measuring the centre of mass of the cells
@@ -107,6 +109,51 @@ public class CellPottsModel extends SpinModel {
 		this.alpha = alpha;
 		this.beta = beta;
 		this.rotateDiff = rotateDiff;
+		this.growthRate = 0.0;
+		this.fracOccupied = 1.0;
+		this.numOfSweeps = n;
+		this.nequil = nequil;
+		this.writers = writers;
+		this.notify = notify;
+	}
+	
+	/**
+	 * Initialise the cellular Potts model
+	 * @param nx number of columns in the lattice
+	 * @param ny number of rows in the lattice
+	 * @param q number of cells
+	 * @param temp effective temperature
+	 * @param lambda strength on area constraint
+	 * @param alpha interfacial energy between cells
+	 * @param beta free boundary energy
+	 * @param motility cell motility strength (P)
+	 * @param rotateDiff rotational diffusion coefficient
+	 * @param growthRate growth rate of the cell (pixel sq per MCS)
+	 * @param fracOccupied fraction of total area occupied by cells
+	 * @param seed seed for random generator
+	 * @param n number of Monte-Carlo steps (MCS) to take in the simulation
+	 * @param nequil number of MCS to take before making measurements
+	 * @param writers data writers to store measurements to file
+	 * @param notify whether or not to notify any observers when the spin 
+	 * at a lattice site is updated
+	 */
+	public CellPottsModel(int nx, int ny, int q, double temp, 
+			double lambda, double alpha, double beta, double motility, 
+			double rotateDiff, double growthRate, double fracOccupied,
+			int seed, int n, int nequil, DataWriter [] writers,
+			boolean notify){
+		this.nx = nx;
+		this.ny = ny;
+		this.q = q;
+		this.seed = seed;
+		this.temperature = temp;
+		this.lambda = lambda;
+		this.motility = motility;
+		this.alpha = alpha;
+		this.beta = beta;
+		this.rotateDiff = rotateDiff;
+		this.growthRate = growthRate;
+		this.fracOccupied = fracOccupied;
 		this.numOfSweeps = n;
 		this.nequil = nequil;
 		this.writers = writers;
@@ -186,13 +233,20 @@ public class CellPottsModel extends SpinModel {
 		spin = new int [nx][ny];
 
 		//initialising each of the Q cells as a square with length delta
-		delta = (int) (Math.sqrt((nx*ny)/ (double) q));
+		cellArea = (double) (nx*ny*fracOccupied) / (double) q;
+		
+		delta = (int) (Math.sqrt(cellArea));		
 
-		cellArea = (double) (nx*ny/3) / (double) q;
-
-		for (int i = 1; i <= q; i++){
-			areaTarget.set(i, (double) (nx*ny/3) / (double) q * (1 + rand.nextDouble()));
-			area.set(i, 0.0);
+		if (growthRate > 0.0){
+			for (int i = 1; i <= q; i++){
+				areaTarget.set(i, cellArea * (1 + rand.nextDouble()));
+				area.set(i, 0.0);
+			}
+		} else {
+			for (int i = 1; i <= q; i++){
+				areaTarget.set(i, cellArea);
+				area.set(i, 0.0);
+			}
 		}
 
 		int ind1, ind2, cellind;
@@ -276,16 +330,14 @@ public class CellPottsModel extends SpinModel {
 
 	//for changing the target area to enable cell growth
 	public void updateAreaTarget(){
-		double inc = (double) (nx*ny/3) / (double) q / (double) 1000 * 2.0;
 		for (int i = 1; i <= q; i++){
-			areaTarget.set(i, areaTarget.get(i) + inc);
+			areaTarget.set(i, areaTarget.get(i) + growthRate);
 		}
 	}
 
 	public void updateArea(){
 		for (int i = 1; i <= q; i++){
 			if (area.get(i) >= cellArea * 2.0){
-				//System.out.println("Cell " + i + " has area > target.");
 				splitCell(i);
 			}
 		}
@@ -411,7 +463,7 @@ public class CellPottsModel extends SpinModel {
 
 		for (int n = 0;  n < numOfSweeps; n++){
 			for (int k = 0; k < nx*ny; k++){
-				nextStep();	
+				nextStep(n);	
 			}
 
 			updatePolarity();
@@ -441,7 +493,7 @@ public class CellPottsModel extends SpinModel {
 	/**
 	 * Take a single elementary step in the simulation
 	 */
-	public void nextStep(){
+	public void nextStep(int n){
 		int i, j, p;
 		int newSpin = 0;
 
@@ -497,7 +549,7 @@ public class CellPottsModel extends SpinModel {
 			double totalEnergy = negDeltaE;
 
 			//only run the motility calculation if it is non-zero
-			if (motility > 0.000001){
+			if (motility > 0.0 && n > nequil){
 				totalEnergy += motilityE(i, j, newSpin, motility);
 			} 
 
@@ -741,7 +793,7 @@ public class CellPottsModel extends SpinModel {
 	 * Calculate the centre of mass (CM) for all cells
 	 */
 	public void updateCM(){
-		for (int i = 0; i <= q; i++){
+		for (int i = 1; i <= q; i++){
 			xcm.set(i, xcmNew.get(i));
 			ycm.set(i, ycmNew.get(i));
 
