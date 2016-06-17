@@ -60,6 +60,11 @@ public class CellPottsModel extends SpinModel {
 
 	private List<ArrayList<Vector2D>> spinPos;
 
+	//variables for cell division
+	private int dormantPeriod = 1000;
+	private ArrayList<Integer> lastDivisionTime;
+	private double divisionConst = 5E7;
+	
 	//variables for calculating acceptance rate
 	private double acceptRate;
 	private long diffSpinStep;
@@ -179,7 +184,7 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public void init(){
 		acceptRate = 0.0;
-
+		rand = new Random();
 		area = new ArrayList<Double>();
 		areaTarget = new ArrayList<Double>();
 
@@ -194,6 +199,8 @@ public class CellPottsModel extends SpinModel {
 		px = new ArrayList<Double>();
 		py = new ArrayList<Double>();
 		theta = new ArrayList<Double>();
+		
+		lastDivisionTime = new ArrayList<Integer>();
 
 		spinPos = new ArrayList<ArrayList<Vector2D>>();
 
@@ -201,8 +208,6 @@ public class CellPottsModel extends SpinModel {
 		for (int i = 0; i <= q; i++){
 			addNewCell();
 		}
-
-		rand = new Random();
 	}
 
 	//init variables for adding new cell
@@ -218,6 +223,7 @@ public class CellPottsModel extends SpinModel {
 		px.add(0.0);
 		py.add(0.0);
 		theta.add(0.0);
+		lastDivisionTime.add(nequil + (int) (nequil * rand.nextDouble()));
 		spinPos.add(new ArrayList<Vector2D>());
 	}
 
@@ -334,15 +340,34 @@ public class CellPottsModel extends SpinModel {
 		}
 	}
 
-	public void updateArea(){
+	public void updateArea(int time){
 		for (int i = 1; i <= q; i++){
-			if (area.get(i) >= cellArea * 2.0){
+			/*if (area.get(i) >= cellArea * 2.0){
 				splitCell(i);
+			}*/
+			if (shouldDivide(time, i, rand.nextDouble())){
+				splitCell(time, i);
+			}
+		}
+	}
+	
+	public boolean shouldDivide(int time, int cellIndex, double r){
+		int dt = time - lastDivisionTime.get(cellIndex);
+		if (dt < dormantPeriod || area.get(cellIndex) < 1.2 * cellArea){
+			return false;
+		} else {
+			double sq = beta / alpha / (double) dt;
+			sq *= sq; 
+			double prob = 1.0 / (divisionConst * sq + 1);
+			if (prob > r){
+				return true;
+			} else {
+				return false;
 			}
 		}
 	}
 
-	public void splitCell(int cellIndex){
+	public void splitCell(int time, int cellIndex){
 		q++;
 		addNewCell();
 
@@ -382,6 +407,8 @@ public class CellPottsModel extends SpinModel {
 		}
 		areaTarget.set(cellIndex, cellArea);
 		areaTarget.set(q, cellArea);
+		lastDivisionTime.set(cellIndex, time);
+		lastDivisionTime.set(q, time);
 	}
 	
 	/*
@@ -491,9 +518,8 @@ public class CellPottsModel extends SpinModel {
 			}
 			
 			if (n > nequil){
-				updateAreaTarget();
+				updateArea(n);
 			}
-			updateArea();
 
 		}
 		

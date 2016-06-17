@@ -183,11 +183,15 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			int seed = -1;
 			int numOfSweeps = Integer.parseInt(txtNumOfSteps.getText());
 			int nequil = Integer.parseInt(txtNEquil.getText());
-
+			
 			model = new CellPottsModel(
 					nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
 					growthRate, fracOccupied, seed, numOfSweeps, nequil, new DataWriter [] {}, true);
-
+			
+			btnRun.setEnabled(false);
+			btnStop.setEnabled(true);
+			btnPause.setEnabled(true);
+			
 			runThread = new MyThread();
 			runThread.start();
 
@@ -195,6 +199,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			btnPause.setEnabled(false);
 			btnPause.setText("Pause");
 			model.stop();
+			
 		} else if (e.getSource() == btnPause){
 			if (model.isPaused()){
 				model.resume();
@@ -206,13 +211,10 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		}
 	}
 	
+	
 	class MyThread extends Thread {
 		@Override
 		public void run(){
-			btnRun.setEnabled(false);
-			btnStop.setEnabled(true);
-			btnPause.setEnabled(true);
-			
 			model.initSpin();
 			model.initPolarity();
 
