@@ -27,6 +27,7 @@ public class CellPottsModel extends SpinModel {
 
 	private int numOfSweeps = 0;
 	private int nequil = 0;
+	private boolean isRunning = false;
 
 	//parameters for cell adhesion energy
 	private double alpha;
@@ -460,8 +461,9 @@ public class CellPottsModel extends SpinModel {
 	public void run(){
 		acceptRate = 0.0;
 		diffSpinStep = 0;
+		isRunning = true;
 
-		for (int n = 0;  n < numOfSweeps; n++){
+		for (int n = 0;  n < numOfSweeps && isRunning; n++){
 			for (int k = 0; k < nx*ny; k++){
 				nextStep(n);	
 			}
@@ -486,8 +488,17 @@ public class CellPottsModel extends SpinModel {
 
 		}
 		//acceptRate /= (double) ((long) numOfSweeps * nx * ny);//potentially big
-		acceptRate /= (double) diffSpinStep;
-		writeData(numOfSweeps-1);
+		
+		if (isRunning){
+			acceptRate /= (double) diffSpinStep;
+			writeData(numOfSweeps-1);
+		}
+		
+		isRunning = false;
+	}
+	
+	public void stop(){
+		isRunning = false;
 	}
 
 	/**

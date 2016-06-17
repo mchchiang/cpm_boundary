@@ -60,8 +60,11 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 	private JTextField txtNEquil;
 	
 	private JButton btnRun;
+	private JButton btnStop;
 	
 	private PottsView view;
+	
+	private CellPottsModel model;
 	
 	public PottsControlPanel(PottsView view){
 		this.view = view;
@@ -108,6 +111,10 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		btnRun = new JButton("Run");
 		btnRun.addActionListener(this);
 		
+		btnStop = new JButton("Stop");
+		btnStop.addActionListener(this);
+		btnStop.setEnabled(false);
+		
 		modelParamsPanel = new JPanel();
 		modelParamsPanel.add(lblAlpha);
 		modelParamsPanel.add(txtAlpha);
@@ -138,6 +145,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		simParamsPanel.add(lblNEquil);
 		simParamsPanel.add(txtNEquil);
 		simParamsPanel.add(btnRun);
+		simParamsPanel.add(btnStop);
 		
 		setLayout(new BorderLayout());
 		add(modelParamsPanel, BorderLayout.NORTH);
@@ -152,32 +160,33 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		 * when the "run" button is clicked
 		 */
 		if (e.getSource() == btnRun){
+			
+			int nx = Integer.parseInt(txtWidth.getText());
+			int ny = Integer.parseInt(txtHeight.getText());
+			int q = Integer.parseInt(txtQ.getText());
+			double temp = Double.parseDouble(txtTemp.getText());
+			double lambda = Double.parseDouble(txtLambda.getText());
+			double alpha = Double.parseDouble(txtAlpha.getText());
+			double beta = Double.parseDouble(txtBeta.getText());
+			double motility = Double.parseDouble(txtMotility.getText());
+			double rotateDiff = Double.parseDouble(txtRotateDiff.getText());
+			double growthRate = Double.parseDouble(txtGrowthRate.getText());
+			double fracOccupied = Double.parseDouble(txtFracOccupied.getText());
+			int seed = -1;
+			int numOfSweeps = Integer.parseInt(txtNumOfSteps.getText());
+			int nequil = Integer.parseInt(txtNEquil.getText());
+			
+			model = new CellPottsModel(
+					nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
+					growthRate, fracOccupied, seed, numOfSweeps, nequil, new DataWriter [] {}, true);
+			
 			Thread runthread = new Thread(){
 				@Override
 				public void run(){					
-					int nx = Integer.parseInt(txtWidth.getText());
-					int ny = Integer.parseInt(txtHeight.getText());
-					int q = Integer.parseInt(txtQ.getText());
-					double temp = Double.parseDouble(txtTemp.getText());
-					double lambda = Double.parseDouble(txtLambda.getText());
-					double alpha = Double.parseDouble(txtAlpha.getText());
-					double beta = Double.parseDouble(txtBeta.getText());
-					double motility = Double.parseDouble(txtMotility.getText());
-					double rotateDiff = Double.parseDouble(txtRotateDiff.getText());
-					double growthRate = Double.parseDouble(txtGrowthRate.getText());
-					double fracOccupied = Double.parseDouble(txtFracOccupied.getText());
-					int seed = -1;
-					int numOfSweeps = Integer.parseInt(txtNumOfSteps.getText());
-					int nequil = Integer.parseInt(txtNEquil.getText());
-					
 					btnRun.setEnabled(false);
-					//SpinReader reader = new SpinReader();
-					//reader.openReader("init_spin.dat");
-					CellPottsModel model = new CellPottsModel(
-							nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
-							growthRate, fracOccupied, seed, numOfSweeps, nequil, new DataWriter [] {}, true);
+					btnStop.setEnabled(true);
+					
 					model.initSpin();
-					//model.initSpin(reader.readSpins());
 					model.initPolarity();
 					
 					view.setModel(model);
@@ -188,9 +197,17 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 					view.stopDrawingImage();
 					
 					btnRun.setEnabled(true);
+					btnStop.setEnabled(false);
 				}
 			};
 			runthread.start();
+			
+		} else if (e.getSource() == btnStop){
+			model.stop();
+			view.stopDrawingImage();
+			btnRun.setEnabled(true);
+			btnStop.setEnabled(false);
 		}
 	}
+
 }
