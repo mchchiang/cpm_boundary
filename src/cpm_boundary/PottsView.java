@@ -38,7 +38,12 @@ public class PottsView extends JFrame {
 	}
 	
 	public static void main (String [] args){
-		new PottsView();
+		SwingUtilities.invokeLater(new Runnable() {
+		    @Override
+		    public void run() {
+		    	new PottsView(); 
+		    }
+		});
 	}
 	
 	/**

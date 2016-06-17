@@ -56,15 +56,12 @@ public class PottsViewPanel extends JPanel implements Observer {
 	public void setColours(){
 		int typesOfSpin = model.getTypesOfSpin();
 		colours = new ArrayList<Color>();
-		for (int i = 0; i < typesOfSpin; i++){
-			colours.add(Color.WHITE);
-		}
 		
 		for (int i = 0; i < typesOfSpin; i++){
 			if (i == 0){
-				colours.set(i, Color.WHITE);
+				colours.add(Color.WHITE);
 			} else {
-				colours.set(i, generateColour());
+				colours.add(generateColour());
 			}
 		}
 	}

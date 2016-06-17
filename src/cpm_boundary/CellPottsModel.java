@@ -27,7 +27,8 @@ public class CellPottsModel extends SpinModel {
 
 	private int numOfSweeps = 0;
 	private int nequil = 0;
-	private boolean isRunning = false;
+	private boolean running = false;
+	private boolean paused = false;
 
 	//parameters for cell adhesion energy
 	private double alpha;
@@ -58,9 +59,6 @@ public class CellPottsModel extends SpinModel {
 	private double rotateDiff = 0.1;
 
 	private List<ArrayList<Vector2D>> spinPos;
-
-	//private List<ArrayList<Integer>> spinXPos;
-	//private List<ArrayList<Integer>> spinYPos;
 
 	//variables for calculating acceptance rate
 	private double acceptRate;
@@ -457,17 +455,28 @@ public class CellPottsModel extends SpinModel {
 
 	/**
 	 * Run the model
+	 * 
 	 */
-	public void run(){
+	public void run() {
 		acceptRate = 0.0;
 		diffSpinStep = 0;
-		isRunning = true;
+		running = true;
+		paused = false;
 
-		for (int n = 0;  n < numOfSweeps && isRunning; n++){
+		for (int n = 0;  n < numOfSweeps && running; n++){
 			for (int k = 0; k < nx*ny; k++){
+				
 				nextStep(n);	
 			}
-
+			
+			synchronized(this){
+				if (paused){
+					try {
+						this.wait();
+					} catch (InterruptedException e) {}
+				}
+			}
+			
 			updatePolarity();
 
 			//only start measuring CM right before equilibrium is reached
@@ -487,18 +496,37 @@ public class CellPottsModel extends SpinModel {
 			updateArea();
 
 		}
-		//acceptRate /= (double) ((long) numOfSweeps * nx * ny);//potentially big
 		
-		if (isRunning){
+		if (running){
 			acceptRate /= (double) diffSpinStep;
 			writeData(numOfSweeps-1);
 		}
 		
-		isRunning = false;
+		running = false;
 	}
 	
-	public void stop(){
-		isRunning = false;
+	public synchronized void stop(){
+		if (paused){
+			resume();
+		}
+		running = false;
+	}
+	
+	public void pause(){
+		paused = true;
+	}
+	
+	public synchronized void resume(){
+		paused = false;
+		this.notifyAll();
+	}
+	
+	public boolean isRunning(){
+		return running;
+	}
+	
+	public boolean isPaused(){
+		return paused;
 	}
 
 	/**
