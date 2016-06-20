@@ -474,10 +474,10 @@ public class CellPottsModel extends SpinModel {
 
 		for (int n = 0;  n < numOfSweeps && running; n++){
 			for (int k = 0; k < nx*ny; k++){
-
 				nextStep(n);	
 			}
-
+			
+			//for pausing the simulation
 			synchronized(this){
 				if (paused){
 					try {
@@ -487,22 +487,15 @@ public class CellPottsModel extends SpinModel {
 			}
 
 			updatePolarity();
-
-			//only start measuring CM right before equilibrium is reached
-
 			updateCM();
 
-			if (n > nequil && n < numOfSweeps){
+			if (n > nequil){
 				updateR();
+				updateArea(n);
 			}
 			if (n >= nequil && n < numOfSweeps-1){
 				writeData(n);
 			}
-
-			if (n > nequil){
-				updateArea(n);
-			}
-
 		}
 
 		if (running){
