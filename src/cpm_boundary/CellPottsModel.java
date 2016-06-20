@@ -23,7 +23,6 @@ public class CellPottsModel extends SpinModel {
 	private double temperature;
 	private double lambda;
 	private double motility;
-	private double growthRate;
 
 	private int numOfSweeps = 0;
 	private int nequil = 0;
@@ -38,7 +37,7 @@ public class CellPottsModel extends SpinModel {
 	private int delta; //average length of each cell
 	private double cellArea;
 	private double fracOccupied;
-	
+
 	private ArrayList<Double> area;
 	private ArrayList<Double> areaTarget;
 
@@ -64,7 +63,7 @@ public class CellPottsModel extends SpinModel {
 	private int dormantPeriod = 1000;
 	private ArrayList<Integer> lastDivisionTime;
 	private double divisionConst = 5E7;
-	
+
 	//variables for calculating acceptance rate
 	private double acceptRate;
 	private long diffSpinStep;
@@ -113,14 +112,13 @@ public class CellPottsModel extends SpinModel {
 		this.alpha = alpha;
 		this.beta = beta;
 		this.rotateDiff = rotateDiff;
-		this.growthRate = 0.0;
 		this.fracOccupied = 1.0;
 		this.numOfSweeps = n;
 		this.nequil = nequil;
 		this.writers = writers;
 		this.notify = notify;
 	}
-	
+
 	/**
 	 * Initialise the cellular Potts model
 	 * @param nx number of columns in the lattice
@@ -143,7 +141,7 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public CellPottsModel(int nx, int ny, int q, double temp, 
 			double lambda, double alpha, double beta, double motility, 
-			double rotateDiff, double growthRate, double fracOccupied,
+			double rotateDiff, double fracOccupied,
 			int seed, int n, int nequil, DataWriter [] writers,
 			boolean notify){
 		this.nx = nx;
@@ -156,7 +154,6 @@ public class CellPottsModel extends SpinModel {
 		this.alpha = alpha;
 		this.beta = beta;
 		this.rotateDiff = rotateDiff;
-		this.growthRate = growthRate;
 		this.fracOccupied = fracOccupied;
 		this.numOfSweeps = n;
 		this.nequil = nequil;
@@ -199,7 +196,7 @@ public class CellPottsModel extends SpinModel {
 		px = new ArrayList<Double>();
 		py = new ArrayList<Double>();
 		theta = new ArrayList<Double>();
-		
+
 		lastDivisionTime = new ArrayList<Integer>();
 
 		spinPos = new ArrayList<ArrayList<Vector2D>>();
@@ -239,19 +236,12 @@ public class CellPottsModel extends SpinModel {
 
 		//initialising each of the Q cells as a square with length delta
 		cellArea = (double) (nx*ny*fracOccupied) / (double) q;
-		
+
 		delta = (int) (Math.sqrt(cellArea));		
 
-		if (growthRate > 0.0){
-			for (int i = 1; i <= q; i++){
-				areaTarget.set(i, cellArea * (1 + rand.nextDouble()));
-				area.set(i, 0.0);
-			}
-		} else {
-			for (int i = 1; i <= q; i++){
-				areaTarget.set(i, cellArea);
-				area.set(i, 0.0);
-			}
+		for (int i = 1; i <= q; i++){
+			areaTarget.set(i, cellArea);
+			area.set(i, 0.0);
 		}
 
 		int ind1, ind2, cellind;
@@ -333,27 +323,17 @@ public class CellPottsModel extends SpinModel {
 		}
 	}
 
-	//for changing the target area to enable cell growth
-	public void updateAreaTarget(){
-		for (int i = 1; i <= q; i++){
-			areaTarget.set(i, areaTarget.get(i) + growthRate);
-		}
-	}
-
 	public void updateArea(int time){
 		for (int i = 1; i <= q; i++){
-			/*if (area.get(i) >= cellArea * 2.0){
-				splitCell(i);
-			}*/
 			if (shouldDivide(time, i, rand.nextDouble())){
 				splitCell(time, i);
 			}
 		}
 	}
-	
+
 	public boolean shouldDivide(int time, int cellIndex, double r){
 		int dt = time - lastDivisionTime.get(cellIndex);
-		if (dt < dormantPeriod || area.get(cellIndex) < 1.2 * cellArea){
+		if (dt < dormantPeriod || area.get(cellIndex) < 1.0 * cellArea){
 			return false;
 		} else {
 			double sq = beta / alpha / (double) dt;
@@ -372,7 +352,7 @@ public class CellPottsModel extends SpinModel {
 		addNewCell();
 
 		double [] w = getMajorAxis(cellIndex);
-		
+
 		ArrayList<Vector2D> cellPos = spinPos.get(cellIndex);
 		ArrayList<Vector2D> newCellPos = spinPos.get(q);
 
@@ -410,7 +390,7 @@ public class CellPottsModel extends SpinModel {
 		lastDivisionTime.set(cellIndex, time);
 		lastDivisionTime.set(q, time);
 	}
-	
+
 	/*
 	 * store the eigenvectors of the gyration tensor of a cell as 
 	 * rows in a matrix
@@ -422,7 +402,7 @@ public class CellPottsModel extends SpinModel {
 		double sxy = gyrationTensor(cellIndex, 0, 1);
 		double sum = sxx + syy;
 		double sqrt = Math.sqrt(sum * sum - 4.0 * (sxx * syy - sxy * sxy));
-		
+
 		/*
 		 * compute the largest eigenvalue as that corresponds to the eigenvector
 		 * that describes the major axis
@@ -437,10 +417,10 @@ public class CellPottsModel extends SpinModel {
 		y /= len;
 		eigenvec[0] = x;
 		eigenvec[1] = y;
-		
+
 		return eigenvec;
 	}
-	
+
 	//return the (i,j) element of the gyration tensor
 	public double gyrationTensor(int cellIndex, int i, int j){
 		double avg = 0.0;
@@ -454,7 +434,7 @@ public class CellPottsModel extends SpinModel {
 				avg += dx * dx;
 			}
 			return avg / (double) n;
-			
+
 		} else if (i == 1 && j == 1){
 			double y0 = ycm.get(cellIndex);
 			double dy;
@@ -463,7 +443,7 @@ public class CellPottsModel extends SpinModel {
 				avg += dy * dy;
 			}
 			return avg / (double) n;
-			
+
 		} else if (i == 0 && j == 1 || i == 1 && j == 0){
 			double x0 = xcm.get(cellIndex);
 			double y0 = ycm.get(cellIndex);
@@ -492,10 +472,10 @@ public class CellPottsModel extends SpinModel {
 
 		for (int n = 0;  n < numOfSweeps && running; n++){
 			for (int k = 0; k < nx*ny; k++){
-				
+
 				nextStep(n);	
 			}
-			
+
 			synchronized(this){
 				if (paused){
 					try {
@@ -503,11 +483,11 @@ public class CellPottsModel extends SpinModel {
 					} catch (InterruptedException e) {}
 				}
 			}
-			
+
 			updatePolarity();
 
 			//only start measuring CM right before equilibrium is reached
-			
+
 			updateCM();
 
 			if (n > nequil && n < numOfSweeps){
@@ -516,41 +496,41 @@ public class CellPottsModel extends SpinModel {
 			if (n >= nequil && n < numOfSweeps-1){
 				writeData(n);
 			}
-			
+
 			if (n > nequil){
 				updateArea(n);
 			}
 
 		}
-		
+
 		if (running){
 			acceptRate /= (double) diffSpinStep;
 			writeData(numOfSweeps-1);
 		}
-		
+
 		running = false;
 	}
-	
+
 	public synchronized void stop(){
 		if (paused){
 			resume();
 		}
 		running = false;
 	}
-	
+
 	public void pause(){
 		paused = true;
 	}
-	
+
 	public synchronized void resume(){
 		paused = false;
 		this.notifyAll();
 	}
-	
+
 	public boolean isRunning(){
 		return running;
 	}
-	
+
 	public boolean isPaused(){
 		return paused;
 	}

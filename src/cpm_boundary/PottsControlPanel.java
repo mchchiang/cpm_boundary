@@ -47,9 +47,6 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 	private JLabel lblTemp;
 	private JTextField txtTemp;
 
-	private JLabel lblGrowthRate;
-	private JTextField txtGrowthRate;
-
 	private JLabel lblFracOccupied;
 	private JTextField txtFracOccupied;
 
@@ -98,9 +95,6 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		txtRotateDiff = new JTextField(3);
 		lblRotateDiff = new JLabel("Rotate Diff: ");
 
-		txtGrowthRate = new JTextField(3);
-		lblGrowthRate = new JLabel("Growth Rate: ");
-
 		txtNEquil = new JTextField(3);
 		lblNEquil = new JLabel("nequil: ");
 
@@ -134,8 +128,6 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		modelParamsPanel.add(txtMotility);
 		modelParamsPanel.add(lblRotateDiff);
 		modelParamsPanel.add(txtRotateDiff);
-		modelParamsPanel.add(lblGrowthRate);
-		modelParamsPanel.add(txtGrowthRate);
 
 		simParamsPanel = new JPanel();
 		simParamsPanel.add(lblWidth);
@@ -178,7 +170,6 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			double beta = Double.parseDouble(txtBeta.getText());
 			double motility = Double.parseDouble(txtMotility.getText());
 			double rotateDiff = Double.parseDouble(txtRotateDiff.getText());
-			double growthRate = Double.parseDouble(txtGrowthRate.getText());
 			double fracOccupied = Double.parseDouble(txtFracOccupied.getText());
 			int seed = -1;
 			int numOfSweeps = Integer.parseInt(txtNumOfSteps.getText());
@@ -186,7 +177,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			
 			model = new CellPottsModel(
 					nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
-					growthRate, fracOccupied, seed, numOfSweeps, nequil, new DataWriter [] {}, true);
+					fracOccupied, seed, numOfSweeps, nequil, new DataWriter [] {}, true);
 			
 			btnRun.setEnabled(false);
 			btnStop.setEnabled(true);
