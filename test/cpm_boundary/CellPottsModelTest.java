@@ -803,7 +803,6 @@ public class CellPottsModelTest {
 		
 		model.initSpin(spin);
 		model.updateCM();
-		model.updateCM();
 		assertEquals("return wrong gyration tensor comp xx value",
 				2.1376, model.gyrationTensor(1, 0, 0), tol);
 	}
@@ -826,7 +825,6 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		model.updateCM();
 		model.updateCM();
 		assertEquals("return wrong gyration tensor comp yy value",
 				1.9264, model.gyrationTensor(1, 1, 1), tol);
@@ -851,7 +849,6 @@ public class CellPottsModelTest {
 		
 		model.initSpin(spin);
 		model.updateCM();
-		model.updateCM();
 		assertEquals("return wrong gyration tensor comp xy value",
 				0.3392, model.gyrationTensor(1, 0, 1), tol);
 	}
@@ -875,13 +872,12 @@ public class CellPottsModelTest {
 		
 		model.initSpin(spin);
 		model.updateCM();
-		model.updateCM();
 		assertEquals("return wrong gyration tensor comp xy value",
 				0.3392, model.gyrationTensor(1, 1, 0), tol);
 	}
 	
 	@Test
-	public void testGetMajorAxis(){
+	public void testGetMajorAxis1(){
 		int [][] spin = new int [][]{
 				{0,0,0,0,0,0,0,0},
 				{0,0,1,1,1,0,0,0},
@@ -899,11 +895,50 @@ public class CellPottsModelTest {
 		
 		model.initSpin(spin);
 		model.updateCM();
-		model.updateCM();
 		double [] vec = model.getMajorAxis(1);
 		assertEquals("return wrong value for major axis",
 				0.80537229, vec[0], tol);
 		assertEquals("return wrong value for major axis",
 				0.592769327, vec[1], tol);
+	}
+	
+	@Test
+	public void testSplitCell1(){
+		int [][] spin = new int [][]{
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,0,0,0},
+				{0,1,1,1,1,1,0,0},
+				{0,1,1,1,1,1,1,0},
+				{0,0,1,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {1.0,1.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 1, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.updateCM();
+		model.splitCell(1, 1);
+
+		int [][] expectedSpin = new int [][] {
+				{0,0,0,0,0,0,0,0},
+				{0,0,2,2,2,0,0,0},
+				{0,2,2,2,2,2,0,0},
+				{0,2,2,2,1,1,1,0},
+				{0,0,2,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		for (int i = 0; i < spin.length; i++){
+			for (int j = 0; j < spin[0].length; j++){
+				spin[i][j] = model.getSpin(i, j);
+			}
+		}
+		assertArrayEquals("splitted cell incorrectly", expectedSpin, spin);
 	}
 }

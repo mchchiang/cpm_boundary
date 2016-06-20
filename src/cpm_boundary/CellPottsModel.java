@@ -246,7 +246,7 @@ public class CellPottsModel extends SpinModel {
 
 		int ind1, ind2, cellind;
 		for (int i = 0; i < nx; i++){
-			for (int j = 0; j < ny/3; j++){
+			for (int j = 0; j < ny*fracOccupied; j++){
 				ind1 = i / delta;
 				ind2 = j / delta;
 				cellind = (int) (ind2 * Math.sqrt(q)) + ind1 + 1; //use q = 0 as empty cells
@@ -359,9 +359,8 @@ public class CellPottsModel extends SpinModel {
 		Vector2D pt;
 		int x, y;
 		double xDiff, yDiff, value;
-		double x0 = xcm.get(cellIndex);
-		double y0 = ycm.get(cellIndex);
-
+		double x0 = xcmNew.get(cellIndex);
+		double y0 = ycmNew.get(cellIndex);
 
 		for (int i = 0; i < cellPos.size(); i++){
 			pt = cellPos.get(i);
@@ -370,14 +369,17 @@ public class CellPottsModel extends SpinModel {
 			xDiff = xDiff(x + 0.5, x0);
 			yDiff = yDiff(y + 0.5, y0);
 			value = dot(xDiff, yDiff, w[0], w[1]);
+			
 			if (value < 0){
 				newCellPos.add(pt);
 				area.set(q, area.get(q)+1.0);
 
 				cellPos.remove(pt);
 				area.set(cellIndex, area.get(cellIndex)-1.0);
-
+				
 				spin[x][y] = q;
+				
+				i--;
 
 				if (notify){
 					this.setChanged();
@@ -427,7 +429,7 @@ public class CellPottsModel extends SpinModel {
 		ArrayList<Vector2D> pos = spinPos.get(cellIndex);
 		int n = pos.size();
 		if (i == 0 && j == 0){
-			double x0 = xcm.get(cellIndex);
+			double x0 = xcmNew.get(cellIndex);
 			double dx;
 			for (int k = 0; k < n; k++){
 				dx = xDiff(pos.get(k).getX() + 0.5, x0);
@@ -436,7 +438,7 @@ public class CellPottsModel extends SpinModel {
 			return avg / (double) n;
 
 		} else if (i == 1 && j == 1){
-			double y0 = ycm.get(cellIndex);
+			double y0 = ycmNew.get(cellIndex);
 			double dy;
 			for (int k = 0; k < n; k++){
 				dy = yDiff(pos.get(k).getY() + 0.5, y0);
@@ -445,8 +447,8 @@ public class CellPottsModel extends SpinModel {
 			return avg / (double) n;
 
 		} else if (i == 0 && j == 1 || i == 1 && j == 0){
-			double x0 = xcm.get(cellIndex);
-			double y0 = ycm.get(cellIndex);
+			double x0 = xcmNew.get(cellIndex);
+			double y0 = ycmNew.get(cellIndex);
 			double dx, dy;
 			Vector2D pt;
 			for (int k = 0; k < n; k++){
