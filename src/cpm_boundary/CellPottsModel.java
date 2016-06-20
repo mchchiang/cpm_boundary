@@ -60,7 +60,7 @@ public class CellPottsModel extends SpinModel {
 	private List<ArrayList<Vector2D>> spinPos;
 
 	//variables for cell division
-	private int dormantPeriod = 1000;
+	private int dormantPeriod = 100;
 	private ArrayList<Integer> lastDivisionTime;
 	private double divisionConst = 5E7;
 
@@ -535,7 +535,7 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public void nextStep(int n){
 		int i, j, p;
-		int oldSpin, newSpin = 0;
+		int oldSpin, newSpin;
 		
 
 		//only perform calculations if the neighbours don't have the same spin
@@ -551,7 +551,8 @@ public class CellPottsModel extends SpinModel {
 		do {
 			i = rand.nextInt(nx);
 			j = rand.nextInt(ny);
-
+			
+			newSpin = -1;
 			oldSpin = spin[i][j];
 			
 			p = rand.nextInt(8);
