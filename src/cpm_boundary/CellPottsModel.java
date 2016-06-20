@@ -369,16 +369,16 @@ public class CellPottsModel extends SpinModel {
 			xDiff = xDiff(x + 0.5, x0);
 			yDiff = yDiff(y + 0.5, y0);
 			value = dot(xDiff, yDiff, w[0], w[1]);
-			
+
 			if (value < 0){
 				newCellPos.add(pt);
 				area.set(q, area.get(q)+1.0);
 
 				cellPos.remove(pt);
 				area.set(cellIndex, area.get(cellIndex)-1.0);
-				
+
 				spin[x][y] = q;
-				
+
 				i--;
 
 				if (notify){
@@ -542,22 +542,25 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public void nextStep(int n){
 		int i, j, p;
-		int newSpin = 0;
-
-		i = rand.nextInt(nx);
-		j = rand.nextInt(ny);
-
-		int oldSpin = spin[i][j];
+		int oldSpin, newSpin = 0;
+		
 
 		//only perform calculations if the neighbours don't have the same spin
-		if (!hasSameNeighbours(i,j)){
-			diffSpinStep++;
+		//if (!hasSameNeighbours(i,j)){
+		diffSpinStep++;
 
-			/*
-			 * randomly pick one of its neighbour's spin (including 
-			 * the ones located at the corners with respect to
-			 * the lattice site)
-			 */
+		/*
+		 * randomly pick one of its neighbour's spin (including 
+		 * the ones located at the corners with respect to
+		 * the lattice site)
+		 */
+		
+		do {
+			i = rand.nextInt(nx);
+			j = rand.nextInt(ny);
+
+			oldSpin = spin[i][j];
+			
 			p = rand.nextInt(8);
 			if (p == 0){
 				newSpin = spin[iup(i)][j];
@@ -576,46 +579,48 @@ public class CellPottsModel extends SpinModel {
 			} else if (p == 7){
 				newSpin = spin[idown(i)][jdown(j)];
 			} 
+			
+		} while (oldSpin == newSpin);
+		
+		//update area of the affected cells due to spin change
+		double newAreaNewSpin, newAreaOldSpin;
 
-			//update area of the affected cells due to spin change
-			double newAreaNewSpin, newAreaOldSpin;
+		//if (newSpin != oldSpin){
+			newAreaNewSpin = area.get(newSpin)+1;
+			newAreaOldSpin = area.get(oldSpin)-1;
+		/*} else {
+			newAreaNewSpin = area.get(newSpin);
+			newAreaOldSpin = area.get(oldSpin);
+		}*/
 
-			if (newSpin != oldSpin){
-				newAreaNewSpin = area.get(newSpin)+1;
-				newAreaOldSpin = area.get(oldSpin)-1;
-			} else {
-				newAreaNewSpin = area.get(newSpin);
-				newAreaOldSpin = area.get(oldSpin);
-			}
+		//implement the metropolis algorithm
+		double negDeltaE = negDeltaE(i, j, newSpin, 
+				area.get(oldSpin), area.get(newSpin), 
+				newAreaOldSpin, newAreaNewSpin);
 
-			//implement the metropolis algorithm
-			double negDeltaE = negDeltaE(i, j, newSpin, 
-					area.get(oldSpin), area.get(newSpin), 
-					newAreaOldSpin, newAreaNewSpin);
+		double totalEnergy = negDeltaE;
 
-			double totalEnergy = negDeltaE;
+		//only run the motility calculation if it is non-zero
+		if (motility > 0.0 && n > nequil){
+			totalEnergy += motilityE(i, j, newSpin, motility);
+		} 
 
-			//only run the motility calculation if it is non-zero
-			if (motility > 0.0 && n > nequil){
-				totalEnergy += motilityE(i, j, newSpin, motility);
-			} 
+		if (Math.log(rand.nextDouble()) <= totalEnergy / temperature){
+			area.set(spin[i][j], newAreaOldSpin);
+			area.set(newSpin, newAreaNewSpin);
+			spin[i][j] = newSpin;
+			spinPos.get(oldSpin).remove(new Vector2D(i,j));
+			spinPos.get(newSpin).add(new Vector2D(i,j));
 
-			if (Math.log(rand.nextDouble()) <= totalEnergy / temperature){
-				area.set(spin[i][j], newAreaOldSpin);
-				area.set(newSpin, newAreaNewSpin);
-				spin[i][j] = newSpin;
-				spinPos.get(oldSpin).remove(new Vector2D(i,j));
-				spinPos.get(newSpin).add(new Vector2D(i,j));
+			acceptRate = acceptRate + 1.0;
 
-				acceptRate = acceptRate + 1.0;
-
-				if (notify){
-					this.setChanged();
-					this.notifyObservers(new Object [] {i,j});
-				}
+			if (notify){
+				this.setChanged();
+				this.notifyObservers(new Object [] {i,j});
 			}
 		}
-	}
+		//}
+}
 
 	/**
 	 * Check if all neighbours of the specified lattice site have the same spin
