@@ -63,6 +63,12 @@ public class CellPottsModel extends SpinModel {
 	private int dormantPeriod = 100;
 	private ArrayList<Integer> lastDivisionTime;
 	private double divisionConst = 5E7;
+	
+	//variables for haptotaxis
+	private double [][] fibrin;
+	private double kh = 40;
+	private double kn = Math.log(100.0) / 2000.0;
+	private double ki = 2 * kn;
 
 	//variables for calculating acceptance rate
 	private double acceptRate;
@@ -205,6 +211,15 @@ public class CellPottsModel extends SpinModel {
 		for (int i = 0; i <= q; i++){
 			addNewCell();
 		}
+		
+		//init fibrin concentration
+		fibrin = new double [nx][ny];
+		for (int i = 0; i < nx; i++){
+			for (int j = 0; j < ny; j++){
+				fibrin[i][j] = 1.0;
+			}
+		}
+		
 	}
 
 	//init variables for adding new cell
@@ -320,6 +335,27 @@ public class CellPottsModel extends SpinModel {
 			theta.set(i, angle);
 			px.set(i, Math.cos(angle));
 			py.set(i, Math.sin(angle));
+		}
+	}
+	
+	public void updateFibrin(){
+		for (int i = 0; i < nx; i++){
+			for (int j = 0; j < ny; j++){
+				if (spin[i][j] != 0){
+					fibrin[i][j] *= Math.exp(-ki);
+				} else if (spin[i][jup(j)] != 0 ||
+						   spin[i][jdown(j)] != 0 ||
+						   spin[iup(i)][j] != 0 ||
+						   spin[idown(i)][j] != 0 ||
+						   spin[iup(i)][jup(j)] != 0 ||
+						   spin[iup(i)][jdown(j)] != 0 ||
+						   spin[idown(i)][jup(j)] != 0 ||
+						   spin[idown(i)][jdown(j)] != 0){
+					fibrin[i][j] *= Math.exp(-kn);
+				} //else {
+				//	fibrin[i][j] = 0;
+				//}
+			}
 		}
 	}
 
@@ -491,7 +527,8 @@ public class CellPottsModel extends SpinModel {
 
 			if (n > nequil){
 				updateR();
-				updateArea(n);
+				updateFibrin();
+				//updateArea(n);
 			}
 			if (n >= nequil && n < numOfSweeps-1){
 				writeData(n);
@@ -536,8 +573,8 @@ public class CellPottsModel extends SpinModel {
 	public void nextStep(int n){
 		int i, j, p;
 		int oldSpin, newSpin;
+		int inew, jnew;
 		
-
 		//only perform calculations if the neighbours don't have the same spin
 		//if (!hasSameNeighbours(i,j)){
 		diffSpinStep++;
@@ -551,28 +588,39 @@ public class CellPottsModel extends SpinModel {
 		do {
 			i = rand.nextInt(nx);
 			j = rand.nextInt(ny);
+			inew = i;
+			jnew = j;
 			
 			newSpin = -1;
 			oldSpin = spin[i][j];
 			
 			p = rand.nextInt(8);
 			if (p == 0){
-				newSpin = spin[iup(i)][j];
+				inew = iup(i);
+				jnew = j;
 			} else if (p == 1){
-				newSpin = spin[idown(i)][j];
+				inew = idown(i);
+				jnew = j;
 			} else if (p == 2){
-				newSpin = spin[i][jup(j)];
+				inew = i;
+				jnew = jup(j);
 			} else if (p == 3){
-				newSpin = spin[i][jdown(j)];
+				inew = i;
+				jnew = jdown(j);
 			} else if (p == 4){
-				newSpin = spin[iup(i)][jup(j)];
+				inew = iup(i);
+				jnew = jup(j);
 			} else if (p == 5){
-				newSpin = spin[idown(i)][jup(j)];
+				inew = idown(i);
+				jnew = jup(j);
 			} else if (p == 6){
-				newSpin = spin[iup(i)][jdown(j)];
+				inew = iup(i);
+				jnew = jdown(j);
 			} else if (p == 7){
-				newSpin = spin[idown(i)][jdown(j)];
+				inew = idown(i);
+				jnew = jdown(j);
 			} 
+			newSpin = spin[inew][jnew];
 			
 		} while (oldSpin == newSpin);
 		
@@ -592,7 +640,7 @@ public class CellPottsModel extends SpinModel {
 				area.get(oldSpin), area.get(newSpin), 
 				newAreaOldSpin, newAreaNewSpin);
 
-		double totalEnergy = negDeltaE;
+		double totalEnergy = negDeltaE + negDeltaHaptoEnergy(i,j,inew,jnew);
 
 		//only run the motility calculation if it is non-zero
 		if (motility > 0.0 && n > nequil){
@@ -709,6 +757,10 @@ public class CellPottsModel extends SpinModel {
 		}
 
 		return enew - eold;
+	}
+	
+	public double negDeltaHaptoEnergy(int iold, int jold, int inew, int jnew){
+		return - kh * (fibrin[inew][jnew] - fibrin[iold][jold]);
 	}
 
 
