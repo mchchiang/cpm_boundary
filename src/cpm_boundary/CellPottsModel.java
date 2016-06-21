@@ -22,7 +22,8 @@ public class CellPottsModel extends SpinModel {
 	//parameters for the simulation
 	private double temperature;
 	private double lambda;
-	private double motility;
+	private ArrayList<Double> motility;
+	private double motilityConst;
 
 	private int numOfSweeps = 0;
 	private int nequil = 0;
@@ -108,7 +109,7 @@ public class CellPottsModel extends SpinModel {
 		this.seed = seed;
 		this.temperature = temp;
 		this.lambda = lambda;
-		this.motility = motility;
+		this.motilityConst = motility;
 		this.alpha = alpha;
 		this.beta = beta;
 		this.rotateDiff = rotateDiff;
@@ -150,7 +151,7 @@ public class CellPottsModel extends SpinModel {
 		this.seed = seed;
 		this.temperature = temp;
 		this.lambda = lambda;
-		this.motility = motility;
+		this.motilityConst = motility;
 		this.alpha = alpha;
 		this.beta = beta;
 		this.rotateDiff = rotateDiff;
@@ -172,7 +173,7 @@ public class CellPottsModel extends SpinModel {
 		this.lambda = lambda;
 		this.alpha = alpha;
 		this.beta = beta;
-		this.motility = motility;
+		this.motilityConst = motility;
 		this.seed = seed;
 	}
 
@@ -195,6 +196,7 @@ public class CellPottsModel extends SpinModel {
 
 		px = new ArrayList<Double>();
 		py = new ArrayList<Double>();
+		motility = new ArrayList<Double>();
 		theta = new ArrayList<Double>();
 
 		lastDivisionTime = new ArrayList<Integer>();
@@ -219,6 +221,7 @@ public class CellPottsModel extends SpinModel {
 		ry.add(0.0);
 		px.add(0.0);
 		py.add(0.0);
+		motility.add(0.0);
 		theta.add(0.0);
 		lastDivisionTime.add(nequil + (int) (nequil * rand.nextDouble()));
 		spinPos.add(new ArrayList<Vector2D>());
@@ -300,12 +303,41 @@ public class CellPottsModel extends SpinModel {
 	 * Initialise random polarity vector to each cell
 	 */
 	public void initPolarity(){
-		double angle;
+		//double angle;
 		for (int i = 1; i<= q; i++){
-			angle = rand.nextDouble() * 2 * Math.PI;
-			theta.set(i, angle);
-			px.set(i, Math.cos(angle));
-			py.set(i, Math.sin(angle));
+			//angle = rand.nextDouble() * 2 * Math.PI;
+			//theta.set(i, angle);
+			//px.set(i, Math.cos(angle));
+			//py.set(i, Math.sin(angle));
+			if (motility.get(i) > 0.0){
+				py.set(i, 1.0);
+			}
+		}
+	}
+	
+	
+	/**
+	 * Initialise a fraction of the cells with motility (leader cells)
+	 * @param fracOfCells fraction of cells to be leader cells
+	 */
+	public void initLeaderCells(double fracOfCells){
+		int numOfLeaders = (int) (fracOfCells * q);
+		initLeaderCells(numOfLeaders);
+	}
+	
+	/**
+	 * Initialise a fraction of the cells with motility (leader cells)
+	 * @param n number of leader cells to introduce
+	 */
+	public void initLeaderCells(int n){
+		int cellIndex;
+		if (n > q) n = q; 
+		
+		for (int i = 0; i < n; i++){
+			do {
+				cellIndex = rand.nextInt(q)+1;
+			} while (motility.get(cellIndex) > 0.0);
+			motility.set(cellIndex, motilityConst);
 		}
 	}
 
@@ -486,12 +518,12 @@ public class CellPottsModel extends SpinModel {
 				}
 			}
 
-			updatePolarity();
+			//updatePolarity();
 			updateCM();
 
 			if (n > nequil){
 				updateR();
-				updateArea(n);
+				//updateArea(n);
 			}
 			if (n >= nequil && n < numOfSweeps-1){
 				writeData(n);
@@ -535,7 +567,7 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public void nextStep(int n){
 		int i, j, p;
-		int oldSpin, newSpin = 0;
+		int oldSpin, newSpin;
 		
 
 		//only perform calculations if the neighbours don't have the same spin
@@ -551,7 +583,8 @@ public class CellPottsModel extends SpinModel {
 		do {
 			i = rand.nextInt(nx);
 			j = rand.nextInt(ny);
-
+			
+			newSpin = -1;
 			oldSpin = spin[i][j];
 			
 			p = rand.nextInt(8);
@@ -594,8 +627,10 @@ public class CellPottsModel extends SpinModel {
 		double totalEnergy = negDeltaE;
 
 		//only run the motility calculation if it is non-zero
-		if (motility > 0.0 && n > nequil){
-			totalEnergy += motilityE(i, j, newSpin, motility);
+		double muOld = motility.get(oldSpin);
+		double muNew = motility.get(newSpin);
+		if ((muOld > 0.0 || muNew > 0.0) && n > nequil){
+			totalEnergy += motilityE(i, j, newSpin, muOld, muNew);
 		} 
 
 		if (Math.log(rand.nextDouble()) <= totalEnergy / temperature){
@@ -644,12 +679,12 @@ public class CellPottsModel extends SpinModel {
 	 * @param p cell motility strength
 	 * @return energy from active cell motility
 	 */
-	public double motilityE(int i, int j, int newSpin, double p){
+	public double motilityE(int i, int j, int newSpin, double muOld, double muNew){
 		double energy = 0.0;
 		double [] dcmOld = calculateDeltaCM(i,j, spin[i][j], true);
 		double [] dcmNew = calculateDeltaCM(i,j, newSpin, false);
-		energy += p * dot(dcmOld[0], dcmOld[1], px.get(spin[i][j]), py.get(spin[i][j]));
-		energy += p * dot(dcmNew[0], dcmNew[1], px.get(newSpin), py.get(newSpin));
+		energy += muOld * dot(dcmOld[0], dcmOld[1], px.get(spin[i][j]), py.get(spin[i][j]));
+		energy += muNew * dot(dcmNew[0], dcmNew[1], px.get(newSpin), py.get(newSpin));
 		return energy;
 	}
 
@@ -1127,20 +1162,39 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	/**
-	 * Set the cell motility strength
+	 * Set the cell motility strength for a particular cell
+	 * @param cellIndex cell index
 	 * @param p new cell motility value
 	 */
-	public void setMotility(double p){
+	public void setMotility(int cellIndex, double p){
 		if (p >= 0){
-			this.motility = p;
+			motility.set(cellIndex, p);
 		}
 	}
 
 	/**
-	 * Return the cell motility strength (P)
+	 * Return the cell motility strength of a particular cell
+	 * @param cellIndex cell index
 	 */
-	public double getMotility(){
-		return motility;
+	public double getMotility(int cellIndex){
+		return motility.get(cellIndex);
+	}
+	
+	/**
+	 * Set the cell motility constant
+	 * @param p cell motility constant
+	 */
+	public void setMotilityConst(double p){
+		if (p >= 0){
+			motilityConst = p;
+		}
+	}
+	
+	/**
+	 * Return the cell motility constant
+	 */
+	public double getMotilityConst(){
+		return motilityConst;
 	}
 
 	/**

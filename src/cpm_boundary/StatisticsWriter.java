@@ -35,7 +35,7 @@ public class StatisticsWriter extends DataWriter {
 			writer.printf("beta %.1f\n", model.getBeta());
 			writer.printf("lambda %.1f\n", model.getLambda());
 			writer.printf("temperature %.1f\n", model.getTemp());
-			writer.printf("motility %.1f\n", model.getMotility());
+			writer.printf("motility %.1f\n", model.getMotilityConst());
 			writer.printf("rotate_diffusion %.1f\n", model.getRotateDiff());
 			writer.printf("accept_rate %.8f\n", model.getAcceptRate());
 			writer.printf("num_of_sweeps %d\n", numOfSweeps);

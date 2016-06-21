@@ -207,6 +207,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		@Override
 		public void run(){
 			model.initSpin();
+			model.initLeaderCells(3);
 			model.initPolarity();
 
 			view.setModel(model);
