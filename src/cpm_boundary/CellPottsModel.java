@@ -75,8 +75,8 @@ public class CellPottsModel extends SpinModel {
 	//whether to notify or not the observers about spin updates
 	private boolean notify = false;
 
-	//data writers
-	private DataWriter [] writers;
+	//data listeners
+	private ArrayList<DataListener> dataListeners = new ArrayList<DataListener>();
 
 	//constructors
 	/**
@@ -93,7 +93,6 @@ public class CellPottsModel extends SpinModel {
 	 * @param seed seed for random generator
 	 * @param n number of Monte-Carlo steps (MCS) to take in the simulation
 	 * @param nequil number of MCS to take before making measurements
-	 * @param writers data writers to store measurements to file
 	 * @param notify whether or not to notify any observers when the spin 
 	 * at a lattice site is updated
 	 */
@@ -115,7 +114,6 @@ public class CellPottsModel extends SpinModel {
 		this.fracOccupied = 1.0;
 		this.numOfSweeps = n;
 		this.nequil = nequil;
-		this.writers = writers;
 		this.notify = notify;
 	}
 
@@ -130,20 +128,17 @@ public class CellPottsModel extends SpinModel {
 	 * @param beta free boundary energy
 	 * @param motility cell motility strength (P)
 	 * @param rotateDiff rotational diffusion coefficient
-	 * @param growthRate growth rate of the cell (pixel sq per MCS)
 	 * @param fracOccupied fraction of total area occupied by cells
 	 * @param seed seed for random generator
 	 * @param n number of Monte-Carlo steps (MCS) to take in the simulation
 	 * @param nequil number of MCS to take before making measurements
-	 * @param writers data writers to store measurements to file
 	 * @param notify whether or not to notify any observers when the spin 
 	 * at a lattice site is updated
 	 */
 	public CellPottsModel(int nx, int ny, int q, double temp, 
 			double lambda, double alpha, double beta, double motility, 
 			double rotateDiff, double fracOccupied,
-			int seed, int n, int nequil, DataWriter [] writers,
-			boolean notify){
+			int seed, int n, int nequil, boolean notify){
 		this.nx = nx;
 		this.ny = ny;
 		this.q = q;
@@ -157,7 +152,6 @@ public class CellPottsModel extends SpinModel {
 		this.fracOccupied = fracOccupied;
 		this.numOfSweeps = n;
 		this.nequil = nequil;
-		this.writers = writers;
 		this.notify = notify;
 	}
 
@@ -174,6 +168,37 @@ public class CellPottsModel extends SpinModel {
 		this.beta = beta;
 		this.motility = motility;
 		this.seed = seed;
+	}
+	
+	/**
+	 * Add a <code>DataListener</code> which retrieves data from the model
+	 * after every Monte Carlo step (MCS)
+	 * @param l data listener
+	 */
+	public void addDataListener(DataListener l){
+		if (!dataListeners.contains(l)){
+			dataListeners.add(l);
+		}
+	}
+	
+	/**
+	 * Remove a <code>DataListener</code> which has been retrieving data 
+	 * from the model after every Monte Carlo step (MCS)
+	 * @param l data listener
+	 */
+	public void removeDataListener(DataListener l){
+		dataListeners.remove(l);
+	}
+	
+	/**
+	 * Notify the data listeners that a Monte Carlo step has passed and they
+	 * should retrieve the data for that time step
+	 * @param time current Monte Carlo step in the simulation
+	 */
+	public void notifyDataListener(int time){
+		for (DataListener l : dataListeners){
+			l.update(this, time);
+		}
 	}
 
 	/**
@@ -494,13 +519,13 @@ public class CellPottsModel extends SpinModel {
 				updateArea(n);
 			}
 			if (n >= nequil && n < numOfSweeps-1){
-				writeData(n);
+				notifyDataListener(n);
 			}
 		}
 
 		if (running){
 			acceptRate /= (double) diffSpinStep;
-			writeData(numOfSweeps-1);
+			notifyDataListener(numOfSweeps-1);
 		}
 
 		running = false;
@@ -974,16 +999,6 @@ public class CellPottsModel extends SpinModel {
 		return x1 * x2 + y1 * y2;
 	}
 
-	/**
-	 * Notify the data writers to write data to file
-	 * @param time the current Monte-Carlo Step of the simulation
-	 */
-	public void writeData(int time){
-		for (int i = 0; i < writers.length; i++){
-			writers[i].writeData(this, time);
-		}
-	}
-
 	//periodic boundary methods
 	private int iup(int i){
 		if (i == nx-1) return 0;
@@ -1078,6 +1093,22 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public double getYCM(int q){
 		return ycmNew.get(q);
+	}
+	
+	/**
+	 * Return the horizontal component of the displacement for cell q
+	 * @param q cell index
+	 */
+	public double getDX(int q){
+		return xDiff(xcmNew.get(q), xcm.get(q));
+	}
+	
+	/**
+	 * Return the vertical component of the displacement for cell q
+	 * @param q cell index
+	 */
+	public double getDY(int q){
+		return yDiff(ycmNew.get(q), ycm.get(q));
 	}
 
 	/**

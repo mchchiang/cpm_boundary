@@ -177,7 +177,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			
 			model = new CellPottsModel(
 					nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
-					fracOccupied, seed, numOfSweeps, nequil, new DataWriter [] {}, true);
+					fracOccupied, seed, numOfSweeps, nequil, true);
 			
 			btnRun.setEnabled(false);
 			btnStop.setEnabled(true);

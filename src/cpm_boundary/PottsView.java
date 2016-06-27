@@ -16,8 +16,9 @@ import javax.swing.*;
 
 @SuppressWarnings("serial")
 public class PottsView extends JFrame {
-	private SpinModel model = new NullModel();
+	private CellPottsModel model;
 	private PottsViewPanel viewPanel;
+	private DisplacementPanel disPanel;
 	private PottsControlPanel controlPanel;
 	
 	//constructor
@@ -27,11 +28,17 @@ public class PottsView extends JFrame {
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setResizable(true);
 		
-		viewPanel = new PottsViewPanel(model);
+		viewPanel = new PottsViewPanel(new NullModel());
 		controlPanel = new PottsControlPanel(this);
+		disPanel = new DisplacementPanel();
+		
+		JPanel displayPanel = new JPanel();
+		displayPanel.setLayout(new GridLayout(0,2));
+		displayPanel.add(viewPanel);
+		displayPanel.add(disPanel);
 		
 		Container content = this.getContentPane();
-		content.add(viewPanel, BorderLayout.CENTER);
+		content.add(displayPanel, BorderLayout.CENTER);
 		content.add(controlPanel, BorderLayout.SOUTH);
 		
 		this.setVisible(true);
@@ -52,6 +59,7 @@ public class PottsView extends JFrame {
 	 */
 	public void setModel(SpinModel model){
 		viewPanel.setModel(model);
+		disPanel.setModel((CellPottsModel) model); 
 	}
 	
 	/**
@@ -59,6 +67,7 @@ public class PottsView extends JFrame {
 	 */
 	public void initImage(){
 		viewPanel.initImage();
+		disPanel.startDrawingImage();
 	}
 	
 	/**
@@ -66,5 +75,6 @@ public class PottsView extends JFrame {
 	 */
 	public void stopDrawingImage(){
 		viewPanel.stopDrawingImage();
+		disPanel.stopDrawingImage();
 	}
 }

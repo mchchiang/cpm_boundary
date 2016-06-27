@@ -12,7 +12,7 @@ import java.io.*;
  * @author Michael Chiang
  *
  */
-public abstract class DataWriter {
+public abstract class DataWriter implements DataListener {
 	
 	protected PrintWriter writer = null;
 	
@@ -44,4 +44,10 @@ public abstract class DataWriter {
 	 * @param time the current time step of the simulation
 	 */
 	public abstract void writeData(CellPottsModel model, int time);
+	
+	
+	public void update(CellPottsModel model, int time){
+		writeData(model,time);
+	}
+	
 }
