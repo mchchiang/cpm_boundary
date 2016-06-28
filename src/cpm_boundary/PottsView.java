@@ -16,14 +16,14 @@ import javax.swing.*;
 
 @SuppressWarnings("serial")
 public class PottsView extends JFrame {
-	private CellPottsModel model;
 	private PottsViewPanel viewPanel;
 	private DisplacementPanel disPanel;
 	private PottsControlPanel controlPanel;
+	private EnergyPanel energyPanel;
 	
 	//constructor
 	public PottsView(){
-		this.setSize(1000, 1000);
+		this.setSize(1700, 500);
 		this.setTitle("Cellular Potts Model");
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setResizable(true);
@@ -31,11 +31,13 @@ public class PottsView extends JFrame {
 		viewPanel = new PottsViewPanel(new NullModel());
 		controlPanel = new PottsControlPanel(this);
 		disPanel = new DisplacementPanel();
+		energyPanel = new EnergyPanel();
 		
 		JPanel displayPanel = new JPanel();
-		displayPanel.setLayout(new GridLayout(0,2));
+		displayPanel.setLayout(new GridLayout(0,3));
 		displayPanel.add(viewPanel);
 		displayPanel.add(disPanel);
+		displayPanel.add(energyPanel);
 		
 		Container content = this.getContentPane();
 		content.add(displayPanel, BorderLayout.CENTER);
@@ -60,6 +62,7 @@ public class PottsView extends JFrame {
 	public void setModel(SpinModel model){
 		viewPanel.setModel(model);
 		disPanel.setModel((CellPottsModel) model); 
+		energyPanel.setModel((CellPottsModel) model);
 	}
 	
 	/**
