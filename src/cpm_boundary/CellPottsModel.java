@@ -754,7 +754,7 @@ public class CellPottsModel extends SpinModel {
 		double energy = alpha;
 
 		if (i == j) energy = 0.0;
-		if (i != j && (i==0) || (j==0)) energy = beta;
+		if (i != j && ((i==0) || (j==0))) energy = beta;
 
 		return energy;
 	}
@@ -1246,7 +1246,7 @@ public class CellPottsModel extends SpinModel {
 		}
 
 		//summing energy associated with elastic area constraint
-		for(int i = 0; i <= q; i++){
+		for(int i = 1; i <= q; i++){
 			energy += lambda * Math.pow(area.get(i) - areaTarget.get(i), 2);
 		}
 		return energy;
