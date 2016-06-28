@@ -133,27 +133,28 @@ public class DisplacementPanel extends JPanel implements DataListener {
 
 	public void updateArrow(){ 
 		synchronized(lock){
-			//clear current arrow
-			//fgGraphics.clearRect(0, 0, width, height);
-			
+			//draw the magnitude of displacement
 			for (int i = 0; i < width; i++){
 				for (int j = 0; j < height; j++){
 					fg.setRGB(i, j, avgDColour.get(model.getSpin(i/arrowSize, j/arrowSize)));
 				}
 			}
 			
-			//draw new arrows
-			double x, y, a;
+			//draw the displacement arrows
+			double x, y, a, dx, dy;
 			
 			for (int i = 1; i < model.getTypesOfSpin(); i++){
 				x = model.getXCM(i);
 				y = model.getYCM(i);
-				a = Math.atan2(avgDY.get(i), avgDX.get(i));
-				drawArrow((int) (x * arrowSize), (int) (y * arrowSize), 
-						arrowSize * 10, a);
+				dx = avgDX.get(i);
+				dy = avgDY.get(i);
+				if (dx != 0.0 && dy != 0.0){
+					a = Math.atan2(dy, dx);
+					drawArrow((int) (x * arrowSize), (int) (y * arrowSize), 
+							arrowSize * 10, a);
+				}
 			}
 		}
-
 	}
 
 	@Override
