@@ -28,6 +28,7 @@ public class CellPottsModel extends SpinModel {
 	private int nequil = 0;
 	private boolean running = false;
 	private boolean paused = false;
+	private int time = 0;
 
 	//parameters for cell adhesion energy
 	private double alpha;
@@ -349,11 +350,13 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	public void updateArea(int time){
-		for (int i = 1; i <= q; i++){
+		int s = spin[nx/2][ny/2];
+		areaTarget.set(s, areaTarget.get(s) * 1.01);
+		/*for (int i = 1; i <= q; i++){
 			if (shouldDivide(time, i, rand.nextDouble())){
 				splitCell(time, i);
 			}
-		}
+		}*/
 	}
 
 	public boolean shouldDivide(int time, int cellIndex, double r){
@@ -496,6 +499,7 @@ public class CellPottsModel extends SpinModel {
 		diffSpinStep = 0;
 		running = true;
 		paused = false;
+		time = 0;
 
 		for (int n = 0;  n < numOfSweeps && running; n++){
 			for (int k = 0; k < nx*ny; k++){
@@ -518,9 +522,12 @@ public class CellPottsModel extends SpinModel {
 				updateR();
 				updateArea(n);
 			}
+			
 			if (n >= nequil && n < numOfSweeps-1){
 				notifyDataListener(n);
 			}
+			
+			time++;
 		}
 
 		if (running){
@@ -1036,6 +1043,13 @@ public class CellPottsModel extends SpinModel {
 			yPos.add(pt.getY());
 		}
 		return yPos;
+	}
+	
+	/**
+	 * Get the current time (MCS) of the simulation
+	 */
+	public int getTime(){
+		return time;
 	}
 
 	/**
