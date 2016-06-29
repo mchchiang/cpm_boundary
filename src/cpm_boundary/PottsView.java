@@ -80,4 +80,8 @@ public class PottsView extends JFrame {
 		viewPanel.stopDrawingImage();
 		disPanel.stopDrawingImage();
 	}
+	
+	public DisplacementPanel getDisplacementPanel(){
+		return disPanel;
+	}
 }

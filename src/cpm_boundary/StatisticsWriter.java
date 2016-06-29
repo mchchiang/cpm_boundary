@@ -30,7 +30,7 @@ public class StatisticsWriter extends DataWriter {
 		if (time == numOfSweeps-1){
 			writer.printf("nx %d\n", model.getNumOfRows());
 			writer.printf("ny %d\n", model.getNumOfColumns());
-			writer.printf("q %d\n", model.getTypesOfSpin());
+			writer.printf("q %d\n", model.getNumberOfSpins());
 			writer.printf("alpha %.1f\n", model.getAlpha());
 			writer.printf("beta %.1f\n", model.getBeta());
 			writer.printf("lambda %.1f\n", model.getLambda());

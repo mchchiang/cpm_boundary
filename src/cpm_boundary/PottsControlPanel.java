@@ -179,6 +179,16 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 					nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
 					fracOccupied, seed, numOfSweeps, nequil, true);
 			
+			CellDivision division = new CellDivision();
+			AverageDisplacement avgDis = new AverageDisplacement();
+			avgDis.addCPMMeasurementListener(view.getDisplacementPanel());
+			division.addCellDivisionListener(avgDis);
+			division.addCellDivisionListener(model);
+			
+			model.addCPMExtension(division);
+			model.addMeasurement(avgDis);
+
+			
 			btnRun.setEnabled(false);
 			btnStop.setEnabled(true);
 			btnPause.setEnabled(true);
@@ -212,7 +222,11 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			view.setModel(model);
 			view.initImage();
 
-			model.run();
+			try {
+				model.run();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			view.stopDrawingImage();
 
 			btnRun.setEnabled(true);

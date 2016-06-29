@@ -37,7 +37,7 @@ public abstract class SpinModel extends Observable {
 	/**
 	 * Get the total possible number of spin values in the model
 	 */
-	public abstract int getTypesOfSpin();
+	public abstract int getNumberOfSpins();
 	
 	/**
 	 * Get the spin value at a particular lattice site

@@ -54,7 +54,7 @@ public class PottsViewPanel extends JPanel implements Observer {
 	 * Set the colour for each spin
 	 */
 	public void setColours(){
-		int typesOfSpin = model.getTypesOfSpin();
+		int typesOfSpin = model.getNumberOfSpins();
 		colours = new ArrayList<Color>();
 		
 		for (int i = 0; i < typesOfSpin; i++){
@@ -134,7 +134,7 @@ public class PottsViewPanel extends JPanel implements Observer {
 	
 	//check if new cells are created and need new colours
 	public void updateColourMap(){
-		int diff = model.getTypesOfSpin() - colours.size();
+		int diff = model.getNumberOfSpins() - colours.size();
 		if (diff > 0){
 			for (int i = 0; i < diff; i++){
 				colours.add(generateColour());

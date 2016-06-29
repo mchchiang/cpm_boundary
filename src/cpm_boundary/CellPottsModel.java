@@ -13,7 +13,7 @@ import java.util.Random;
  * @author Michael Chiang
  *
  */
-public class CellPottsModel extends SpinModel {
+public class CellPottsModel extends SpinModel implements CellDivisionListener {
 
 	private int nx, ny;
 	private int q;	
@@ -78,6 +78,14 @@ public class CellPottsModel extends SpinModel {
 
 	//data listeners
 	private ArrayList<DataListener> dataListeners = new ArrayList<DataListener>();
+
+	//CPM extensions
+	private Object extensionsLock = new Object();
+	private Object energyTermsLock = new Object();
+	private Object measurementsLock = new Object();
+	private ArrayList<CPMExtension> extensions = new ArrayList<CPMExtension>();
+	private ArrayList<CPMEnergyExtension> energyTerms = new ArrayList<CPMEnergyExtension>();
+	private ArrayList<CPMMeasurement> measurements = new ArrayList<CPMMeasurement>();
 
 	//constructors
 	/**
@@ -170,7 +178,7 @@ public class CellPottsModel extends SpinModel {
 		this.motility = motility;
 		this.seed = seed;
 	}
-	
+
 	/**
 	 * Add a <code>DataListener</code> which retrieves data from the model
 	 * after every Monte Carlo step (MCS)
@@ -181,7 +189,7 @@ public class CellPottsModel extends SpinModel {
 			dataListeners.add(l);
 		}
 	}
-	
+
 	/**
 	 * Remove a <code>DataListener</code> which has been retrieving data 
 	 * from the model after every Monte Carlo step (MCS)
@@ -190,7 +198,7 @@ public class CellPottsModel extends SpinModel {
 	public void removeDataListener(DataListener l){
 		dataListeners.remove(l);
 	}
-	
+
 	/**
 	 * Notify the data listeners that a Monte Carlo step has passed and they
 	 * should retrieve the data for that time step
@@ -201,6 +209,49 @@ public class CellPottsModel extends SpinModel {
 			l.update(this, time);
 		}
 	}
+
+	public void addCPMExtension(CPMExtension ext){
+		//synchronized(extensionsLock){
+			if (!extensions.contains(ext)){
+				extensions.add(ext);
+			}
+		//}
+	}
+
+	public void removeCPMExtension(CPMExtension ext){
+		//synchronized(extensionsLock){
+			extensions.remove(ext);
+		//}
+	}
+
+	public void addEnergyTerm(CPMEnergyExtension ext){
+		//synchronized(energyTermsLock){
+			if (!energyTerms.contains(ext)){
+				energyTerms.add(ext);
+			}
+		//}
+	}
+
+	public void removeEnergyTerm(CPMEnergyExtension ext){
+		//synchronized(energyTermsLock){
+			energyTerms.remove(ext);
+		//}
+	}
+
+	public void addMeasurement(CPMMeasurement m){
+		//synchronized(measurementsLock){
+			if (!measurements.contains(m)){
+				measurements.add(m);
+			}
+		//}
+	}
+
+	public void removeMeasurement(CPMMeasurement m){
+		//synchronized(measurementsLock){
+			measurements.remove(m);
+		//}
+	}
+
 
 	/**
 	 * Initialise the model
@@ -227,14 +278,27 @@ public class CellPottsModel extends SpinModel {
 
 		spinPos = new ArrayList<ArrayList<Vector2D>>();
 
+		for (CPMExtension ext : extensions){
+			ext.init(this);
+		}
+
+		for (CPMMeasurement m : measurements){
+			m.init(this);
+		}
+
 		//init all arrays
 		for (int i = 0; i <= q; i++){
-			addNewCell();
+			addNewCellDetails();
 		}
 	}
 
 	//init variables for adding new cell
 	public void addNewCell(){
+		q++;
+		addNewCellDetails();
+	}
+	
+	private void addNewCellDetails(){
 		area.add(0.0);
 		areaTarget.add(0.0);
 		xcm.add(0.0);
@@ -376,7 +440,7 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	public void splitCell(int time, int cellIndex){
-		q++;
+		//q++;
 		addNewCell();
 
 		double [] w = getMajorAxis(cellIndex);
@@ -492,9 +556,10 @@ public class CellPottsModel extends SpinModel {
 
 	/**
 	 * Run the model
+	 * @throws Exception 
 	 * 
 	 */
-	public void run() {
+	public void run() throws Exception {
 		acceptRate = 0.0;
 		diffSpinStep = 0;
 		running = true;
@@ -505,7 +570,7 @@ public class CellPottsModel extends SpinModel {
 			for (int k = 0; k < nx*ny; k++){
 				nextStep(n);	
 			}
-			
+
 			//for pausing the simulation
 			synchronized(this){
 				if (paused){
@@ -514,19 +579,29 @@ public class CellPottsModel extends SpinModel {
 					} catch (InterruptedException e) {}
 				}
 			}
-
-			updatePolarity();
+			
 			updateCM();
 
-			if (n > nequil){
-				updateR();
-				updateArea(n);
+			if (n < nequil){
+				for (CPMExtension ext : extensions){
+					if (ext.executePriorEquil()){
+						ext.execute(this, n);
+					}
+				}
+				for (CPMMeasurement m : measurements){
+					if (m.measurePriorEquil()){
+						m.makeMeasurement(this, n);
+					}
+				}
+			} else {
+				for (CPMExtension ext : extensions){
+					ext.execute(this, n);
+				}
+				for (CPMMeasurement m : measurements){
+					m.makeMeasurement(this, n);
+				}
 			}
-			
-			if (n >= nequil && n < numOfSweeps-1){
-				notifyDataListener(n);
-			}
-			
+			System.out.println(time);
 			time++;
 		}
 
@@ -566,9 +641,9 @@ public class CellPottsModel extends SpinModel {
 	 * Take a single elementary step in the simulation
 	 */
 	public void nextStep(int n){
-		int i, j, p;
+		int i, j, inew, jnew, p;
 		int oldSpin, newSpin;
-		
+
 
 		//only perform calculations if the neighbours don't have the same spin
 		//if (!hasSameNeighbours(i,j)){
@@ -579,45 +654,51 @@ public class CellPottsModel extends SpinModel {
 		 * the ones located at the corners with respect to
 		 * the lattice site)
 		 */
-		
+
 		do {
 			i = rand.nextInt(nx);
 			j = rand.nextInt(ny);
+			inew = i;
+			jnew = j;
 			
 			newSpin = -1;
 			oldSpin = spin[i][j];
 			
 			p = rand.nextInt(8);
 			if (p == 0){
-				newSpin = spin[iup(i)][j];
+				inew = iup(i);
+				jnew = j;
 			} else if (p == 1){
-				newSpin = spin[idown(i)][j];
+				inew = idown(i);
+				jnew = j;
 			} else if (p == 2){
-				newSpin = spin[i][jup(j)];
+				inew = i;
+				jnew = jup(j);
 			} else if (p == 3){
-				newSpin = spin[i][jdown(j)];
+				inew = i;
+				jnew = jdown(j);
 			} else if (p == 4){
-				newSpin = spin[iup(i)][jup(j)];
+				inew = iup(i);
+				jnew = jup(j);
 			} else if (p == 5){
-				newSpin = spin[idown(i)][jup(j)];
+				inew = idown(i);
+				jnew = jup(j);
 			} else if (p == 6){
-				newSpin = spin[iup(i)][jdown(j)];
+				inew = iup(i);
+				jnew = jdown(j);
 			} else if (p == 7){
-				newSpin = spin[idown(i)][jdown(j)];
+				inew = idown(i);
+				jnew = jdown(j);
 			} 
+			newSpin = spin[inew][jnew];
 			
 		} while (oldSpin == newSpin);
-		
+
 		//update area of the affected cells due to spin change
 		double newAreaNewSpin, newAreaOldSpin;
-
-		//if (newSpin != oldSpin){
-			newAreaNewSpin = area.get(newSpin)+1;
-			newAreaOldSpin = area.get(oldSpin)-1;
-		/*} else {
-			newAreaNewSpin = area.get(newSpin);
-			newAreaOldSpin = area.get(oldSpin);
-		}*/
+		
+		newAreaNewSpin = area.get(newSpin)+1;
+		newAreaOldSpin = area.get(oldSpin)-1;
 
 		//implement the metropolis algorithm
 		double negDeltaE = negDeltaE(i, j, newSpin, 
@@ -625,6 +706,14 @@ public class CellPottsModel extends SpinModel {
 				newAreaOldSpin, newAreaNewSpin);
 
 		double totalEnergy = negDeltaE;
+		
+		//extra energy terms
+		for (CPMEnergyExtension ext : energyTerms){
+			if (n > nequil || (ext.executePriorEquil() && n < nequil)){
+				totalEnergy -= ext.getDeltaE(
+						this, i, j, inew, jnew, oldSpin, newSpin);
+			}
+		}
 
 		//only run the motility calculation if it is non-zero
 		if (motility > 0.0 && n > nequil){
@@ -632,21 +721,10 @@ public class CellPottsModel extends SpinModel {
 		} 
 
 		if (Math.log(rand.nextDouble()) <= totalEnergy / temperature){
-			area.set(spin[i][j], newAreaOldSpin);
-			area.set(newSpin, newAreaNewSpin);
-			spin[i][j] = newSpin;
-			spinPos.get(oldSpin).remove(new Vector2D(i,j));
-			spinPos.get(newSpin).add(new Vector2D(i,j));
-
+			setSpin(i, j, newSpin);
 			acceptRate = acceptRate + 1.0;
-
-			if (notify){
-				this.setChanged();
-				this.notifyObservers(new Object [] {i,j});
-			}
 		}
-		//}
-}
+	}
 
 	/**
 	 * Check if all neighbours of the specified lattice site have the same spin
@@ -1028,7 +1106,7 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	//accessor methods
-	protected ArrayList<Integer> getSpinXPos(int spin){
+	public ArrayList<Integer> getSpinXPos(int spin){
 		ArrayList<Integer> xPos = new ArrayList<Integer>();
 		ArrayList<Vector2D> pos = spinPos.get(spin);
 		for (Vector2D pt : pos){
@@ -1036,7 +1114,8 @@ public class CellPottsModel extends SpinModel {
 		}
 		return xPos;
 	}
-	protected ArrayList<Integer> getSpinYPos(int spin){
+
+	public ArrayList<Integer> getSpinYPos(int spin){
 		ArrayList<Integer> yPos = new ArrayList<Integer>();
 		ArrayList<Vector2D> pos = spinPos.get(spin);
 		for (Vector2D pt : pos){
@@ -1044,7 +1123,16 @@ public class CellPottsModel extends SpinModel {
 		}
 		return yPos;
 	}
-	
+
+	public ArrayList<Vector2D> getSpinPos(int spin){
+		ArrayList<Vector2D> copy = new ArrayList<Vector2D>();
+		ArrayList<Vector2D> pos = spinPos.get(spin);
+		for (Vector2D pt : pos){
+			copy.add(pt);
+		}
+		return copy;
+	}
+
 	/**
 	 * Get the current time (MCS) of the simulation
 	 */
@@ -1108,7 +1196,7 @@ public class CellPottsModel extends SpinModel {
 	public double getYCM(int q){
 		return ycmNew.get(q);
 	}
-	
+
 	/**
 	 * Return the horizontal component of the displacement for cell q
 	 * @param q cell index
@@ -1116,7 +1204,7 @@ public class CellPottsModel extends SpinModel {
 	public double getDX(int q){
 		return xDiff(xcmNew.get(q), xcm.get(q));
 	}
-	
+
 	/**
 	 * Return the vertical component of the displacement for cell q
 	 * @param q cell index
@@ -1173,6 +1261,38 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	/**
+	 * Set the target area of cell q
+	 * @param q cell index
+	 * @param value target area
+	 */
+	public void setAreaTarget(int q, double value){
+		areaTarget.set(q, value);
+	}
+
+	/**
+	 * Return the target area of cell q
+	 * @param q cell index
+	 */
+	public double getAreaTarget(int q){
+		return areaTarget.get(q);
+	}
+
+	/**
+	 * Return the area of cell q
+	 * @param q cell index
+	 */
+	public double getArea(int q){
+		return area.get(q);
+	}
+
+	/**
+	 * Return the default target area for cells
+	 */
+	public double getCellArea(){
+		return cellArea;
+	}
+
+	/**
 	 * Set the cell motility strength
 	 * @param p new cell motility value
 	 */
@@ -1194,6 +1314,24 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public double getRotateDiff(){
 		return rotateDiff;
+	}
+	
+	@Override
+	public void setSpin(int i, int j, int newSpin) {
+		if (0 <= newSpin && newSpin <= q){
+			int oldSpin = spin[i][j];
+			Vector2D pt = new Vector2D(i,j);
+			spinPos.get(newSpin).add(pt);
+			area.set(newSpin, area.get(newSpin) + 1.0);
+			spinPos.get(oldSpin).remove(pt);
+			area.set(oldSpin, area.get(oldSpin) - 1.0);
+			spin[i][j] = newSpin;
+
+			if (notify){
+				this.setChanged();
+				this.notifyObservers(new Object [] {i,j});
+			}	
+		}
 	}
 
 	@Override
@@ -1224,15 +1362,6 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	@Override
-	public void setSpin(int i, int j, int value) {
-		if (0 <= value && value <= q){
-			area.set(spin[i][j], area.get(spin[i][j])-1);
-			spin[i][j] = value;
-			area.set(value, area.get(value)+1);
-		}
-	}
-
-	@Override
 	public double getTotalEnergy() {
 		double energy = 0.0;
 		//summing pairwise spin energy
@@ -1258,7 +1387,7 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	@Override
-	public int getTypesOfSpin(){
+	public int getNumberOfSpins(){
 		return q+1;
 	}
 
@@ -1323,7 +1452,7 @@ public class CellPottsModel extends SpinModel {
 		}
 	}
 
-	public static void main (String [] args){
+	public static void main (String [] args) throws Exception{
 		int nx = 200;
 		int ny = 200;
 		int q = 1000;
