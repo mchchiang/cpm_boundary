@@ -1007,22 +1007,22 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	//periodic boundary methods
-	private int iup(int i){
+	public int iup(int i){
 		if (i == nx-1) return 0;
 		return i+1;
 	}
 
-	private int idown(int i){
+	public int idown(int i){
 		if (i == 0) return nx-1;
 		return i-1;
 	}
 
-	private int jup(int j){
+	public int jup(int j){
 		if (j == ny-1) return 0;
 		return j+1;
 	}
 
-	private int jdown(int j){
+	public int jdown(int j){
 		if (j == 0) return ny-1;
 		return j-1;
 	}
