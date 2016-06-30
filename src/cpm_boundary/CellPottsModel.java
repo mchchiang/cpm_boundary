@@ -23,7 +23,8 @@ public class CellPottsModel extends SpinModel {
 	//parameters for the simulation
 	private double temperature;
 	private double lambda;
-	private double motility;
+	private ArrayList<Double> motility;
+	private double motilityConst;
 
 	private int numOfSweeps = 0;
 	private int nequil = 0;
@@ -65,7 +66,7 @@ public class CellPottsModel extends SpinModel {
 	private int dormantPeriod = 100;
 	private ArrayList<Integer> lastDivisionTime;
 	private double divisionConst = 5E7;
-	
+
 	//variables for average displacement
 	private ArrayList<LinkedList<Double>> dxData;
 	private ArrayList<LinkedList<Double>> dyData;
@@ -110,7 +111,7 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public CellPottsModel(int nx, int ny, int q, double temp, 
 			double lambda, double alpha, double beta, 
-			double motility, double rotateDiff, int seed, 
+			double motilityConst, double rotateDiff, int seed, 
 			int n, int nequil, boolean notify){
 		this.nx = nx;
 		this.ny = ny;
@@ -118,7 +119,7 @@ public class CellPottsModel extends SpinModel {
 		this.seed = seed;
 		this.temperature = temp;
 		this.lambda = lambda;
-		this.motility = motility;
+		this.motilityConst = motilityConst;
 		this.alpha = alpha;
 		this.beta = beta;
 		this.rotateDiff = rotateDiff;
@@ -147,7 +148,7 @@ public class CellPottsModel extends SpinModel {
 	 * at a lattice site is updated
 	 */
 	public CellPottsModel(int nx, int ny, int q, double temp, 
-			double lambda, double alpha, double beta, double motility, 
+			double lambda, double alpha, double beta, double motilityConst, 
 			double rotateDiff, double fracOccupied,
 			int seed, int n, int nequil, boolean notify){
 		this.nx = nx;
@@ -156,7 +157,7 @@ public class CellPottsModel extends SpinModel {
 		this.seed = seed;
 		this.temperature = temp;
 		this.lambda = lambda;
-		this.motility = motility;
+		this.motilityConst = motilityConst;
 		this.alpha = alpha;
 		this.beta = beta;
 		this.rotateDiff = rotateDiff;
@@ -177,10 +178,10 @@ public class CellPottsModel extends SpinModel {
 		this.lambda = lambda;
 		this.alpha = alpha;
 		this.beta = beta;
-		this.motility = motility;
+		this.motilityConst = motilityConst;
 		this.seed = seed;
 	}
-	
+
 	/**
 	 * Add a <code>DataListener</code> which retrieves data from the model
 	 * after every Monte Carlo step (MCS)
@@ -191,7 +192,7 @@ public class CellPottsModel extends SpinModel {
 			dataListeners.add(l);
 		}
 	}
-	
+
 	/**
 	 * Remove a <code>DataListener</code> which has been retrieving data 
 	 * from the model after every Monte Carlo step (MCS)
@@ -200,7 +201,7 @@ public class CellPottsModel extends SpinModel {
 	public void removeDataListener(DataListener l){
 		dataListeners.remove(l);
 	}
-	
+
 	/**
 	 * Notify the data listeners that a Monte Carlo step has passed and they
 	 * should retrieve the data for that time step
@@ -232,7 +233,8 @@ public class CellPottsModel extends SpinModel {
 		px = new ArrayList<Double>();
 		py = new ArrayList<Double>();
 		theta = new ArrayList<Double>();
-		
+		motility = new ArrayList<Double>();
+
 		dxData = new ArrayList<LinkedList<Double>>();
 		dyData = new ArrayList<LinkedList<Double>>();
 		sumDX = new ArrayList<Double>();
@@ -264,6 +266,7 @@ public class CellPottsModel extends SpinModel {
 		px.add(0.0);
 		py.add(0.0);
 		theta.add(0.0);
+		motility.add(0.0);
 		dxData.add(new LinkedList<Double>());
 		dyData.add(new LinkedList<Double>());
 		sumDX.add(0.0);
@@ -359,6 +362,31 @@ public class CellPottsModel extends SpinModel {
 			py.set(i, Math.sin(angle));
 		}
 	}
+	
+	/**
+	 * Initialise the motility strength of each cell
+	 * @param frac fraction of cells with motility
+	 */
+	public void initMotility(double frac){
+		int motileCells = (int) (frac * q);
+		initMotility(motileCells);
+	}
+	
+	/**
+	 * Initialise the motility strength of each cell
+	 * @param n number of cells with motility
+	 */
+	public void initMotility(int n){
+		int cellIndex;
+		if (n > q) n = q; 
+		
+		for (int i = 0; i < n; i++){
+			do {
+				cellIndex = rand.nextInt(q)+1;
+			} while (motility.get(cellIndex) > 0.0);
+			motility.set(cellIndex, motilityConst);
+		}
+	}
 
 	/**
 	 * Change the polarity vector of each cell via a rotation diffusion
@@ -376,7 +404,7 @@ public class CellPottsModel extends SpinModel {
 
 	public void updateArea(int time){
 		int s = spin[nx/2][ny/2];
-		areaTarget.set(s, areaTarget.get(s) + 25);
+		areaTarget.set(s, areaTarget.get(s) * 1.01);
 		/*if (area.get(s) > cellArea * 50){
 			splitCell(time, s);
 		}*/
@@ -512,39 +540,39 @@ public class CellPottsModel extends SpinModel {
 		}
 		return 0.0;
 	}
-	
+
 	public void updateAverageDisplacement(){
 		LinkedList<Double> dxList;
 		LinkedList<Double> dyList;
-		
+
 		double dx, dy, sumX, sumY, avgX, avgY, avgDis;
-		
+
 		for (int i = 1; i <= q; i++){
 			dxList = dxData.get(i);
 			dyList = dyData.get(i);
-			
+
 			dx = getDX(i);
 			dy = getDY(i);
-			
+
 			dxList.add(dx);
 			dyList.add(dy);
-			
+
 			sumX =  sumDX.get(i) + dx;
 			sumY =  sumDY.get(i) + dy;
-			
+
 			sumDX.set(i,sumX);
 			sumDY.set(i,sumY);
-			
+
 			if (dxList.size() >= avgInt){
 				avgX = sumX / (double) dxList.size();
 				avgY = sumY / (double) dyList.size();
-				
+
 				avgDX.set(i, avgX);
 				avgDY.set(i, avgY);
-				
+
 				avgDis = Math.sqrt(avgX * avgX + avgY * avgY);
 				avgD.set(i, avgDis);
-				
+
 				sumDX.set(i, sumX - dxList.remove());
 				sumDY.set(i, sumY - dyList.remove());
 			}
@@ -566,7 +594,7 @@ public class CellPottsModel extends SpinModel {
 			for (int k = 0; k < nx*ny; k++){
 				nextStep(n);	
 			}
-			
+
 			//for pausing the simulation
 			synchronized(this){
 				if (paused){
@@ -584,11 +612,11 @@ public class CellPottsModel extends SpinModel {
 				updateArea(n);
 				updateAverageDisplacement();
 			}
-			
+
 			if (n >= nequil && n < numOfSweeps-1){
 				notifyDataListener(n);
 			}
-			
+
 			time++;
 		}
 
@@ -599,7 +627,7 @@ public class CellPottsModel extends SpinModel {
 
 		running = false;
 	}
-
+	
 	public synchronized void stop(){
 		if (paused){
 			resume();
@@ -630,7 +658,7 @@ public class CellPottsModel extends SpinModel {
 	public void nextStep(int n){
 		int i, j, p;
 		int oldSpin, newSpin;
-		
+
 
 		//only perform calculations if the neighbours don't have the same spin
 		//if (!hasSameNeighbours(i,j)){
@@ -641,14 +669,14 @@ public class CellPottsModel extends SpinModel {
 		 * the ones located at the corners with respect to
 		 * the lattice site)
 		 */
-		
+
 		do {
 			i = rand.nextInt(nx);
 			j = rand.nextInt(ny);
-			
+
 			newSpin = -1;
 			oldSpin = spin[i][j];
-			
+
 			p = rand.nextInt(8);
 			if (p == 0){
 				newSpin = spin[iup(i)][j];
@@ -667,15 +695,15 @@ public class CellPottsModel extends SpinModel {
 			} else if (p == 7){
 				newSpin = spin[idown(i)][jdown(j)];
 			} 
-			
+
 		} while (oldSpin == newSpin);
-		
+
 		//update area of the affected cells due to spin change
 		double newAreaNewSpin, newAreaOldSpin;
 
 		//if (newSpin != oldSpin){
-			newAreaNewSpin = area.get(newSpin)+1;
-			newAreaOldSpin = area.get(oldSpin)-1;
+		newAreaNewSpin = area.get(newSpin)+1;
+		newAreaOldSpin = area.get(oldSpin)-1;
 		/*} else {
 			newAreaNewSpin = area.get(newSpin);
 			newAreaOldSpin = area.get(oldSpin);
@@ -689,10 +717,13 @@ public class CellPottsModel extends SpinModel {
 		double totalEnergy = negDeltaE;
 
 		//only run the motility calculation if it is non-zero
-		if (motility > 0.0 && n > nequil){
-			totalEnergy += motilityE(i, j, newSpin, motility);
+		double muOld = motility.get(oldSpin);
+		double muNew = motility.get(newSpin);
+		
+		if ((muOld > 0.0 || muNew > 0.0) && n > nequil){
+			totalEnergy += motilityE(i, j, newSpin, muOld, muNew);
 		} 
-
+		
 		if (Math.log(rand.nextDouble()) <= totalEnergy / temperature){
 			area.set(spin[i][j], newAreaOldSpin);
 			area.set(newSpin, newAreaNewSpin);
@@ -708,7 +739,7 @@ public class CellPottsModel extends SpinModel {
 			}
 		}
 		//}
-}
+	}
 
 	/**
 	 * Check if all neighbours of the specified lattice site have the same spin
@@ -736,18 +767,19 @@ public class CellPottsModel extends SpinModel {
 	 * @param i column index of the lattice site considered in the spin copy attempt
 	 * @param j row index of the lattice site considered in the spin copy attempt
 	 * @param newSpin new spin value for the spin copy attempt
-	 * @param p cell motility strength
+	 * @param muOld motility strength of the original cell
+	 * @param muNew motility strength of the new cell
 	 * @return energy from active cell motility
 	 */
-	public double motilityE(int i, int j, int newSpin, double p){
+	public double motilityE(int i, int j, int newSpin, double muOld, double muNew){
 		double energy = 0.0;
 		double [] dcmOld = calculateDeltaCM(i,j, spin[i][j], true);
 		double [] dcmNew = calculateDeltaCM(i,j, newSpin, false);
-		energy += p * dot(dcmOld[0], dcmOld[1], px.get(spin[i][j]), py.get(spin[i][j]));
-		energy += p * dot(dcmNew[0], dcmNew[1], px.get(newSpin), py.get(newSpin));
+		energy += muOld * dot(dcmOld[0], dcmOld[1], px.get(spin[i][j]), py.get(spin[i][j]));
+		energy += muNew * dot(dcmNew[0], dcmNew[1], px.get(newSpin), py.get(newSpin));
 		return energy;
 	}
-
+	
 	/**
 	 * Calculate the negative of the change in energy due to spin change
 	 * @param i column index of the lattice site considered in the spin copy attempt
@@ -1106,7 +1138,7 @@ public class CellPottsModel extends SpinModel {
 		}
 		return yPos;
 	}
-	
+
 	/**
 	 * Get the current time (MCS) of the simulation
 	 */
@@ -1170,7 +1202,7 @@ public class CellPottsModel extends SpinModel {
 	public double getYCM(int q){
 		return ycmNew.get(q);
 	}
-	
+
 	/**
 	 * Return the horizontal component of the displacement for cell q
 	 * @param q cell index
@@ -1178,7 +1210,7 @@ public class CellPottsModel extends SpinModel {
 	public double getDX(int q){
 		return xDiff(xcmNew.get(q), xcm.get(q));
 	}
-	
+
 	/**
 	 * Return the vertical component of the displacement for cell q
 	 * @param q cell index
@@ -1186,7 +1218,7 @@ public class CellPottsModel extends SpinModel {
 	public double getDY(int q){
 		return yDiff(ycmNew.get(q), ycm.get(q));
 	}
-	
+
 	/**
 	 * Return the horizontal component of the average displacement for cell q
 	 * @param q cell index
@@ -1194,7 +1226,7 @@ public class CellPottsModel extends SpinModel {
 	public double getAvgDX(int q){
 		return avgDX.get(q);
 	}
-	
+
 	/**
 	 * Return the vertical component of the average displacement for cell q
 	 * @param q cell index
@@ -1202,7 +1234,7 @@ public class CellPottsModel extends SpinModel {
 	public double getAvgDY(int q){
 		return avgDY.get(q);
 	}
-	
+
 	/**
 	 * Return the magnitude of the average displacement for cell q
 	 * @param q cell index
@@ -1262,17 +1294,36 @@ public class CellPottsModel extends SpinModel {
 	 * Set the cell motility strength
 	 * @param p new cell motility value
 	 */
-	public void setMotility(double p){
+	public void setMotilityConst(double p){
 		if (p >= 0){
-			this.motility = p;
+			this.motilityConst = p;
 		}
 	}
 
 	/**
-	 * Return the cell motility strength (P)
+	 * Return the default cell motility strength (P)
 	 */
-	public double getMotility(){
-		return motility;
+	public double getMotilityConst(){
+		return motilityConst;
+	}
+	
+	/**
+	 * Set the motility strength of cell q
+	 * @param q cell index
+	 * @param p motility strength
+	 */
+	public void setMotility(int q, double p){
+		if (p >= 0){
+			motility.set(q, p);
+		}
+	}
+	
+	/**
+	 * Return the motility strength of cell q
+	 * @param q cell index
+	 */
+	public double getMotility(int q){
+		return motility.get(q);
 	}
 
 	/**
@@ -1281,7 +1332,7 @@ public class CellPottsModel extends SpinModel {
 	public double getRotateDiff(){
 		return rotateDiff;
 	}
-	
+
 	/**
 	 * Set the interval for averaging cell displacements
 	 * @param avgInt averaging interval
@@ -1289,7 +1340,7 @@ public class CellPottsModel extends SpinModel {
 	public void setAverageInterval(int avgInt){
 		this.avgInt = avgInt;
 	}
-	
+
 	/**
 	 * Return the interval for averaging cell displacements
 	 */
@@ -1432,21 +1483,23 @@ public class CellPottsModel extends SpinModel {
 		double lambda = 1.0;
 		double alpha = 2.0;
 		double beta = 5.0;
-		double motility = 0.0;
-		double rotateDiff = 0.0;
-		int numOfSweeps = 501;
+		double motility = 10.0;
+		double fracOfMotileCells = 0.05;
+		double rotateDiff = 0.1;
+		int numOfSweeps = 601;
 		int nequil = 100;
 		int seed = -1;
 		int run = 1;
-		int measureTime = 500;
-		int avgInt = 400;
+		int measureTime = 600;
+		int avgInt = 200;
+		String type = "exp_growth_1.01";
 
 		//SpinReader reader = new SpinReader();
 		//reader.openReader("init_spin_1000_2.dat");
-		String filename = String.format("%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_t_%d_avgInt_%d_meas_%d_run_%d.dat",
-				nx, ny, q, alpha, lambda, motility, rotateDiff, numOfSweeps, avgInt, measureTime, run);
+		String filename = String.format("%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_fracMo_%.2f_t_%d_avgInt_%d_meas_%d_run_%d.dat",
+				nx, ny, q, alpha, lambda, motility, rotateDiff, fracOfMotileCells, numOfSweeps, avgInt, measureTime, run);
 		DataWriter avgDisWriter = new AverageDisplacementWriter(measureTime);
-		avgDisWriter.openWriter("avgDis_linear_growth_25_" + filename);
+		avgDisWriter.openWriter("avgDis_" + type + "_" + filename);
 		//DataWriter r2Writer = new R2Writer();
 		//DataWriter ergWriter = new EnergyWriter();
 		//DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
@@ -1463,6 +1516,7 @@ public class CellPottsModel extends SpinModel {
 		model.setAverageInterval(avgInt);
 		model.initSpin();
 		model.initPolarity();
+		model.initMotility(fracOfMotileCells);
 		model.run();
 		//r2Writer.closeWriter();
 		//ergWriter.closeWriter();

@@ -87,7 +87,7 @@ public class Measurement implements Runnable {
 	public void run() {
 		System.out.printf(Calendar.getInstance().getTime() + 
 				"\t - Running: a = %.1f\tp = %.1f\ttrial %d\n", 
-				model.getAlpha(), model.getMotility(), trial);
+				model.getAlpha(), model.getMotilityConst(), trial);
 		model.run();
 		
 		for (int i = 0; i < writers.length; i++){

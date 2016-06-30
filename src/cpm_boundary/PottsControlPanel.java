@@ -37,6 +37,9 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 
 	private JLabel lblMotility;
 	private JTextField txtMotility;
+	
+	private JLabel lblFracOfMotile;
+	private JTextField txtFracOfMotile;
 
 	private JLabel lblRotateDiff;
 	private JTextField txtRotateDiff;
@@ -94,6 +97,9 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 
 		txtMotility = new JTextField(3);
 		lblMotility = new JLabel("Motility: ");
+		
+		txtFracOfMotile = new JTextField(3);
+		lblFracOfMotile = new JLabel("Frac. of Motile Cells: ");
 
 		txtRotateDiff = new JTextField(3);
 		lblRotateDiff = new JLabel("Rotate Diff: ");
@@ -134,6 +140,8 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		modelParamsPanel.add(txtMotility);
 		modelParamsPanel.add(lblRotateDiff);
 		modelParamsPanel.add(txtRotateDiff);
+		modelParamsPanel.add(lblFracOfMotile);
+		modelParamsPanel.add(txtFracOfMotile);
 
 		simParamsPanel = new JPanel();
 		simParamsPanel.add(lblWidth);
@@ -218,6 +226,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		public void run(){
 			model.initSpin();
 			model.initPolarity();
+			model.initMotility(Double.parseDouble(txtFracOfMotile.getText()));
 
 			view.setModel(model);
 			view.initImage();
