@@ -5,7 +5,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,15 +23,7 @@ public class DisplacementPanel extends JPanel implements DataListener {
 
 	private final double qPI = 0.25*Math.PI;
 
-	private ArrayList<LinkedList<Double>> dxData;
-	private ArrayList<LinkedList<Double>> dyData;
-	private ArrayList<Double> sumDX;
-	private ArrayList<Double> sumDY;
-	private ArrayList<Double> avgDX;
-	private ArrayList<Double> avgDY;
-	private ArrayList<Double> avgD;
 	private ArrayList<Integer> avgDColour;
-	private int avgInt = 100;
 	private double maxD;
 
 
@@ -50,13 +41,6 @@ public class DisplacementPanel extends JPanel implements DataListener {
 		if (width == 0) width = 1;
 		if (height == 0) height = 1;
 
-		dxData = new ArrayList<LinkedList<Double>>();
-		dyData = new ArrayList<LinkedList<Double>>();
-		sumDX = new ArrayList<Double>();
-		sumDY = new ArrayList<Double>();
-		avgDX = new ArrayList<Double>();
-		avgDY = new ArrayList<Double>();
-		avgD = new ArrayList<Double>();
 		avgDColour = new ArrayList<Integer>();
 		maxD = 0.1;
 
@@ -69,8 +53,7 @@ public class DisplacementPanel extends JPanel implements DataListener {
 		fgGraphics = fg.createGraphics();
 		fgGraphics.setBackground(Color.WHITE);
 		fgGraphics.setColor(Color.BLACK);
-
-		updateArrow();
+		
 		repaint();
 	}
 
@@ -131,7 +114,22 @@ public class DisplacementPanel extends JPanel implements DataListener {
 				y2 - (int) Math.round(l2*Math.sin(ap)));
 	}
 
-	public void updateArrow(){ 
+	@Override
+	public void update(CellPottsModel model, int time) {
+
+		double diff = model.getTypesOfSpin() - avgDColour.size();
+
+		while (diff > 0){
+			addNewCell();
+			diff--;
+		}
+		
+		float h = 0.3f, s = 0.0f, b = 1.0f;
+		for (int i = 1; i < model.getTypesOfSpin(); i++){
+			s = (float) (model.getAvgD(i) / maxD);
+			avgDColour.set(i, Color.getHSBColor(h, s, b).getRGB());
+		}
+
 		synchronized(lock){
 			//draw the magnitude of displacement
 			for (int i = 0; i < width; i++){
@@ -139,15 +137,15 @@ public class DisplacementPanel extends JPanel implements DataListener {
 					fg.setRGB(i, j, avgDColour.get(model.getSpin(i/arrowSize, j/arrowSize)));
 				}
 			}
-			
+
 			//draw the displacement arrows
 			double x, y, a, dx, dy;
-			
+
 			for (int i = 1; i < model.getTypesOfSpin(); i++){
 				x = model.getXCM(i);
 				y = model.getYCM(i);
-				dx = avgDX.get(i);
-				dy = avgDY.get(i);
+				dx = model.getAvgDX(i);
+				dy = model.getAvgDY(i);
 				if (dx != 0.0 && dy != 0.0){
 					a = Math.atan2(dy, dx);
 					drawArrow((int) (x * arrowSize), (int) (y * arrowSize), 
@@ -157,71 +155,7 @@ public class DisplacementPanel extends JPanel implements DataListener {
 		}
 	}
 
-	@Override
-	public void update(CellPottsModel model, int time) {
-		
-		double diff = model.getTypesOfSpin() - dxData.size();
-		
-		while (diff > 0){
-			addNewCell();
-			diff--;
-		}
-		
-		LinkedList<Double> dxList;
-		LinkedList<Double> dyList;
-		
-		double dx, dy, sumX, sumY, avgX, avgY, avgDis;
-		
-		float h = 0.3f, s = 0.0f, b = 1.0f;
-		
-		for (int i = 1; i < model.getTypesOfSpin(); i++){
-			dxList = dxData.get(i);
-			dyList = dyData.get(i);
-			
-			dx = model.getDX(i);
-			dy = model.getDY(i);
-			
-			dxList.add(dx);
-			dyList.add(dy);
-			
-			sumX =  sumDX.get(i) + dx;
-			sumY =  sumDY.get(i) + dy;
-			
-			sumDX.set(i,sumX);
-			sumDY.set(i,sumY);
-			
-			if (dxList.size() >= avgInt){
-				avgX = sumX / (double) dxList.size();
-				avgY = sumY / (double) dyList.size();
-				
-				avgDX.set(i, avgX);
-				avgDY.set(i, avgY);
-				
-				avgDis = Math.sqrt(avgX * avgX + avgY * avgY);
-				avgD.set(i, avgDis);
-				
-				sumDX.set(i, sumX - dxList.remove());
-				sumDY.set(i, sumY - dyList.remove());
-			}
-		}
-		
-		if (time - model.getNEquil() >= avgInt){
-			for (int i = 1; i < model.getTypesOfSpin(); i++){
-				s = (float) (avgD.get(i) / maxD);
-				avgDColour.set(i, Color.getHSBColor(h, s, b).getRGB());
-			}
-			updateArrow();
-		}
-	}
-	
 	public void addNewCell(){
-		dxData.add(new LinkedList<Double>());
-		dyData.add(new LinkedList<Double>());
-		sumDX.add(0.0);
-		sumDY.add(0.0);
-		avgDX.add(0.0);
-		avgDY.add(0.0);
-		avgD.add(0.0);
 		avgDColour.add(Color.WHITE.getRGB());
 	}
 }

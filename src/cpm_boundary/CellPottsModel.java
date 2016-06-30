@@ -1,6 +1,7 @@
 package cpm_boundary;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -64,6 +65,16 @@ public class CellPottsModel extends SpinModel {
 	private int dormantPeriod = 100;
 	private ArrayList<Integer> lastDivisionTime;
 	private double divisionConst = 5E7;
+	
+	//variables for average displacement
+	private ArrayList<LinkedList<Double>> dxData;
+	private ArrayList<LinkedList<Double>> dyData;
+	private ArrayList<Double> sumDX;
+	private ArrayList<Double> sumDY;
+	private ArrayList<Double> avgDX;
+	private ArrayList<Double> avgDY;
+	private ArrayList<Double> avgD;
+	private int avgInt = 100;
 
 	//variables for calculating acceptance rate
 	private double acceptRate;
@@ -100,8 +111,7 @@ public class CellPottsModel extends SpinModel {
 	public CellPottsModel(int nx, int ny, int q, double temp, 
 			double lambda, double alpha, double beta, 
 			double motility, double rotateDiff, int seed, 
-			int n, int nequil, DataWriter [] writers,
-			boolean notify){
+			int n, int nequil, boolean notify){
 		this.nx = nx;
 		this.ny = ny;
 		this.q = q;
@@ -222,6 +232,14 @@ public class CellPottsModel extends SpinModel {
 		px = new ArrayList<Double>();
 		py = new ArrayList<Double>();
 		theta = new ArrayList<Double>();
+		
+		dxData = new ArrayList<LinkedList<Double>>();
+		dyData = new ArrayList<LinkedList<Double>>();
+		sumDX = new ArrayList<Double>();
+		sumDY = new ArrayList<Double>();
+		avgDX = new ArrayList<Double>();
+		avgDY = new ArrayList<Double>();
+		avgD = new ArrayList<Double>();
 
 		lastDivisionTime = new ArrayList<Integer>();
 
@@ -246,6 +264,13 @@ public class CellPottsModel extends SpinModel {
 		px.add(0.0);
 		py.add(0.0);
 		theta.add(0.0);
+		dxData.add(new LinkedList<Double>());
+		dyData.add(new LinkedList<Double>());
+		sumDX.add(0.0);
+		sumDY.add(0.0);
+		avgDX.add(0.0);
+		avgDY.add(0.0);
+		avgD.add(0.0);
 		lastDivisionTime.add(nequil + (int) (nequil * rand.nextDouble()));
 		spinPos.add(new ArrayList<Vector2D>());
 	}
@@ -351,11 +376,9 @@ public class CellPottsModel extends SpinModel {
 
 	public void updateArea(int time){
 		int s = spin[nx/2][ny/2];
-		areaTarget.set(s, areaTarget.get(s) * 1.01);
-		/*for (int i = 1; i <= q; i++){
-			if (shouldDivide(time, i, rand.nextDouble())){
-				splitCell(time, i);
-			}
+		areaTarget.set(s, areaTarget.get(s) + 25);
+		/*if (area.get(s) > cellArea * 50){
+			splitCell(time, s);
 		}*/
 	}
 
@@ -489,6 +512,44 @@ public class CellPottsModel extends SpinModel {
 		}
 		return 0.0;
 	}
+	
+	public void updateAverageDisplacement(){
+		LinkedList<Double> dxList;
+		LinkedList<Double> dyList;
+		
+		double dx, dy, sumX, sumY, avgX, avgY, avgDis;
+		
+		for (int i = 1; i <= q; i++){
+			dxList = dxData.get(i);
+			dyList = dyData.get(i);
+			
+			dx = getDX(i);
+			dy = getDY(i);
+			
+			dxList.add(dx);
+			dyList.add(dy);
+			
+			sumX =  sumDX.get(i) + dx;
+			sumY =  sumDY.get(i) + dy;
+			
+			sumDX.set(i,sumX);
+			sumDY.set(i,sumY);
+			
+			if (dxList.size() >= avgInt){
+				avgX = sumX / (double) dxList.size();
+				avgY = sumY / (double) dyList.size();
+				
+				avgDX.set(i, avgX);
+				avgDY.set(i, avgY);
+				
+				avgDis = Math.sqrt(avgX * avgX + avgY * avgY);
+				avgD.set(i, avgDis);
+				
+				sumDX.set(i, sumX - dxList.remove());
+				sumDY.set(i, sumY - dyList.remove());
+			}
+		}
+	}
 
 	/**
 	 * Run the model
@@ -521,6 +582,7 @@ public class CellPottsModel extends SpinModel {
 			if (n > nequil){
 				updateR();
 				updateArea(n);
+				updateAverageDisplacement();
 			}
 			
 			if (n >= nequil && n < numOfSweeps-1){
@@ -1124,6 +1186,30 @@ public class CellPottsModel extends SpinModel {
 	public double getDY(int q){
 		return yDiff(ycmNew.get(q), ycm.get(q));
 	}
+	
+	/**
+	 * Return the horizontal component of the average displacement for cell q
+	 * @param q cell index
+	 */
+	public double getAvgDX(int q){
+		return avgDX.get(q);
+	}
+	
+	/**
+	 * Return the vertical component of the average displacement for cell q
+	 * @param q cell index
+	 */
+	public double getAvgDY(int q){
+		return avgDY.get(q);
+	}
+	
+	/**
+	 * Return the magnitude of the average displacement for cell q
+	 * @param q cell index
+	 */
+	public double getAvgD(int q){
+		return avgD.get(q);
+	}
 
 	/**
 	 * Set the interfacial energy between cells (alpha)
@@ -1194,6 +1280,21 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public double getRotateDiff(){
 		return rotateDiff;
+	}
+	
+	/**
+	 * Set the interval for averaging cell displacements
+	 * @param avgInt averaging interval
+	 */
+	public void setAverageInterval(int avgInt){
+		this.avgInt = avgInt;
+	}
+	
+	/**
+	 * Return the interval for averaging cell displacements
+	 */
+	public int getAverageInterval(){
+		return avgInt;
 	}
 
 	@Override
@@ -1324,43 +1425,50 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	public static void main (String [] args){
-		int nx = 200;
-		int ny = 200;
-		int q = 1000;
+		int nx = 300;
+		int ny = 300;
+		int q = 2000;
 		double temp = 1.0;
 		double lambda = 1.0;
-		double alpha = 8.0;
-		double beta = 16.0;
+		double alpha = 2.0;
+		double beta = 5.0;
 		double motility = 0.0;
 		double rotateDiff = 0.0;
-		int numOfSweeps = 10000;
-		int nequil = 0;
+		int numOfSweeps = 501;
+		int nequil = 100;
 		int seed = -1;
 		int run = 1;
+		int measureTime = 500;
+		int avgInt = 400;
 
-		SpinReader reader = new SpinReader();
-		reader.openReader("init_spin_1000_2.dat");
-		String filename = String.format("%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_t_%d_run_%d.dat",
-				nx, ny, q, alpha, lambda, motility, rotateDiff, numOfSweeps, run);
-		DataWriter r2Writer = new R2Writer();
-		DataWriter ergWriter = new EnergyWriter();
-		DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
-		DataWriter a2Writer = new A2Writer();
-		r2Writer.openWriter("r2_" + filename);
-		ergWriter.openWriter("energy_" + filename);
-		a2Writer.openWriter("a2_" + filename);
-		statsWriter.openWriter("stats_" + filename);
+		//SpinReader reader = new SpinReader();
+		//reader.openReader("init_spin_1000_2.dat");
+		String filename = String.format("%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_t_%d_avgInt_%d_meas_%d_run_%d.dat",
+				nx, ny, q, alpha, lambda, motility, rotateDiff, numOfSweeps, avgInt, measureTime, run);
+		DataWriter avgDisWriter = new AverageDisplacementWriter(measureTime);
+		avgDisWriter.openWriter("avgDis_linear_growth_25_" + filename);
+		//DataWriter r2Writer = new R2Writer();
+		//DataWriter ergWriter = new EnergyWriter();
+		//DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
+		//DataWriter a2Writer = new A2Writer();
+		//r2Writer.openWriter("r2_" + filename);
+		//ergWriter.openWriter("energy_" + filename);
+		//a2Writer.openWriter("a2_" + filename);
+		//statsWriter.openWriter("stats_" + filename);
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temp, lambda, alpha, beta, motility, 
-				rotateDiff, seed, numOfSweeps, nequil, 
-				new DataWriter [] {r2Writer, a2Writer, ergWriter, statsWriter}, false);
-		model.initSpin(reader.readSpins());
+				rotateDiff, seed, numOfSweeps, nequil, false);
+		//model.initSpin(reader.readSpins());
+		model.addDataListener(avgDisWriter);
+		model.setAverageInterval(avgInt);
+		model.initSpin();
 		model.initPolarity();
 		model.run();
-		r2Writer.closeWriter();
-		ergWriter.closeWriter();
-		statsWriter.closeWriter();
-		a2Writer.closeWriter();
-		reader.closeReader();
+		//r2Writer.closeWriter();
+		//ergWriter.closeWriter();
+		//statsWriter.closeWriter();
+		//a2Writer.closeWriter();
+		//reader.closeReader();
+		avgDisWriter.closeWriter();
 	}
 }

@@ -75,7 +75,10 @@ public class Measurement implements Runnable {
 		
 		//Initialise the model
 		model = new CellPottsModel(nx, ny, q, temp, lambda, 
-				alpha, beta, motility, rotateDiff, -1, n, nequil, writers, false);
+				alpha, beta, motility, rotateDiff, -1, n, nequil, false);
+		for (int i = 0; i < writers.length; i++){
+			model.addDataListener(writers[i]);
+		}
 		model.initSpin(spin);
 		model.initPolarity();
 	}

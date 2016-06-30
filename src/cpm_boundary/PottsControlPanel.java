@@ -55,6 +55,9 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 
 	private JLabel lblNEquil;
 	private JTextField txtNEquil;
+	
+	private JLabel lblAvgInt;
+	private JTextField txtAvgInt;
 
 	private JButton btnRun;
 	private JButton btnStop;
@@ -103,6 +106,9 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 
 		txtNumOfSteps = new JTextField(3);
 		lblNumOfSteps = new JLabel("Steps: ");
+		
+		txtAvgInt = new JTextField(3);
+		lblAvgInt = new JLabel("AvgInt: ");
 
 		btnRun = new JButton("Run");
 		btnRun.addActionListener(this);
@@ -142,6 +148,8 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		simParamsPanel.add(txtNumOfSteps);
 		simParamsPanel.add(lblNEquil);
 		simParamsPanel.add(txtNEquil);
+		simParamsPanel.add(lblAvgInt);
+		simParamsPanel.add(txtAvgInt);
 		simParamsPanel.add(btnRun);
 		simParamsPanel.add(btnStop);
 		simParamsPanel.add(btnPause);
@@ -174,10 +182,12 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			int seed = -1;
 			int numOfSweeps = Integer.parseInt(txtNumOfSteps.getText());
 			int nequil = Integer.parseInt(txtNEquil.getText());
+			int avgInt = Integer.parseInt(txtAvgInt.getText());
 			
 			model = new CellPottsModel(
 					nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
 					fracOccupied, seed, numOfSweeps, nequil, true);
+			model.setAverageInterval(avgInt);
 			
 			btnRun.setEnabled(false);
 			btnStop.setEnabled(true);

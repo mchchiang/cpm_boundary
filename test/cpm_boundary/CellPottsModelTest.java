@@ -34,7 +34,7 @@ public class CellPottsModelTest {
 	public void testPottsEnergy1(){
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		assertEquals("Returned wrong energy value for a pair of same spins",
 				model.pottsEnergy(3,3), 0.0, tol);
 	}
@@ -43,7 +43,7 @@ public class CellPottsModelTest {
 	public void testPottsEnergy2(){
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		assertEquals("Returned wrong energy value for a pair that involves q = 0",
 				model.pottsEnergy(0,2), beta, tol);
 	}
@@ -52,7 +52,7 @@ public class CellPottsModelTest {
 	public void testPottsEnergy3(){
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		assertEquals("Returned wrong energy value",
 				model.pottsEnergy(1,2), alpha, tol);
 	}
@@ -61,7 +61,7 @@ public class CellPottsModelTest {
 	public void testGetSpin(){
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		model.initSpin();
 		model.setSpin(2, 3, 1);
 		assertEquals("Returned wrong value when getting spin",
@@ -125,7 +125,7 @@ public class CellPottsModelTest {
 		
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		ArrayList<Integer> xPos = new ArrayList<Integer>();
 		xPos.add(1);
 		xPos.add(1);
@@ -653,7 +653,7 @@ public class CellPottsModelTest {
 	public void testXDiff1(){
 		CellPottsModel model = new CellPottsModel(
 				7, 7, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		model.initSpin();
 		
 		assertEquals("Return wrong xDiff value",
@@ -664,7 +664,7 @@ public class CellPottsModelTest {
 	public void testXDiff2(){
 		CellPottsModel model = new CellPottsModel(
 				7, 7, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		model.initSpin();
 		
 		assertEquals("Return wrong xDiff value",
@@ -676,7 +676,7 @@ public class CellPottsModelTest {
 	public void testXDiff3(){
 		CellPottsModel model = new CellPottsModel(
 				7, 7, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		model.initSpin();
 		
 		assertEquals("Return wrong xDiff value",
@@ -687,7 +687,7 @@ public class CellPottsModelTest {
 	public void testXDiff4(){
 		CellPottsModel model = new CellPottsModel(
 				7, 7, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		model.initSpin();
 		
 		assertEquals("Return wrong xDiff value",
@@ -698,7 +698,7 @@ public class CellPottsModelTest {
 	public void testYDiff1(){
 		CellPottsModel model = new CellPottsModel(
 				7, 7, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		model.initSpin();
 		
 		assertEquals("Return wrong xDiff value",
@@ -709,7 +709,7 @@ public class CellPottsModelTest {
 	public void testYDiff2(){
 		CellPottsModel model = new CellPottsModel(
 				7, 7, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		model.initSpin();
 		
 		assertEquals("Return wrong xDiff value",
@@ -721,7 +721,7 @@ public class CellPottsModelTest {
 	public void testYDiff3(){
 		CellPottsModel model = new CellPottsModel(
 				7, 7, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		model.initSpin();
 		
 		assertEquals("Return wrong xDiff value",
@@ -732,7 +732,7 @@ public class CellPottsModelTest {
 	public void testYDiff4(){
 		CellPottsModel model = new CellPottsModel(
 				7, 7, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		model.initSpin();
 		
 		assertEquals("Return wrong xDiff value",
@@ -743,7 +743,7 @@ public class CellPottsModelTest {
 	public void testDot1(){
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		assertEquals("Return wrong dot product",
 				0.0, model.dot(2.0, 0.0, 0.0, 7.0), tol);
 	}
@@ -752,7 +752,7 @@ public class CellPottsModelTest {
 	public void testDot2(){
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		assertEquals("Return wrong dot product",
 				154.0, model.dot(15.0, 2.0, 8.0, 17.0), tol);
 	}
@@ -761,7 +761,7 @@ public class CellPottsModelTest {
 	public void testMag2_1(){
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		assertEquals("Return wrong magnitude squared value",
 				0.0, model.mag2(0.0, 0.0), tol);
 	}
@@ -770,7 +770,7 @@ public class CellPottsModelTest {
 	public void testMag2_2(){
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		assertEquals("Return wrong magnitude squared value",
 				25.0, model.mag2(3.0, 4.0), tol);
 	}
@@ -779,7 +779,7 @@ public class CellPottsModelTest {
 	public void testMag2_3(){
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, new DataWriter [] {new NullWriter()}, false);
+				seed, numOfSweeps, nequil, false);
 		assertEquals("Return wrong magnitude squared value",
 				169.0, model.mag2(5.0, 12.0), tol);
 	}
