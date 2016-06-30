@@ -56,12 +56,26 @@ public class PottsViewPanel extends JPanel implements Observer {
 	public void setColours(){
 		int typesOfSpin = model.getTypesOfSpin();
 		colours = new ArrayList<Color>();
-		
-		for (int i = 0; i < typesOfSpin; i++){
-			if (i == 0){
-				colours.add(Color.WHITE);
-			} else {
-				colours.add(generateColour());
+
+		if (model instanceof CellPottsModel){
+			for (int i = 0; i < typesOfSpin; i++){
+				if (i == 0){
+					colours.add(Color.WHITE);
+				} else {
+					if (((CellPottsModel) model).getMotility(i) > 0.0){
+						colours.add(Color.BLACK);
+					} else {
+						colours.add(generateColour());
+					}
+				}
+			}
+		} else {
+			for (int i = 0; i < typesOfSpin; i++){
+				if (i == 0){
+					colours.add(Color.WHITE);
+				} else {
+					colours.add(generateColour());
+				}
 			}
 		}
 	}
@@ -131,7 +145,7 @@ public class PottsViewPanel extends JPanel implements Observer {
 		updateColourMap();
 		fg.setRGB(i, j, colours.get(model.getSpin(i, j)).getRGB());
 	}
-	
+
 	//check if new cells are created and need new colours
 	public void updateColourMap(){
 		int diff = model.getTypesOfSpin() - colours.size();
@@ -141,7 +155,7 @@ public class PottsViewPanel extends JPanel implements Observer {
 			}
 		}
 	}
-	
+
 	public Color generateColour(){
 		float s, b, h;
 		h = (float) Math.random();

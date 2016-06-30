@@ -387,6 +387,23 @@ public class CellPottsModel extends SpinModel {
 			motility.set(cellIndex, motilityConst);
 		}
 	}
+	
+	public void initRandomMotility(double frac){
+		int motileCells = (int) (frac * q);
+		initRandomMotility(motileCells);
+	}
+	
+	public void initRandomMotility(int n){
+		int cellIndex;
+		if (n > q) n = q; 
+		
+		for (int i = 0; i < n; i++){
+			do {
+				cellIndex = rand.nextInt(q)+1;
+			} while (motility.get(cellIndex) > 0.0);
+			motility.set(cellIndex, motilityConst * (1 + rand.nextDouble()));
+		}
+	}
 
 	/**
 	 * Change the polarity vector of each cell via a rotation diffusion
@@ -403,11 +420,13 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	public void updateArea(int time){
-		int s = spin[nx/2][ny/2];
-		areaTarget.set(s, areaTarget.get(s) * 1.01);
-		/*if (area.get(s) > cellArea * 50){
-			splitCell(time, s);
-		}*/
+		//int s = spin[nx/2][ny/2];
+		//areaTarget.set(s, areaTarget.get(s) * 1.01);
+		for (int i = 1; i <= q; i++){
+			if (shouldDivide(time, i, rand.nextDouble())){
+				splitCell(time, i);
+			}
+		}
 	}
 
 	public boolean shouldDivide(int time, int cellIndex, double r){
@@ -609,7 +628,7 @@ public class CellPottsModel extends SpinModel {
 
 			if (n > nequil){
 				updateR();
-				updateArea(n);
+				//updateArea(n);
 				updateAverageDisplacement();
 			}
 

@@ -226,7 +226,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		public void run(){
 			model.initSpin();
 			model.initPolarity();
-			model.initMotility(Double.parseDouble(txtFracOfMotile.getText()));
+			//model.initRandomMotility(Double.parseDouble(txtFracOfMotile.getText()));
 
 			view.setModel(model);
 			view.initImage();
