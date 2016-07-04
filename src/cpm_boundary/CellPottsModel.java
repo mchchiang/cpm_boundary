@@ -75,7 +75,7 @@ public class CellPottsModel extends SpinModel {
 	private ArrayList<Double> avgDX;
 	private ArrayList<Double> avgDY;
 	private ArrayList<Double> avgD;
-	private int avgInt = 100;
+	private int avgInt = 1;
 
 	//variables for calculating acceptance rate
 	private double acceptRate;
@@ -127,6 +127,7 @@ public class CellPottsModel extends SpinModel {
 		this.numOfSweeps = n;
 		this.nequil = nequil;
 		this.notify = notify;
+		init();
 	}
 
 	/**
@@ -165,11 +166,12 @@ public class CellPottsModel extends SpinModel {
 		this.numOfSweeps = n;
 		this.nequil = nequil;
 		this.notify = notify;
+		init();
 	}
 
 	//constructor used for unit testing only!
 	protected CellPottsModel(int nx, int ny, int q, ArrayList<Double> areaTarget, 
-			double temp, double lambda, double alpha, double beta, double motility, int seed){
+			double temp, double lambda, double alpha, double beta, double motilityConst, int seed){
 		this.nx = nx;
 		this.ny = ny;
 		this.q = q;
@@ -180,6 +182,7 @@ public class CellPottsModel extends SpinModel {
 		this.beta = beta;
 		this.motilityConst = motilityConst;
 		this.seed = seed;
+		init();
 	}
 
 	/**
@@ -284,8 +287,6 @@ public class CellPottsModel extends SpinModel {
 	 * Initialise the lattice with random spins
 	 */
 	public void initSpin(){
-		init();
-
 		spin = new int [nx][ny];
 
 		//initialising each of the Q cells as a square with length delta
@@ -322,8 +323,6 @@ public class CellPottsModel extends SpinModel {
 	 * @param spin initial condition of the lattice
 	 */
 	public void initSpin(int [][] spin){
-		init();
-
 		if (spin.length == nx && spin[0].length == ny){
 
 			//deep copy the spin
@@ -906,8 +905,8 @@ public class CellPottsModel extends SpinModel {
 
 		cm = 0;
 
-		double leftCount = 0;
-		double rightCount = 0;
+		int leftCount = 0;
+		int rightCount = 0;
 		double leftSum = 0;
 		double rightSum = 0;
 		double total = 0;
@@ -1310,7 +1309,17 @@ public class CellPottsModel extends SpinModel {
 	public double getMotility(int q){
 		return motility.get(q);
 	}
-
+	
+	/**
+	 * Set the rotational diffusion coefficient
+	 * @param d rotational diffusion coefficient
+	 */
+	public void setRotateDiff(double d){
+		if ( d>= 0.0){
+			rotateDiff = d;
+		}
+	}
+	
 	/**
 	 * Return the rotational diffusion coefficient
 	 */
@@ -1323,7 +1332,9 @@ public class CellPottsModel extends SpinModel {
 	 * @param avgInt averaging interval
 	 */
 	public void setAverageInterval(int avgInt){
-		this.avgInt = avgInt;
+		if (avgInt >= 0){
+			this.avgInt = avgInt;
+		}
 	}
 
 	/**
