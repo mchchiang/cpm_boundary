@@ -49,6 +49,8 @@ public class CellPottsModel extends SpinModel {
 	private ArrayList<Double> ycm;
 	private ArrayList<Double> xcmNew;
 	private ArrayList<Double> ycmNew;
+	private ArrayList<Double> sumX;
+	private ArrayList<Double> sumY;
 
 	//variables for measuring <R^2>
 	private ArrayList<Double> rx;
@@ -226,6 +228,8 @@ public class CellPottsModel extends SpinModel {
 		ycm = new ArrayList<Double>();
 		xcmNew = new ArrayList<Double>();
 		ycmNew = new ArrayList<Double>();
+		sumX = new ArrayList<Double>();
+		sumY = new ArrayList<Double>();
 
 		rx = new ArrayList<Double>();
 		ry = new ArrayList<Double>();
@@ -261,6 +265,8 @@ public class CellPottsModel extends SpinModel {
 		ycm.add(0.0);
 		xcmNew.add(0.0);
 		ycmNew.add(0.0);
+		sumX.add(0.0);
+		sumY.add(0.0);
 		rx.add(0.0);
 		ry.add(0.0);
 		px.add(0.0);
@@ -718,7 +724,6 @@ public class CellPottsModel extends SpinModel {
 			setSpin(i, j, newSpin);
 			acceptRate = acceptRate + 1.0;
 		}
-		//}
 	}
 
 	/**
@@ -941,6 +946,165 @@ public class CellPottsModel extends SpinModel {
 
 		return cm;
 	}
+	
+	public double calculatePositionSum(ArrayList<Integer> pos, int length){
+		int n = pos.size();
+		double total = 0;
+		int width = (int) Math.ceil(0.05 * length);
+		int x;
+		boolean inCriticalRegion = false;
+		
+		for (int i = 0; i < n; i++){
+			x = pos.get(i);
+			total += getCentre(x);
+			if (x > length-1-width || x < width){
+				inCriticalRegion = true;
+				break;
+			}	
+		}
+
+		if (!inCriticalRegion){
+			return total;
+		}
+
+		int leftCount = 0;
+		int rightCount = 0;
+		double leftSum = 0;
+		double rightSum = 0;
+
+		for (int i = 0; i < n; i++){
+			x = pos.get(i);
+			if (x < length / 2){
+				leftCount++;
+				leftSum += getCentre(x);//shift to centre of cell
+			} else {
+				rightCount++;
+				rightSum += getCentre(x);
+			}
+		}
+
+		if (leftCount > rightCount){
+			total = leftSum + rightSum - rightCount * length;
+		} else {
+			total = rightSum + leftSum + leftCount * length;
+		}
+
+		/*
+		 * correction for cases if leftCount == rightCount that there 
+		 * is a chance the addition above will yield a result outside the
+		 * boundary
+		 */
+
+		if (total < 0){
+			total = leftSum + leftCount * length + rightSum;
+		} else if (total > length * n){
+			total = leftSum + rightSum - rightCount * length;
+		}
+
+		return total;
+	}
+	
+	public void initCM(){
+		for (int i = 1; i <= q; i++){
+			initCM(i);
+		}
+	}
+	
+	public void initCM(int cellIndex){
+		ArrayList<Vector2D> pos = spinPos.get(cellIndex);
+		ArrayList<Integer> xPos = new ArrayList<Integer>();
+		ArrayList<Integer> yPos = new ArrayList<Integer>();
+		int n = pos.size();
+		
+		for (Vector2D v : pos){
+			xPos.add(v.getX());
+			yPos.add(v.getY());
+		}
+		
+		double tempSumX = calculatePositionSum(xPos, nx);
+		double tempSumY = calculatePositionSum(yPos, ny);
+		
+		sumX.set(cellIndex, tempSumX);
+		sumY.set(cellIndex, tempSumY);
+		
+		xcmNew.set(cellIndex, tempSumX / (double) n);
+		ycmNew.set(cellIndex, tempSumY / (double) n);
+	}
+	
+	public void updateCM(int cellIndex, int i, int j, boolean remove){
+		double xcm = xcmNew.get(cellIndex);
+		double ycm = ycmNew.get(cellIndex);
+		double newSumX, newSumY;
+		int n = spinPos.get(cellIndex).size();
+		
+		double x = getCentre(i);
+		double y = getCentre(j);
+		
+		if (x-xcm > nx/2){
+			x -= nx;
+		} else if (x-xcm < -nx/2){
+			x += nx;
+		}
+		
+		if (y-ycm > ny/2){
+			y -= ny;
+		} else if (y-ycm < -ny/2){
+			y += nx;
+		}
+		
+		if (remove){
+			newSumX = sumX.get(cellIndex) - x;
+			newSumY = sumY.get(cellIndex) - y;
+			xcmNew.set(cellIndex, newSumX / (double) (n-1));
+			ycmNew.set(cellIndex, newSumY / (double) (n-1));
+		} else {
+			newSumX = sumX.get(cellIndex) + x;
+			newSumY = sumY.get(cellIndex) + y;
+			xcmNew.set(cellIndex, newSumX / (double) (n+1));
+			ycmNew.set(cellIndex, newSumY / (double) (n+1));
+		}
+		sumX.set(cellIndex, newSumX);
+		sumY.set(cellIndex, newSumY);
+	}
+	
+	public double calculateDCMX(int cellIndex, int i, boolean remove){
+		double xcm = xcmNew.get(cellIndex);
+		double sum = sumX.get(cellIndex);
+		int n = spinPos.get(cellIndex).size();
+		double x = getCentre(i);
+		
+		if (x-xcm > nx/2){
+			x -= nx;
+		} else if (x-xcm < -nx/2){
+			x += nx;
+		}
+		
+		if (remove){
+			return (sum-x) / (double) (n-1) - xcm;
+		} else {
+			return (sum+x) / (double) (n+1) - xcm;
+		}
+	}
+	
+	public double calculateDCMY(int cellIndex, int j, boolean remove){
+		double ycm = ycmNew.get(cellIndex);
+		double sum = sumY.get(cellIndex);
+		int n = spinPos.get(cellIndex).size();
+		double y = getCentre(j);
+		
+		if (y-ycm > ny/2){
+			y -= ny;
+		} else if (y-ycm < -ny/2){
+			y += ny;
+		}
+		
+		if (remove){
+			return (sum-y) / (double) (n-1) - ycm;
+		} else {
+			return (sum+y) / (double) (n+1) - ycm;
+		}
+	}
+	
 
 	/**
 	 * Calculate the centre of mass (CM) for all cells
@@ -1079,6 +1243,10 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public double dot(double x1, double y1, double x2, double y2){
 		return x1 * x2 + y1 * y2;
+	}
+	
+	public double getCentre(int pos){
+		return pos + 0.5;
 	}
 
 	//periodic boundary methods
