@@ -21,6 +21,10 @@ public class CellPottsModelTest {
 	private final int nequil = 0;
 	private final double rotateDiff = 1.0;
 	
+	private final CellPottsModel defaultModel = new CellPottsModel(
+			nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
+			seed, numOfSweeps, nequil, false);
+	
 	//convert primitive double array to arraylist
 	public ArrayList<Double> toList(double [] array){
 		ArrayList<Double> list = new ArrayList<Double>();
@@ -30,42 +34,421 @@ public class CellPottsModelTest {
 		return list;
 	}
 	
+	//Test accessor methods
+
+	@Test
+	public void testGetSpin1(){
+		defaultModel.initSpin();
+		defaultModel.setSpin(2, 3, 1);
+		assertEquals("Problem in setting/getting spin",
+				1, defaultModel.getSpin(2, 3));
+	}
+	
+	@Test
+	public void testSetAlpha1(){
+		double newAlpha = 123.2;
+		defaultModel.setAlpha(newAlpha);
+		assertEquals("Set a wrong value for alpha",
+				newAlpha, defaultModel.getAlpha(), tol);
+	}
+	
+	@Test
+	public void testGetAlpha1(){
+		assertEquals("Returned a wrong value for alpha",
+				alpha, defaultModel.getAlpha(), tol);
+	}
+	
+	@Test
+	public void testSetBeta1(){
+		double newBeta = 435.5;
+		defaultModel.setBeta(newBeta);
+		assertEquals("Set a wrong value for beta",
+				newBeta, defaultModel.getBeta(), tol);
+	}
+	
+	@Test
+	public void testGetBeta1(){
+		assertEquals("Returned a wrong value for beta",
+				beta, defaultModel.getBeta(), tol);
+	}
+	
+	@Test
+	public void testSetLambda1(){
+		double newLambda = 8937.23;
+		defaultModel.setLambda(newLambda);
+		assertEquals("Set a wrong value for lambda",
+				newLambda, defaultModel.getLambda(), tol);
+	}
+	
+	@Test
+	public void testGetLambda1(){
+		assertEquals("Returned a wrong value for lambda",
+				lambda, defaultModel.getLambda(), tol);
+	}
+	
+	@Test
+	public void testGetNumOfRows1(){
+		assertEquals("Returned a wrong value for the number of rows in lattice",
+				ny, defaultModel.getNumOfRows());
+	}
+	
+	@Test
+	public void testGetNumOfColumns1(){
+		assertEquals("Returned a wrong value for the number of columns in lattice",
+				nx, defaultModel.getNumOfColumns());
+	}
+	
+	@Test
+	public void testSetTemp1(){
+		double newTemp = 4351.3;
+		defaultModel.setTemp(newTemp);
+		assertEquals("Set a wrong value for the temperature",
+				newTemp, defaultModel.getTemp(), tol);
+	}
+	
+	@Test
+	public void testGetTemp1(){
+		assertEquals("Returned a wrong value for the temperature",
+				temperature, defaultModel.getTemp(), tol);
+	}
+	
+	@Test
+	public void testSetRotateDiff1(){
+		double newRotateDiff = 4351.3;
+		defaultModel.setRotateDiff(newRotateDiff);
+		assertEquals("Set a wrong value for the rotational diffusion coefficient",
+				newRotateDiff, defaultModel.getRotateDiff(), tol);
+	}
+	
+	@Test
+	public void testGetRotateDiff1(){
+		assertEquals("Returned a wrong value for the rotational diffusion coefficient",
+				rotateDiff, defaultModel.getRotateDiff(), tol);
+	}
+	
+	@Test
+	public void testSetNEquil1(){
+		int newNequil = 3472;
+		defaultModel.setNEquil(newNequil);
+		assertEquals("Set a wrong value for the number of steps to reach equilibrium (nequil)",
+				newNequil, defaultModel.getNEquil());
+	}
+	
+	@Test
+	public void testSetNEquil2(){
+		int newNequil = -239047;
+		defaultModel.setNEquil(newNequil);
+		assertEquals("Set a wrong value for the number of steps to reach equilibrium (nequil)",
+				nequil, defaultModel.getNEquil());
+	}
+	
+	@Test
+	public void testGetNEquil1(){
+		assertEquals("Returned a wrong value for the number of steps to reach equilibrium (nequil)",
+				nequil, defaultModel.getNEquil(), tol);
+	}
+	
+	@Test
+	public void testSetNumOfSweeps1(){
+		int newNumOfSweeps = 45668;
+		defaultModel.setNumOfSweeps(newNumOfSweeps);
+		assertEquals("Set a wrong value for the number of sweeps",
+				newNumOfSweeps, defaultModel.getNumOfSweeps());
+	}
+	
+	@Test
+	public void testSetNumOfSweeps2(){
+		int newNumOfSweeps = -234789239;
+		defaultModel.setNumOfSweeps(newNumOfSweeps);
+		assertEquals("Set a wrong value for the number of sweeps",
+				numOfSweeps, defaultModel.getNumOfSweeps());
+	}
+	
+	@Test
+	public void testGetNumOfSweeps1(){
+		assertEquals("Returned a wrong value for the number of sweeps",
+				numOfSweeps, defaultModel.getNumOfSweeps());
+	}
+	
+	@Test
+	public void testSetMotilityConst1(){
+		double newMotiltyConst = 34985.423;
+		defaultModel.setMotilityConst(newMotiltyConst);
+		assertEquals("Set a wrong value for the motility constant",
+				newMotiltyConst, defaultModel.getMotilityConst(), tol);
+	}
+	
+	@Test
+	public void testSetMotilityConst2(){
+		double newMotiltyConst = -238947.34598;
+		defaultModel.setMotilityConst(newMotiltyConst);
+		assertEquals("Set a wrong value for the motility constant",
+				motility, defaultModel.getMotilityConst(), tol);
+	}
+	
+	@Test
+	public void testGetMotilityConst1(){
+		assertEquals("Returned a wrong value for the motility constant",
+				motility, defaultModel.getMotilityConst(), tol);
+	}
+	
+	@Test
+	public void testSetMotility1(){
+		double newMotility = 90812.324;
+		defaultModel.setMotility(1, newMotility);
+		assertEquals("Set a wrong value for the motility constant",
+				newMotility, defaultModel.getMotility(1), tol);
+	}
+	
+	@Test
+	public void testSetMotility2(){
+		double newMotility = 905.232;
+		defaultModel.setMotility(3, newMotility);
+		assertEquals("Set a wrong value for the motility constant",
+				newMotility, defaultModel.getMotility(3), tol);
+	}
+	
+	@Test
+	public void testSetMotility3(){
+		double newMotility = -8234.34534;
+		defaultModel.setMotility(1, newMotility);
+		assertEquals("Set a wrong value for the motility constant",
+				0.0, defaultModel.getMotility(1), tol);
+	}
+	
+	@Test
+	public void testGetMotility1(){
+		assertEquals("Returned a wrong value for the motility constant for spin 1",
+				0.0, defaultModel.getMotility(1), tol);
+		assertEquals("Returned a wrong value for the motility constant for spin 2",
+				0.0, defaultModel.getMotility(2), tol);
+		assertEquals("Returned a wrong value for the motility constant for spin 3",
+				0.0, defaultModel.getMotility(3), tol);
+		assertEquals("Returned a wrong value for the motility constant for spin 4",
+				0.0, defaultModel.getMotility(4), tol);
+	}
+	
+	@Test
+	public void testSetAverageInterval1(){
+		int avgInt = 45668;
+		defaultModel.setAverageInterval(avgInt);
+		assertEquals("Set a wrong value for the number of sweeps",
+				avgInt, defaultModel.getAverageInterval());
+	}
+	
+	@Test
+	public void testSetAverageInterval2(){
+		int avgInt = -234;
+		defaultModel.setAverageInterval(avgInt);
+		assertEquals("Set a wrong value for the number of sweeps",
+				1, defaultModel.getAverageInterval());
+	}
+	
+	@Test
+	public void testGetAverageInterval1(){
+		assertEquals("Returned a wrong value for the number of sweeps",
+				1, defaultModel.getAverageInterval());
+	}
+	
+	@Test
+	public void testIsRunning1(){
+		assertFalse("Returned true even when the model is not running", 
+				defaultModel.isRunning());
+	}
+	
+	@Test
+	public void testIsPaused1(){
+		assertFalse("Returned true even when the model is not running", 
+				defaultModel.isPaused());
+	}
+	
+	//Test init methods
+	@Test
+	public void testInitSpin1(){
+		int [][] expectedSpin = new int [][]{
+				{1,1,1,1},
+				{1,2,2,1},
+				{1,2,2,1},
+				{1,1,1,1}
+		};
+		
+		double [] areaTarget = new double [] {4.0, 4.0};
+		CellPottsModel model = new CellPottsModel(4, 4, 4, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(expectedSpin);
+		
+		int nx = expectedSpin.length;
+		int ny = expectedSpin[0].length;
+		
+		int [][] actualSpin = new int [nx][ny];
+		
+		for (int i = 0; i < nx; i++){
+			for (int j = 0; j < ny; j++){
+				actualSpin[i][j] = model.getSpin(i, j);
+			}
+		}
+		
+		assertArrayEquals("Initialise spins incorrectly", 
+				expectedSpin, actualSpin);
+	}
+	
+	@Test
+	public void testInitSpin2(){
+		int [][] expectedSpin = new int [][] {
+				{1,2,2,1},
+				{1,2,3,4},
+				{4,3,3,4},
+				{1,2,3,4}
+		};
+		
+		double [] areaTarget = new double [] {4.0, 4.0, 4.0, 4.0};
+		CellPottsModel model = new CellPottsModel(4, 4, 4, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(expectedSpin);
+		
+		int nx = expectedSpin.length;
+		int ny = expectedSpin[0].length;
+		
+		int [][] actualSpin = new int [nx][ny];
+		
+		for (int i = 0; i < nx; i++){
+			for (int j = 0; j < ny; j++){
+				actualSpin[i][j] = model.getSpin(i, j);
+			}
+		}
+		
+		assertArrayEquals("Initialise spins incorrectly", 
+				expectedSpin, actualSpin);
+	}
+	
+	@Test
+	public void testInitSpin3(){
+		int [][] expectedSpin = new int [][] {
+				{3,2,2,2,4,3},
+				{3,2,2,2,4,4},
+				{1,5,5,2,4,1},
+				{1,5,5,5,1,1},
+				{3,3,5,5,1,1},
+				{3,3,3,4,4,3}
+		};
+		
+		double [] areaTarget = new double [] {7.0, 7.0, 7.0, 7.0, 7.0};
+		CellPottsModel model = new CellPottsModel(6, 6, 5, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(expectedSpin);
+		
+		int nx = expectedSpin.length;
+		int ny = expectedSpin[0].length;
+		
+		int [][] actualSpin = new int [nx][ny];
+		
+		for (int i = 0; i < nx; i++){
+			for (int j = 0; j < ny; j++){
+				actualSpin[i][j] = model.getSpin(i, j);
+			}
+		}
+		
+		assertArrayEquals("Initialise spins incorrectly", 
+				expectedSpin, actualSpin);
+	}
+	
+	@Test
+	public void testInitSpin4(){
+		int [][] expectedSpin = new int [][]{
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,0,0,0},
+				{0,1,1,1,1,1,0,0},
+				{0,1,1,1,1,1,1,0},
+				{0,0,1,1,1,1,1,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,1,1,0,0,0},
+				{0,0,0,0,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {1.0,1.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 1, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(expectedSpin);
+		
+		int nx = expectedSpin.length;
+		int ny = expectedSpin[0].length;
+		
+		int [][] actualSpin = new int [nx][ny];
+		
+		for (int i = 0; i < nx; i++){
+			for (int j = 0; j < ny; j++){
+				actualSpin[i][j] = model.getSpin(i, j);
+			}
+		}
+		
+		assertArrayEquals("Initialise spins incorrectly", 
+				expectedSpin, actualSpin);
+	}
+	
+	@Test
+	public void testInitMotility1(){
+		int numOfMotileCells = 2;
+		defaultModel.initMotility(numOfMotileCells);
+		double cellMotility;
+		int count = 0;
+		for (int i = 1; i < defaultModel.getTypesOfSpin(); i++){
+			cellMotility = defaultModel.getMotility(i);
+			if (cellMotility > 0.0){
+				count++;
+				assertEquals("Returned wrong motility strength for spin " + i,
+					motility, cellMotility, tol);
+			} else {
+				assertEquals("Returned wrong motility strength for spin " + i,
+						0.0, cellMotility, tol);
+			}
+		}
+		assertEquals("Initialise wrong number of motile cells", 
+				numOfMotileCells, count);
+	}
+	
+	@Test
+	public void testInitMotility2(){
+		int numOfMotileCells = (int) (q * 0.5);
+		defaultModel.initMotility(0.5);
+		double cellMotility;
+		int count = 0;
+		for (int i = 1; i < defaultModel.getTypesOfSpin(); i++){
+			cellMotility = defaultModel.getMotility(i);
+			if (cellMotility > 0.0){
+				count++;
+				assertEquals("Returned wrong motility strength for spin " + i,
+					motility, cellMotility, tol);
+			} else {
+				assertEquals("Returned wrong motility strength for spin " + i,
+						0.0, cellMotility, tol);
+			}
+		}
+		assertEquals("Initialise wrong number of motile cells", 
+				numOfMotileCells, count);
+	}
+	
+	//Test other methods
+	
 	@Test
 	public void testPottsEnergy1(){
-		CellPottsModel model = new CellPottsModel(
-				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, false);
 		assertEquals("Returned wrong energy value for a pair of same spins",
-				model.pottsEnergy(3,3), 0.0, tol);
+				defaultModel.pottsEnergy(3,3), 0.0, tol);
 	}
 	
 	@Test
 	public void testPottsEnergy2(){
-		CellPottsModel model = new CellPottsModel(
-				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, false);
 		assertEquals("Returned wrong energy value for a pair that involves q = 0",
-				model.pottsEnergy(0,2), beta, tol);
+				defaultModel.pottsEnergy(0,2), beta, tol);
 	}
 	
 	@Test
 	public void testPottsEnergy3(){
-		CellPottsModel model = new CellPottsModel(
-				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, false);
 		assertEquals("Returned wrong energy value",
-				model.pottsEnergy(1,2), alpha, tol);
-	}
-	
-	@Test
-	public void testGetSpin(){
-		CellPottsModel model = new CellPottsModel(
-				nx, ny, q, temperature, lambda, alpha, beta, motility, rotateDiff,
-				seed, numOfSweeps, nequil, false);
-		model.initSpin();
-		model.setSpin(2, 3, 1);
-		assertEquals("Returned wrong value when getting spin",
-				1, model.getSpin(2, 3));
+				defaultModel.pottsEnergy(1,2), alpha, tol);
 	}
 	
 	@Test
@@ -115,7 +498,7 @@ public class CellPottsModelTest {
 	}
 	
 	@Test
-	public void testCalculateCM1a(){
+	public void testCalculateCM1_1Xa(){
 		/* test for the configuration
 				{1,1,1,1}
 				{1,2,2,1}
@@ -138,7 +521,7 @@ public class CellPottsModelTest {
 	
 	//same test as testCalculateCM1a but with internal array list
 	@Test
-	public void testCalculateCM1b(){
+	public void testCalculateCM1_1Xb(){
 		int [][] spin = new int [][]{
 				{1,1,1,1},
 				{1,2,2,1},
@@ -157,7 +540,7 @@ public class CellPottsModelTest {
 	
 	
 	@Test
-	public void testCalculateCM2a(){
+	public void testCalculateCM2_1X(){
 		int [][] spin = new int [][]{
 				{1,3,3,1},
 				{1,3,2,1},
@@ -175,7 +558,7 @@ public class CellPottsModelTest {
 	}
 	
 	@Test
-	public void testCalculateCM2b(){
+	public void testCalculateCM2_1Y(){
 		int [][] spin = new int [][]{
 				{1,3,3,1},
 				{1,3,2,1},
@@ -193,7 +576,7 @@ public class CellPottsModelTest {
 	}
 
 	@Test
-	public void testCalculateCM2c(){
+	public void testCalculateCM2_2X(){
 		int [][] spin = new int [][]{
 				{1,3,3,1},
 				{1,3,2,1},
@@ -211,7 +594,7 @@ public class CellPottsModelTest {
 	}
 	
 	@Test
-	public void testCalculateCM2d(){
+	public void testCalculateCM2_2Y(){
 		int [][] spin = new int [][]{
 				{1,3,3,1},
 				{1,3,2,1},
@@ -229,7 +612,32 @@ public class CellPottsModelTest {
 	}
 	
 	@Test
-	public void testCalculateCM3a(){
+	public void testUpdateCM2(){
+		int [][] spin = new int [][]{
+				{1,3,3,1},
+				{1,3,2,1},
+				{4,2,2,2},
+				{4,3,2,4}
+		};
+		
+		double [] areaTarget = new double [] {4.0, 4.0, 4.0, 4.0};
+		CellPottsModel model = new CellPottsModel(4, 4, 4, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.updateCM();
+		assertEquals("Returned wrong xcm value for spin 3",
+				0.5, model.getXCM(3), tol);
+		assertEquals("Returned wrong ycm value for spin 3",
+				1.75, model.getYCM(3), tol);
+		assertEquals("Returned wrong xcm value for spin 4",
+				19.0/6.0, model.getXCM(4), tol);
+		assertEquals("Returned wrong ycm value for spin 4",
+				1.0/6.0, model.getYCM(4), tol);
+	}
+	
+	@Test
+	public void testCalculateCM3_1X(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -244,12 +652,12 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		assertEquals("Returned wrong ycm value for spin 1",
+		assertEquals("Returned wrong xcm value for spin 1",
 				3.5, model.calculateCM(model.getSpinXPos(1), 6), tol);
 	}
 	
 	@Test
-	public void testCalculateCM3b(){
+	public void testCalculateCM3_1Y(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -269,7 +677,7 @@ public class CellPottsModelTest {
 	}
 	
 	@Test
-	public void testCalculateCM3c(){
+	public void testCalculateCM3_2X(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -284,12 +692,12 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		assertEquals("Returned wrong ycm value for spin 1",
+		assertEquals("Returned wrong xcm value for spin 2",
 				17.0/14.0, model.calculateCM(model.getSpinXPos(2), 6), tol);
 	}
 	
 	@Test
-	public void testCalculateCM3d(){
+	public void testCalculateCM3_2Y(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -304,12 +712,12 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		assertEquals("Returned wrong ycm value for spin 1",
+		assertEquals("Returned wrong ycm value for spin 2",
 				37.0/14.0, model.calculateCM(model.getSpinYPos(2), 6), tol);
 	}
 	
 	@Test
-	public void testCalculateCM3e(){
+	public void testCalculateCM3_3X(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -324,12 +732,12 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		assertEquals("Returned wrong ycm value for spin 1",
+		assertEquals("Returned wrong xcm value for spin 3",
 				103.0/18.0, model.calculateCM(model.getSpinXPos(3), 6), tol);
 	}
 	
 	@Test
-	public void testCalculateCM3f(){
+	public void testCalculateCM3_3Y(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -344,12 +752,12 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		assertEquals("Returned wrong ycm value for spin 1",
+		assertEquals("Returned wrong ycm value for spin 3",
 				13.0/18.0, model.calculateCM(model.getSpinYPos(3), 6), tol);
 	}
 	
 	@Test
-	public void testCalculateCM3g(){
+	public void testCalculateCM3_4X(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -364,12 +772,12 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		assertEquals("Returned wrong ycm value for spin 1",
+		assertEquals("Returned wrong xcm value for spin 4",
 				5.0/6.0, model.calculateCM(model.getSpinXPos(4), 6), tol);
 	}
 	
 	@Test
-	public void testCalculateCM3h(){
+	public void testCalculateCM3_4Y(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -384,12 +792,12 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		assertEquals("Returned wrong ycm value for spin 1",
+		assertEquals("Returned wrong ycm value for spin 4",
 				4.5, model.calculateCM(model.getSpinYPos(4), 6), tol);
 	}
 	
 	@Test
-	public void testCalculateCM3i(){
+	public void testCalculateCM3_5X(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -404,12 +812,12 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		assertEquals("Returned wrong ycm value for spin 1",
+		assertEquals("Returned wrong xcm value for spin 5",
 				3.5, model.calculateCM(model.getSpinXPos(5), 6), tol);
 	}
 	
 	@Test
-	public void testCalculateCM3j(){
+	public void testCalculateCM3_5Y(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -424,12 +832,50 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		assertEquals("Returned wrong ycm value for spin 1",
+		assertEquals("Returned wrong ycm value for spin 5",
 				2.5, model.calculateCM(model.getSpinYPos(5), 6), tol);
 	}
 	
 	@Test
-	public void testCalculateCM3k(){
+	public void testUpdateCM3(){
+		int [][] spin = new int [][]{
+				{3,2,2,2,4,3},
+				{3,2,2,2,4,4},
+				{1,5,5,2,4,1},
+				{1,5,5,5,1,1},
+				{3,3,5,5,1,1},
+				{3,3,3,4,4,3}
+		};
+		
+		double [] areaTarget = new double [] {7.0, 7.0, 7.0, 7.0, 7.0};
+		CellPottsModel model = new CellPottsModel(6, 6, 5, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updateCM();
+		assertEquals("Returned wrong xcm value for spin 1",
+				3.5, model.getXCM(1), tol);
+		assertEquals("Returned wrong ycm value for spin 1",
+				5.5, model.getYCM(1), tol);
+		assertEquals("Returned wrong xcm value for spin 2",
+				17.0/14.0, model.getXCM(2), tol);
+		assertEquals("Returned wrong ycm value for spin 2",
+				37.0/14.0, model.getYCM(2), tol);
+		assertEquals("Returned wrong xcm value for spin 3",
+				103.0/18.0, model.getXCM(3), tol);
+		assertEquals("Returned wrong ycm value for spin 3",
+				13.0/18.0, model.getYCM(3), tol);
+		assertEquals("Returned wrong xcm value for spin 4",
+				5.0/6.0, model.getXCM(4), tol);
+		assertEquals("Returned wrong ycm value for spin 4",
+				4.5, model.getYCM(4), tol);
+		assertEquals("Returned wrong xcm value for spin 5",
+				3.5, model.getXCM(5), tol);
+		assertEquals("Returned wrong ycm value for spin 5",
+				2.5, model.getYCM(5), tol);
+	}
+	
+	@Test
+	public void testCalculateCM4_1X(){
 		int [][] spin = new int [][]{
 				{0,0,0,0,0,0,0,0},
 				{0,0,1,1,1,0,0,0},
@@ -451,7 +897,7 @@ public class CellPottsModelTest {
 	}
 	
 	@Test
-	public void testCalculateCM3l(){
+	public void testCalculateCM4_1Y(){
 		int [][] spin = new int [][]{
 				{0,0,0,0,0,0,0,0},
 				{0,0,1,1,1,0,0,0},
