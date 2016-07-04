@@ -215,11 +215,8 @@ public class CellPottsModel extends SpinModel {
 			l.update(this, time);
 		}
 	}
-
-	/**
-	 * Initialise the model
-	 */
-	public void init(){
+	
+	private void init(){
 		acceptRate = 0.0;
 		rand = new Random();
 		area = new ArrayList<Double>();
@@ -257,7 +254,7 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	//init variables for adding new cell
-	public void addNewCell(){
+	private void addNewCell(){
 		area.add(0.0);
 		areaTarget.add(0.0);
 		xcm.add(0.0);
