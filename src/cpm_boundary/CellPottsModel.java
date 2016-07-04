@@ -700,20 +700,13 @@ public class CellPottsModel extends SpinModel {
 		} while (oldSpin == newSpin);
 
 		//update area of the affected cells due to spin change
-		double newAreaNewSpin, newAreaOldSpin;
-
-		//if (newSpin != oldSpin){
-		newAreaNewSpin = area.get(newSpin)+1;
-		newAreaOldSpin = area.get(oldSpin)-1;
-		/*} else {
-			newAreaNewSpin = area.get(newSpin);
-			newAreaOldSpin = area.get(oldSpin);
-		}*/
+		double areaOldSpin = area.get(oldSpin);
+		double areaNewSpin = area.get(newSpin);
 
 		//implement the metropolis algorithm
 		double negDeltaE = negDeltaE(i, j, newSpin, 
-				area.get(oldSpin), area.get(newSpin), 
-				newAreaOldSpin, newAreaNewSpin);
+				areaOldSpin, areaNewSpin, 
+				areaOldSpin-1, areaNewSpin+1);
 
 		double totalEnergy = negDeltaE;
 
@@ -836,7 +829,6 @@ public class CellPottsModel extends SpinModel {
 	 * @return the pair-wise Potts energy between the two spins
 	 */
 	public double pottsEnergy(int i, int j){
-		
 		if (i == j){
 			return 0.0;
 		} else if (i == 0 || j == 0){
@@ -844,14 +836,6 @@ public class CellPottsModel extends SpinModel {
 		} else {
 			return alpha;
 		}
-		
-		
-	/*	double energy = alpha;
-		
-		if (i == j) energy = 0.0;
-		if (i != j && ((i==0) || (j==0))) energy = beta;
-
-		return energy;*/
 	}
 
 	/**
