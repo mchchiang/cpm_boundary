@@ -262,6 +262,30 @@ public class CellPottsModelTest {
 				defaultModel.isPaused());
 	}
 	
+	@Test
+	public void testGetTotalTypesOfSpin1(){
+		assertEquals("Returned a wrong value for the total types of spin",
+				q+1, defaultModel.getTypesOfSpin());
+	}
+	
+	@Test
+	public void testGetTotalEnergy1(){
+		int [][] spin = new int [][]{
+				{1,3,3,1},
+				{1,3,2,1},
+				{4,2,2,2},
+				{4,3,2,4}
+		};
+		
+		double [] areaTarget = new double [] {4.0, 4.0, 4.0, 4.0};
+		CellPottsModel model = new CellPottsModel(4, 4, 4, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		assertEquals("Return a wrong value for the total energy",
+				(19+23) * alpha + 2 * lambda, model.getTotalEnergy(), tol);
+	}
+	
 	//Test init methods
 	@Test
 	public void testInitSpin1(){
@@ -431,8 +455,7 @@ public class CellPottsModelTest {
 				numOfMotileCells, count);
 	}
 	
-	//Test other methods
-	
+	//Test other methods	
 	@Test
 	public void testPottsEnergy1(){
 		assertEquals("Returned wrong energy value for a pair of same spins",
