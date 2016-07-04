@@ -441,7 +441,6 @@ public class CellPottsModel extends SpinModel {
 		double [] w = getMajorAxis(cellIndex);
 
 		ArrayList<Vector2D> cellPos = spinPos.get(cellIndex);
-		ArrayList<Vector2D> newCellPos = spinPos.get(q);
 
 		Vector2D pt;
 		int x, y;
@@ -458,22 +457,11 @@ public class CellPottsModel extends SpinModel {
 			value = dot(xDiff, yDiff, w[0], w[1]);
 
 			if (value < 0){
-				newCellPos.add(pt);
-				area.set(q, area.get(q)+1.0);
-
-				cellPos.remove(pt);
-				area.set(cellIndex, area.get(cellIndex)-1.0);
-
-				spin[x][y] = q;
-
-				i--;
-
-				if (notify){
-					this.setChanged();
-					this.notifyObservers(new Object [] {x,y});
-				}	
+				setSpin(x, y, q);
+				i--;	
 			}
 		}
+		
 		areaTarget.set(cellIndex, cellArea);
 		areaTarget.set(q, cellArea);
 		lastDivisionTime.set(cellIndex, time);
@@ -738,18 +726,8 @@ public class CellPottsModel extends SpinModel {
 		} 
 		
 		if (Math.log(rand.nextDouble()) <= totalEnergy / temperature){
-			area.set(spin[i][j], newAreaOldSpin);
-			area.set(newSpin, newAreaNewSpin);
-			spin[i][j] = newSpin;
-			spinPos.get(oldSpin).remove(new Vector2D(i,j));
-			spinPos.get(newSpin).add(new Vector2D(i,j));
-
+			setSpin(i, j, newSpin);
 			acceptRate = acceptRate + 1.0;
-
-			if (notify){
-				this.setChanged();
-				this.notifyObservers(new Object [] {i,j});
-			}
 		}
 		//}
 	}
@@ -1399,11 +1377,23 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	@Override
-	public void setSpin(int i, int j, int value) {
-		if (0 <= value && value <= q){
-			area.set(spin[i][j], area.get(spin[i][j])-1);
-			spin[i][j] = value;
-			area.set(value, area.get(value)+1);
+	public void setSpin(int i, int j, int newSpin) {
+		int oldSpin = spin[i][j];
+		if (0 <= newSpin && newSpin <= q && oldSpin != newSpin){
+			Vector2D pt = new Vector2D(i,j);
+			
+			area.set(newSpin, area.get(newSpin)+1.0);
+			area.set(oldSpin, area.get(oldSpin)-1.0);
+			
+			spinPos.get(oldSpin).remove(pt);
+			spinPos.get(newSpin).add(pt);
+
+			spin[i][j] = newSpin;
+
+			if (notify){
+				this.setChanged();
+				this.notifyObservers(new Object [] {i,j});
+			}	
 		}
 	}
 
