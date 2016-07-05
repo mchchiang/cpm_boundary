@@ -635,7 +635,7 @@ public class CellPottsModelTest {
 	}
 	
 	@Test
-	public void testUpdateCM2(){
+	public void testInitCM2(){
 		int [][] spin = new int [][]{
 				{1,3,3,1},
 				{1,3,2,1},
@@ -860,7 +860,7 @@ public class CellPottsModelTest {
 	}
 	
 	@Test
-	public void testUpdateCM3(){
+	public void testInitCM3(){
 		int [][] spin = new int [][]{
 				{3,2,2,2,4,3},
 				{3,2,2,2,4,4},
@@ -1409,5 +1409,1125 @@ public class CellPottsModelTest {
 			}
 		}
 		assertArrayEquals("splitted cell incorrectly", expectedSpin, spin);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_1X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> xPos = model.getSpinXPos(1);
+		assertEquals("Returned a wrong value for the x position sum for spin 1",
+				5.0, model.calculatePositionSum(xPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_1Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> yPos = model.getSpinYPos(1);
+		assertEquals("Returned a wrong value for the y position sum for spin 1",
+				3.0, model.calculatePositionSum(yPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_2X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> xPos = model.getSpinXPos(2);
+		assertEquals("Returned a wrong value for the x position sum for spin 2",
+				31.5, model.calculatePositionSum(xPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_2Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> yPos = model.getSpinYPos(2);
+		assertEquals("Returned a wrong value for the y position sum for spin 2",
+				76.5, model.calculatePositionSum(yPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_3X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> xPos = model.getSpinXPos(3);
+		assertEquals("Returned a wrong value for the x position sum for spin 3",
+				8.0, model.calculatePositionSum(xPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_3Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> yPos = model.getSpinYPos(3);
+		assertEquals("Returned a wrong value for the y position sum for spin 3",
+				16.0, model.calculatePositionSum(yPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_4X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> xPos = model.getSpinXPos(4);
+		assertEquals("Returned a wrong value for the x position sum for spin 4",
+				38.5, model.calculatePositionSum(xPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_4Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> yPos = model.getSpinYPos(4);
+		assertEquals("Returned a wrong value for the y position sum for spin 4",
+				52.5, model.calculatePositionSum(yPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_6X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> xPos = model.getSpinXPos(6);
+		assertEquals("Returned a wrong value for the x position sum for spin 6",
+				28, model.calculatePositionSum(xPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_6Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> yPos = model.getSpinYPos(6);
+		assertEquals("Returned a wrong value for the y position sum for spin 6",
+				22, model.calculatePositionSum(yPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_7X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> xPos = model.getSpinXPos(7);
+		assertEquals("Returned a wrong value for the x position sum for spin 7",
+				0.0, model.calculatePositionSum(xPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_7Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> yPos = model.getSpinYPos(7);
+		assertEquals("Returned a wrong value for the y position sum for spin 7",
+				17.0, model.calculatePositionSum(yPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_8X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> xPos = model.getSpinXPos(8);
+		assertEquals("Returned a wrong value for the x position sum for spin 8",
+				38.5, model.calculatePositionSum(xPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_8Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> yPos = model.getSpinYPos(8);
+		assertEquals("Returned a wrong value for the y position sum for spin 8",
+				31.5, model.calculatePositionSum(yPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_9X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> xPos = model.getSpinXPos(9);
+		assertEquals("Returned a wrong value for the x position sum for spin 9",
+				22.0, model.calculatePositionSum(xPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculatePositionSum1_9Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		ArrayList<Integer> yPos = model.getSpinYPos(9);
+		assertEquals("Returned a wrong value for the y position sum for spin 9",
+			7.0, model.calculatePositionSum(yPos, 8), tol);
+	}
+	
+	@Test
+	public void testCalculateDXCM1_1(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dxcm for spin 1",
+				1.0/11.0, model.calculateDXCM(1, 1, false), tol);
+	}
+	
+	@Test
+	public void testCalculateDYCM1_1(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dycm for spin 1",
+				-9.0/55.0, model.calculateDYCM(1, 6, false), tol);
+	}
+	
+	@Test
+	public void testCalculateDXCM1_2(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dxcm for spin 2",
+				3.0/22.0, model.calculateDXCM(2, 1, true), tol);
+	}
+	
+	@Test
+	public void testCalculateDYCM1_2(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dycm for spin 2",
+				1.0/22.0, model.calculateDYCM(2, 6, true), tol);
+	}
+	
+	@Test
+	public void testCalculateDXCM1_3(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dxcm for spin 3",
+				-0.1, model.calculateDXCM(3, 1, false), tol);
+	}
+	
+	@Test
+	public void testCalculateDYCM1_3(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dycm for spin 3",
+				-0.3, model.calculateDYCM(3, 2, false), tol);
+	}
+	
+	@Test
+	public void testCalculateDXCM1_4(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dxcm for spin 4",
+				-1.0/6.0, model.calculateDXCM(4, 6, true), tol);
+	}
+	
+	@Test
+	public void testCalculateDYCM1_4(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dycm for spin 4",
+				-1.0/6.0, model.calculateDYCM(4, 0, true), tol);
+	}
+	
+	@Test
+	public void testCalculateDXCM1_6(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dxcm for spin 6",
+				0.0, model.calculateDXCM(6, 3, true), tol);
+	}
+	
+	@Test
+	public void testCalculateDYCM1_6(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dycm for spin 6",
+				-0.25, model.calculateDYCM(6, 4, true), tol);
+	}
+	
+	@Test
+	public void testCalculateDXCM1_7(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dxcm for spin 7",
+				-0.3, model.calculateDXCM(7, 1, true), tol);
+	}
+	
+	@Test
+	public void testCalculateDYCM1_7(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dycm for spin 7",
+				1.0/15.0, model.calculateDYCM(7, 2, true), tol);
+	}
+	
+	@Test
+	public void testCalculateDXCM1_8(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dxcm for spin 8",
+				-0.25, model.calculateDXCM(8, 3, false), tol);
+	}
+	
+	@Test
+	public void testCalculateDYCM1_8(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dycm for spin 8",
+				0.0, model.calculateDYCM(8, 4, false), tol);
+	}
+	
+	@Test
+	public void testCalculateDXCM1_9(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dxcm for spin 9",
+				0.2, model.calculateDXCM(9, 6, false), tol);
+	}
+	
+	@Test
+	public void testCalculateDYCM1_9(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		assertEquals("Returned a wrong value for dycm for spin 9",
+				-0.25, model.calculateDYCM(9, 0, false), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_1X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(1, 1, 6, false);
+		assertEquals("Didn't update the x cm for spin 1 correctly",
+				13.0/22.0, model.getXCM(1), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_1Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(1, 1, 6, false);
+		assertEquals("Didn't update the y cm for spin 1 correctly",
+				3.0/22.0, model.getYCM(1), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_2X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(2, 1, 6, true);
+		assertEquals("Didn't update the x cm for spin 2 correctly",
+				3.0, model.getXCM(2), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_2Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(2, 1, 6, true);
+		assertEquals("Didn't update the y cm for spin 2 correctly",
+				7.0, model.getYCM(2), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_3X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(3, 1, 2, false);
+		assertEquals("Didn't update the x cm for spin 3 correctly",
+				1.9, model.getXCM(3), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_3Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(3, 1, 2, false);
+		assertEquals("Didn't update the y cm for spin 3 correctly",
+				3.7, model.getYCM(3), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_4X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(4, 6, 0, true);
+		assertEquals("Didn't update the x cm for spin 4 correctly",
+				16.0/3.0, model.getXCM(4), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_4Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(4, 6, 0, true);
+		assertEquals("Didn't update the y cm for spin 4 correctly",
+				22.0/3.0, model.getYCM(4), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_6X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(6, 3, 4, true);
+		assertEquals("Didn't update the x cm for spin 6 correctly",
+				3.5, model.getXCM(6), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_6Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(6, 3, 4, true);
+		assertEquals("Didn't update the y cm for spin 6 correctly",
+				2.5, model.getYCM(6), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_7X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(7, 1, 2, true);
+		assertEquals("Didn't update the x cm for spin 7 correctly",
+				7.7, model.getXCM(7), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_7Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(7, 1, 2, true);
+		assertEquals("Didn't update the y cm for spin 7 correctly",
+				2.9, model.getYCM(7), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_8X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(8, 3, 4, false);
+		assertEquals("Didn't update the x cm for spin 8 correctly",
+				5.25, model.getXCM(8), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_8Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(8, 3, 4, false);
+		assertEquals("Didn't update the y cm for spin 8 correctly",
+				4.5, model.getYCM(8), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_9X(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(9, 6, 0, false);
+		assertEquals("Didn't update the x cm for spin 9 correctly",
+				5.7, model.getXCM(9), tol);
+	}
+	
+	@Test
+	public void testUpdateCM1_9Y(){
+		int [][] spin = new int [][] {
+				{1,1,7,7,5,5,1,1},
+				{1,1,7,3,3,2,2,1},
+				{2,6,6,3,3,2,2,2},
+				{2,6,6,6,6,2,2,2},
+				{2,9,6,6,8,8,4,4},
+				{4,9,9,8,8,8,4,4},
+				{4,9,7,8,8,5,5,4},
+				{1,1,7,7,5,5,5,1}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 9, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.initCM();
+		model.updateCM(9, 6, 0, false);
+		assertEquals("Didn't update the y cm for spin 9 correctly",
+				1.5, model.getYCM(9), tol);
 	}
 }
