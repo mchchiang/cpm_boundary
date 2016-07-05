@@ -408,8 +408,8 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	public void updateArea(int time){
-		int s = spin[nx/2][ny/2];
-		areaTarget.set(s, areaTarget.get(s) * 1.01);
+		//int s = spin[nx/2][ny/2];
+		//areaTarget.set(s, areaTarget.get(s) * 1.01);
 		/*if (area.get(s) > cellArea * 50){
 			splitCell(time, s);
 		}*/
@@ -603,8 +603,11 @@ public class CellPottsModel extends SpinModel {
 			}
 			
 			updatePolarity();
-			updateCM();
-
+			
+			if (n == nequil){
+				initCM();
+			}
+			
 			if (n > nequil){
 				updateR();
 				updateArea(n);
@@ -614,7 +617,9 @@ public class CellPottsModel extends SpinModel {
 			if (n >= nequil && n < numOfSweeps-1){
 				notifyDataListener(n);
 			}
-
+			
+			updateCM();//must be done last (for there to be difference between xcm and xcmNew)
+			
 			time++;
 		}
 
@@ -721,6 +726,10 @@ public class CellPottsModel extends SpinModel {
 		} 
 		
 		if (Math.log(rand.nextDouble()) <= totalEnergy / temperature){
+			if (n > nequil){
+				updateCM(oldSpin, i, j, true);
+				updateCM(newSpin, i, j, false);
+			}
 			setSpin(i, j, newSpin);
 			acceptRate = acceptRate + 1.0;
 		}
@@ -758,10 +767,16 @@ public class CellPottsModel extends SpinModel {
 	 */
 	public double motilityE(int i, int j, int newSpin, double muOld, double muNew){
 		double energy = 0.0;
-		double [] dcmOld = calculateDeltaCM(i,j, spin[i][j], true);
-		double [] dcmNew = calculateDeltaCM(i,j, newSpin, false);
-		energy += muOld * dot(dcmOld[0], dcmOld[1], px.get(spin[i][j]), py.get(spin[i][j]));
-		energy += muNew * dot(dcmNew[0], dcmNew[1], px.get(newSpin), py.get(newSpin));
+		int oldSpin = spin[i][j];
+		//double [] dcmOld = calculateDeltaCM(i,j, spin[i][j], true);
+		//double [] dcmNew = calculateDeltaCM(i,j, newSpin, false);
+		
+		double dxcmOld = calculateDXCM(oldSpin, i, true);
+		double dycmOld = calculateDYCM(oldSpin, j, true);
+		double dxcmNew = calculateDXCM(newSpin, i, false);
+		double dycmNew = calculateDYCM(newSpin, j, false);
+		energy += muOld * dot(dxcmOld, dycmOld, px.get(spin[i][j]), py.get(spin[i][j]));
+		energy += muNew * dot(dxcmNew, dycmNew, px.get(newSpin), py.get(newSpin));
 		return energy;
 	}
 	
@@ -1034,7 +1049,7 @@ public class CellPottsModel extends SpinModel {
 	public void updateCM(int cellIndex, int i, int j, boolean remove){
 		double xcm = xcmNew.get(cellIndex);
 		double ycm = ycmNew.get(cellIndex);
-		double newSumX, newSumY;
+		double newSumX, newSumY, newXCM, newYCM;
 		int n = spinPos.get(cellIndex).size();
 		
 		double x = getCentre(i);
@@ -1049,25 +1064,33 @@ public class CellPottsModel extends SpinModel {
 		if (y-ycm > ny/2){
 			y -= ny;
 		} else if (y-ycm < -ny/2){
-			y += nx;
+			y += ny;
 		}
 		
 		if (remove){
 			newSumX = sumX.get(cellIndex) - x;
 			newSumY = sumY.get(cellIndex) - y;
-			xcmNew.set(cellIndex, newSumX / (double) (n-1));
-			ycmNew.set(cellIndex, newSumY / (double) (n-1));
+			newXCM = newSumX / (double) (n-1);
+			newYCM = newSumY / (double) (n-1);
 		} else {
 			newSumX = sumX.get(cellIndex) + x;
 			newSumY = sumY.get(cellIndex) + y;
-			xcmNew.set(cellIndex, newSumX / (double) (n+1));
-			ycmNew.set(cellIndex, newSumY / (double) (n+1));
+			newXCM = newSumX / (double) (n+1);
+			newYCM = newSumY / (double) (n+1);
 		}
-		sumX.set(cellIndex, newSumX);
-		sumY.set(cellIndex, newSumY);
+		
+		if (newXCM > nx || newXCM < 0 ||
+			newYCM > ny || newYCM < 0){
+			initCM(cellIndex);
+		} else {
+			xcmNew.set(cellIndex, newXCM);
+			ycmNew.set(cellIndex, newYCM);
+			sumX.set(cellIndex, newSumX);
+			sumY.set(cellIndex, newSumY);
+		}
 	}
 	
-	public double calculateDCMX(int cellIndex, int i, boolean remove){
+	public double calculateDXCM(int cellIndex, int i, boolean remove){
 		double xcm = xcmNew.get(cellIndex);
 		double sum = sumX.get(cellIndex);
 		int n = spinPos.get(cellIndex).size();
@@ -1086,7 +1109,7 @@ public class CellPottsModel extends SpinModel {
 		}
 	}
 	
-	public double calculateDCMY(int cellIndex, int j, boolean remove){
+	public double calculateDYCM(int cellIndex, int j, boolean remove){
 		double ycm = ycmNew.get(cellIndex);
 		double sum = sumY.get(cellIndex);
 		int n = spinPos.get(cellIndex).size();
@@ -1113,11 +1136,11 @@ public class CellPottsModel extends SpinModel {
 		for (int i = 1; i <= q; i++){
 			xcm.set(i, xcmNew.get(i));
 			ycm.set(i, ycmNew.get(i));
-
-			double [] cmNew = calculateCM(spinPos.get(i));
+			//System.out.println(i + " " + xcmNew.get(i) + " " + ycmNew.get(i));
+			/*double [] cmNew = calculateCM(spinPos.get(i));
 
 			xcmNew.set(i, cmNew[0]);
-			ycmNew.set(i, cmNew[1]);
+			ycmNew.set(i, cmNew[1]);*/
 		}
 	}
 

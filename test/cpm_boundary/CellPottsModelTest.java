@@ -648,7 +648,7 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		model.updateCM();
+		model.initCM();
 		assertEquals("Returned wrong xcm value for spin 3",
 				0.5, model.getXCM(3), tol);
 		assertEquals("Returned wrong ycm value for spin 3",
@@ -874,7 +874,7 @@ public class CellPottsModelTest {
 		CellPottsModel model = new CellPottsModel(6, 6, 5, toList(areaTarget), 
 				temperature, lambda, alpha, beta, motility, seed);
 		model.initSpin(spin);
-		model.updateCM();
+		model.initCM();
 		assertEquals("Returned wrong xcm value for spin 1",
 				3.5, model.getXCM(1), tol);
 		assertEquals("Returned wrong ycm value for spin 1",
@@ -1271,7 +1271,7 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		model.updateCM();
+		model.initCM();
 		assertEquals("return wrong gyration tensor comp xx value",
 				2.1376, model.gyrationTensor(1, 0, 0), tol);
 	}
@@ -1294,7 +1294,7 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		model.updateCM();
+		model.initCM();
 		assertEquals("return wrong gyration tensor comp yy value",
 				1.9264, model.gyrationTensor(1, 1, 1), tol);
 	}
@@ -1317,7 +1317,7 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		model.updateCM();
+		model.initCM();
 		assertEquals("return wrong gyration tensor comp xy value",
 				0.3392, model.gyrationTensor(1, 0, 1), tol);
 	}
@@ -1340,7 +1340,7 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		model.updateCM();
+		model.initCM();
 		assertEquals("return wrong gyration tensor comp xy value",
 				0.3392, model.gyrationTensor(1, 1, 0), tol);
 	}
@@ -1363,7 +1363,7 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		model.updateCM();
+		model.initCM();
 		double [] vec = model.getMajorAxis(1);
 		assertEquals("return wrong value for major axis",
 				0.80537229, vec[0], tol);
@@ -1389,7 +1389,7 @@ public class CellPottsModelTest {
 				temperature, lambda, alpha, beta, motility, seed);
 		
 		model.initSpin(spin);
-		model.updateCM();
+		model.initCM();
 		model.splitCell(1, 1);
 
 		int [][] expectedSpin = new int [][] {

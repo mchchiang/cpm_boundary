@@ -146,8 +146,10 @@ public class DisplacementPanel extends JPanel implements DataListener {
 				y = model.getYCM(i);
 				dx = model.getAvgDX(i);
 				dy = model.getAvgDY(i);
+				
 				//if (dx != 0.0 && dy != 0.0){
 					a = Math.atan2(dy, dx);
+					//System.out.println(a);
 					drawArrow((int) (x * arrowSize), (int) (y * arrowSize), 
 							arrowSize * 5, a);
 				//}
