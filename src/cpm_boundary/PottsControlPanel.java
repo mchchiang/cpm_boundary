@@ -46,6 +46,9 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 
 	private JLabel lblLambda;
 	private JTextField txtLambda;
+	
+	private JLabel lblGrowthConst;
+	private JTextField txtGrowthConst;
 
 	private JLabel lblTemp;
 	private JTextField txtTemp;
@@ -103,6 +106,9 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 
 		txtRotateDiff = new JTextField(3);
 		lblRotateDiff = new JLabel("Rotate Diff: ");
+		
+		txtGrowthConst = new JTextField(3);
+		lblGrowthConst = new JLabel("Growth const: ");
 
 		txtNEquil = new JTextField(3);
 		lblNEquil = new JLabel("nequil: ");
@@ -142,6 +148,8 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		modelParamsPanel.add(txtRotateDiff);
 		modelParamsPanel.add(lblFracOfMotile);
 		modelParamsPanel.add(txtFracOfMotile);
+		modelParamsPanel.add(lblGrowthConst);
+		modelParamsPanel.add(txtGrowthConst);
 
 		simParamsPanel = new JPanel();
 		simParamsPanel.add(lblWidth);
@@ -187,21 +195,28 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			double motility = Double.parseDouble(txtMotility.getText());
 			double rotateDiff = Double.parseDouble(txtRotateDiff.getText());
 			double fracOccupied = Double.parseDouble(txtFracOccupied.getText());
+			double growthConst = Double.parseDouble(txtGrowthConst.getText());
 			int seed = -1;
 			int numOfSweeps = Integer.parseInt(txtNumOfSteps.getText());
 			int nequil = Integer.parseInt(txtNEquil.getText());
 			int avgInt = Integer.parseInt(txtAvgInt.getText());
 			
 			model = new CellPottsModel(
-					nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
+					nx, ny, q, temp, lambda, alpha, 1000, motility, rotateDiff,
 					fracOccupied, seed, numOfSweeps, nequil, true);
 			model.setAverageInterval(avgInt);
+			model.setGrowthConst(growthConst);
 			
 			btnRun.setEnabled(false);
 			btnStop.setEnabled(true);
 			btnPause.setEnabled(true);
 			
-			runThread = new MyThread();
+			runThread = new MyThread(){
+				public void update(CellPottsModel model, int time) {
+					model.setBeta(beta);
+				}
+			};
+			model.addDataListener(runThread);
 			runThread.start();
 
 		} else if (e.getSource() == btnStop){
@@ -221,7 +236,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 	}
 	
 	
-	class MyThread extends Thread {
+	class MyThread extends Thread implements DataListener {
 		@Override
 		public void run(){
 			model.initSpin();
@@ -238,5 +253,8 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			btnStop.setEnabled(false);
 			btnPause.setEnabled(false);
 		}
+
+		@Override
+		public void update(CellPottsModel model, int time) {}
 	}
 }

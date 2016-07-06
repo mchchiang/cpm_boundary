@@ -1333,6 +1333,8 @@ public class CellPottsModelTest {
 				0.80537229, vec[0], tol);
 		assertEquals("return wrong value for major axis",
 				0.592769327, vec[1], tol);
+		assertEquals("eigenvectors are not orthonormal",
+				0.0, vec[0] * vec[2] + vec[1] * vec[3], tol);
 	}
 	
 	@Test
