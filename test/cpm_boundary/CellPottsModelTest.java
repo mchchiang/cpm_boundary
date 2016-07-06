@@ -941,46 +941,9 @@ public class CellPottsModelTest {
 				3.94, model.calculateCM(model.getSpinYPos(1), 8), tol);
 	}
 	
-	/*@Test
+	@Test
+	@Deprecated
 	public void testCalculateDeltaCM1a(){
-		int [][] spin = new int [][]{
-				{1,3,3,1},
-				{1,3,2,1},
-				{4,2,2,2},
-				{4,3,2,4}
-		};
-		
-		double [] areaTarget = new double [] {4.0, 4.0, 4.0, 4.0};
-		CellPottsModel model = new CellPottsModel(4, 4, 4, areaTarget, 
-				temperature, lambda, alpha, beta, motility, seed);
-		
-		model.initSpin(spin);
-		
-		assertEquals("Returned wrong delta xcm value",
-				17.0/6.0-3.0, model.calculateDeltaCM(1, 1, 2, false)[0], tol);
-	}
-	
-	@Test
-	public void testCalculateDeltaCM1b(){
-		int [][] spin = new int [][]{
-				{1,3,3,1},
-				{1,3,2,1},
-				{4,2,2,2},
-				{4,3,2,4}
-		};
-		
-		double [] areaTarget = new double [] {4.0, 4.0, 4.0, 4.0};
-		CellPottsModel model = new CellPottsModel(4, 4, 4, areaTarget, 
-				temperature, lambda, alpha, beta, motility, seed);
-		
-		model.initSpin(spin);
-		
-		assertEquals("Returned wrong delta ycm value",
-				17.0/6.0-3.0, model.calculateDeltaCM(1, 1, 2, false)[1], tol);
-	}*/
-	
-	@Test
-	public void testCalculateDeltaCM2a(){
 		int [][] spin = new int [][]{
 				{1,3,3,1},
 				{1,3,2,1},
@@ -999,7 +962,8 @@ public class CellPottsModelTest {
 	}
 	
 	@Test
-	public void testCalculateDeltaCM2b(){
+	@Deprecated
+	public void testCalculateDeltaCM1b(){
 		int [][] spin = new int [][]{
 				{1,3,3,1},
 				{1,3,2,1},
