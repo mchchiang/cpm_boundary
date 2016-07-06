@@ -511,7 +511,7 @@ public class CellPottsModel extends SpinModel {
 			double x0 = xcmNew.get(cellIndex);
 			double dx;
 			for (int k = 0; k < n; k++){
-				dx = xDiff(pos.get(k).getX() + 0.5, x0);
+				dx = xDiff(getCentre(pos.get(k).getX()), x0);
 				avg += dx * dx;
 			}
 			return avg / (double) n;
@@ -520,7 +520,7 @@ public class CellPottsModel extends SpinModel {
 			double y0 = ycmNew.get(cellIndex);
 			double dy;
 			for (int k = 0; k < n; k++){
-				dy = yDiff(pos.get(k).getY() + 0.5, y0);
+				dy = yDiff(getCentre(pos.get(k).getY()), y0);
 				avg += dy * dy;
 			}
 			return avg / (double) n;
@@ -532,8 +532,8 @@ public class CellPottsModel extends SpinModel {
 			Vector2D pt;
 			for (int k = 0; k < n; k++){
 				pt = pos.get(k);
-				dx = xDiff(pt.getX() + 0.5, x0);
-				dy = yDiff(pt.getY() + 0.5, y0);
+				dx = xDiff(getCentre(pt.getX()), x0);
+				dy = yDiff(getCentre(pt.getY()), y0);
 				avg += dx * dy;
 			}
 			return avg / (double) n;
