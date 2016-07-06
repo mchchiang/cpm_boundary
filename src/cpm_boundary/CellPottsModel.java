@@ -622,7 +622,7 @@ public class CellPottsModel extends SpinModel {
 				notifyDataListener(n);
 			}
 
-			updateCM();//must be done last (for there to be difference between xcm and xcmNew)
+			copyCMNewToCM();//must be done last (for there to be difference between xcm and xcmNew)
 
 			time++;
 		}
@@ -634,7 +634,7 @@ public class CellPottsModel extends SpinModel {
 
 		running = false;
 	}
-
+	
 	public synchronized void stop(){
 		if (paused){
 			resume();
@@ -860,13 +860,18 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	/**
-	 * Calculate the change in the centre of mass (CM) of a cell when the spin 
+	 * Calculate the change in the centre of mass (CM) of a cell if the spin 
 	 * copy attempt is accepted
 	 * @param x column index of the lattice site considered in the spin copy attempt
 	 * @param y row index of the lattice site considered in the spin copy attempt
 	 * @param spin the index of the cell of interest
 	 * @param remove whether the site is added to or removed from the specified cell
 	 * @return a vector storing the change in the CM
+	 * @deprecated This is an old method of calculating the change in CM which 
+	 * has not been optimised. Use the 
+	 * {@link #calculateDXCM(int, int, boolean) calculateDXCM} 
+	 * and {@link #calculateDYCM(int, int, boolean) calculateDYCM} 
+	 * methods instead.
 	 */
 	public double [] calculateDeltaCM(int x, int y, int spin, boolean remove){
 		ArrayList<Vector2D> pos = spinPos.get(spin);
@@ -886,7 +891,13 @@ public class CellPottsModel extends SpinModel {
 
 		return new double [] {xDiff(cmNew[0], cm[0]), yDiff(cmNew[1], cm[1])};
 	}
-
+	
+	/**
+	 * Calculate the centre of mass (CM) for a particular cell
+	 * @param pos an array storing the lattice sites of the cell
+	 * @return the cell's CM stored in an array with first element being the
+	 * horizontal component and the last element being the vertical component
+	 */
 	public double [] calculateCM(ArrayList<Vector2D> pos){
 		ArrayList<Integer> xPos = new ArrayList<Integer>();
 		ArrayList<Integer> yPos = new ArrayList<Integer>();
@@ -899,74 +910,22 @@ public class CellPottsModel extends SpinModel {
 
 	/**
 	 * Calculate a component of the centre of mass (CM) for a particular cell
-	 * @param pos an array storing the positions of lattice sites of the cell
+	 * @param pos an array storing the lattice sites of the cell
 	 * @param length the length of the lattice
 	 * @return the specified component of the cell's CM
 	 */
 	public double calculateCM(ArrayList<Integer> pos, int length){
-		int n = pos.size();
-		double cm = 0;
-
-		int width = (int) Math.ceil(0.05 * length);
-
-		int x = 0;
-		boolean inCriticalRegion = false;
-		for (int i = 0; i < n; i++){
-			x = pos.get(i);
-			cm += x;
-			if (x > length-1-width || x < width){
-				inCriticalRegion = true;
-				break;
-			}	
-		}
-
-		if (!inCriticalRegion){
-			cm /= (double) n;
-			return cm + 0.5;
-		}
-
-		cm = 0;
-
-		int leftCount = 0;
-		int rightCount = 0;
-		double leftSum = 0;
-		double rightSum = 0;
-		double total = 0;
-
-		for (int i = 0; i < n; i++){
-			x = pos.get(i);
-			if (x < length / 2){
-				leftCount++;
-				leftSum += (x+0.5);//shift to centre of cell
-			} else {
-				rightCount++;
-				rightSum += (x+0.5);
-			}
-		}
-
-		if (leftCount > rightCount){
-			total = leftSum + rightSum - rightCount * length;
-		} else {
-			total = rightSum + leftSum + leftCount * length;
-		}
-
-		/*
-		 * correction for cases if leftCount == rightCount that there 
-		 * is a chance the addition above will yield a result outside the
-		 * boundary
-		 */
-
-		if (total < 0){
-			total = leftSum + leftCount * length + rightSum;
-		} else if (total > length * n){
-			total = leftSum + rightSum - rightCount * length;
-		}
-
-		cm = (double) total / (double) n;
-
-		return cm;
+		double sum = calculatePositionSum(pos,length);
+		return sum / (double) pos.size();
 	}
 
+	/**
+	 * Calculate the sum of a component of the lattice sites of a cell
+	 * @param pos an array storing the particular component of lattice sites 
+	 * of the cell
+	 * @param length the length of the lattice
+	 * @return the sum of a component of the lattice sites of a cell
+	 */
 	public double calculatePositionSum(ArrayList<Integer> pos, int length){
 		int n = pos.size();
 		double total = 0;
@@ -1024,12 +983,19 @@ public class CellPottsModel extends SpinModel {
 		return total;
 	}
 
+	/**
+	 * Initialise the centre of mass (CM) of all the cells
+	 */
 	public void initCM(){
 		for (int i = 1; i <= q; i++){
 			initCM(i);
 		}
 	}
 
+	/**
+	 * Initialise the centre of mass (CM) for a particular cell
+	 * @param cellIndex index of the cell
+	 */
 	public void initCM(int cellIndex){
 		ArrayList<Vector2D> pos = spinPos.get(cellIndex);
 		ArrayList<Integer> xPos = new ArrayList<Integer>();
@@ -1051,6 +1017,13 @@ public class CellPottsModel extends SpinModel {
 		ycmNew.set(cellIndex, tempSumY / (double) n);
 	}
 
+	/**
+	 * Update the centre of mass of a cell after a spin copy attempt is accepted
+	 * @param cellIndex index of the cell
+	 * @param i column index of the lattice site involved in the spin copy attempt
+	 * @param j row index of the lattice site involved in the spin copy attempt
+	 * @param remove whether the site is added to or removed from the specified cell
+	 */
 	public void updateCM(int cellIndex, int i, int j, boolean remove){
 		double xcm = xcmNew.get(cellIndex);
 		double ycm = ycmNew.get(cellIndex);
@@ -1087,25 +1060,33 @@ public class CellPottsModel extends SpinModel {
 
 		if (newXCM > nx){
 			newSumX -= nx * n;
+			newXCM = newSumX / (double) n;
 		} else if (newXCM < 0){
 			newSumX += nx * n;
+			newXCM = newSumX / (double) n;
 		}
 
 		if (newYCM > ny){
 			newSumY -= ny * n;
+			newYCM = newSumY / (double) n;
 		} else if (newYCM < 0){
 			newSumY += ny * n;
+			newYCM = newSumY / (double) n;
 		}
-
-		newXCM = newSumX / (double) n;
-		newYCM = newSumY / (double) n;
-
+		
 		xcmNew.set(cellIndex, newXCM);
 		ycmNew.set(cellIndex, newYCM);
 		sumX.set(cellIndex, newSumX);
 		sumY.set(cellIndex, newSumY);
 	}
-
+	
+	/**
+	 * Calculate the change in the horizontal component of the centre of mass of 
+	 * a particular cell if a spin copy attempt is accepted
+	 * @param cellIndex index of the cell
+	 * @param i column index of the lattice site involved in the spin copy attempt
+	 * @param remove whether the site is added to or removed from the specified cell
+	 */
 	public double calculateDXCM(int cellIndex, int i, boolean remove){
 		double xcm = xcmNew.get(cellIndex);
 		double sum = sumX.get(cellIndex);
@@ -1121,31 +1102,31 @@ public class CellPottsModel extends SpinModel {
 		double newSumX, newXCM;
 
 		if (remove){
-			newSumX = sum - x;
-			newXCM = newSumX / (double) (n-1);
-			//return xDiff((sum-x) / (double) (n-1), xcm);
+			n--;
+			newSumX = sum - x;			
 		} else {
+			n++;
 			newSumX = sum + x;
-			newXCM = newSumX / (double) (n+1);
-			//return xDiff((sum+x) / (double) (n+1), xcm);
 		}
-
-		if (newXCM > nx || newXCM < 0){
-			ArrayList<Integer> xPos = getSpinXPos(cellIndex);
-			if (remove){
-				xPos.remove((Integer) i);
-				newSumX = calculatePositionSum(xPos, nx);
-				newXCM = newSumX / (double) (n-1);
-			} else {
-				xPos.add((Integer) i);
-				newSumX = calculatePositionSum(xPos, nx);
-				newXCM = newSumX / (double) (n+1);
-			}			
+		newXCM = newSumX / (double) n;
+		
+		if (newXCM > nx){
+			newSumX -= nx * n;
+			newXCM = newSumX / (double) n;
+		} else if (newXCM < 0){
+			newSumX += nx * n;
+			newXCM = newSumX / (double) n;
 		}
-
 		return xDiff(newXCM, xcm);
 	}
 
+	/**
+	 * Calculate the change in the vertical component of the centre of mass of 
+	 * a particular cell if a spin copy attempt is accepted
+	 * @param cellIndex index of the cell
+	 * @param j row index of the lattice site involved in the spin copy attempt
+	 * @param remove whether the site is added to or removed from the specified cell
+	 */
 	public double calculateDYCM(int cellIndex, int j, boolean remove){
 		double ycm = ycmNew.get(cellIndex);
 		double sum = sumY.get(cellIndex);
@@ -1161,36 +1142,30 @@ public class CellPottsModel extends SpinModel {
 		double newSumY, newYCM;
 
 		if (remove){
-			newSumY = sum - y;
-			newYCM = newSumY / (double) (n-1);
-			//return yDiff((sum-y) / (double) (n-1), ycm);
+			n--;
+			newSumY = sum - y;	
 		} else {
+			n++;
 			newSumY = sum + y;
-			newYCM = newSumY / (double) (n+1);
-			//return yDiff((sum+y) / (double) (n+1), ycm);
 		}
-
-		if (newYCM > ny || newYCM < 0){
-			ArrayList<Integer> yPos = getSpinYPos(cellIndex);
-			if (remove){
-				yPos.remove((Integer) j);
-				newSumY = calculatePositionSum(yPos, ny);
-				newYCM = newSumY / (double) (n-1);
-			} else {
-				yPos.add((Integer) j);
-				newSumY = calculatePositionSum(yPos, ny);
-				newYCM = newSumY / (double) (n+1);
-			}			
+		
+		newYCM = newSumY / (double) n;
+		
+		if (newYCM > ny){
+			newSumY -= ny * n;
+			newYCM = newSumY / (double) n;
+		} else if (newYCM < 0){
+			newSumY += ny * n;
+			newYCM = newSumY / (double) n;
 		}
-
 		return yDiff(newYCM, ycm);
 	}
 
 
 	/**
-	 * Calculate the centre of mass (CM) for all cells
+	 * Update the centre of mass (CM) for all cells
 	 */
-	public void updateCM(){
+	public void copyCMNewToCM(){
 		for (int i = 1; i <= q; i++){
 			xcm.set(i, xcmNew.get(i));
 			ycm.set(i, ycmNew.get(i));
@@ -1321,8 +1296,12 @@ public class CellPottsModel extends SpinModel {
 		return x1 * x2 + y1 * y2;
 	}
 
-	public double getCentre(int pos){
-		return pos + 0.5;
+	/**
+	 * Return the centre position of a particular component of a lattice site
+	 * @param index the component index of the lattice site 
+	 */
+	public double getCentre(int index){
+		return index + 0.5;
 	}
 
 	//periodic boundary methods
@@ -1669,7 +1648,7 @@ public class CellPottsModel extends SpinModel {
 
 	@Override
 	public int getTypesOfSpin(){
-		return q+1;
+		return q+1;//need to include spin zero
 	}
 
 	/**
