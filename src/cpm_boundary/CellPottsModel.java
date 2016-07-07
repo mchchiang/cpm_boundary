@@ -79,6 +79,10 @@ public class CellPottsModel extends SpinModel {
 	private ArrayList<Double> avgDY;
 	private ArrayList<Double> avgD;
 	private int avgInt = 1;
+	
+	//variables for computing roughness of interface
+	private int minRow = 0;
+	private int maxRow = 0;
 
 	//variables for calculating acceptance rate
 	private double acceptRate;
@@ -221,7 +225,12 @@ public class CellPottsModel extends SpinModel {
 
 	private void init(){
 		acceptRate = 0.0;
+		
+		maxRow = (int) (ny * fracOccupied) - 1;
+		minRow = maxRow;
+		
 		rand = new Random();
+		
 		area = new ArrayList<Double>();
 		areaTarget = new ArrayList<Double>();
 
@@ -606,6 +615,11 @@ public class CellPottsModel extends SpinModel {
 			}
 
 			updatePolarity();
+			
+			//update the interface variables
+			updateMinRow();
+			updateMaxRow();
+			System.out.println("min: " + minRow + " max: " + maxRow);
 
 			if (n == nequil){
 				equilibrated = true;
@@ -769,9 +783,7 @@ public class CellPottsModel extends SpinModel {
 	public double motilityE(int i, int j, int newSpin, double muOld, double muNew){
 		double energy = 0.0;
 		int oldSpin = spin[i][j];
-		//double [] dcmOld = calculateDeltaCM(i,j, spin[i][j], true);
-		//double [] dcmNew = calculateDeltaCM(i,j, newSpin, false);
-
+		
 		double dxcmOld = calculateDXCM(oldSpin, i, true);
 		double dycmOld = calculateDYCM(oldSpin, j, true);
 		energy += muOld * dot(dxcmOld, dycmOld, px.get(spin[i][j]), py.get(spin[i][j]));
@@ -1236,6 +1248,75 @@ public class CellPottsModel extends SpinModel {
 		double a2 = ((1.0 / 2.0) * r4 / (r2 * r2)) - 1.0;
 
 		return new double [] {a2, r4};
+	}
+	
+	private boolean hasZeroSpin(int rowIndex){
+		for (int i = 0; i < nx; i++){
+			if (spin[i][rowIndex] == 0){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean hasNonZeroSpin(int rowIndex){
+		for (int i = 0; i < nx; i++){
+			if (spin[i][rowIndex] != 0){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void updateMaxRow(){
+		boolean hasNonZero = hasNonZeroSpin(maxRow);
+		if (hasNonZero){
+			do {
+				maxRow++;
+				hasNonZero = hasNonZeroSpin(maxRow);
+			} while (hasNonZero);
+			maxRow--;
+		} else {
+			do {
+				maxRow--;
+				hasNonZero = hasNonZeroSpin(maxRow);
+			} while (!hasNonZero);
+		}
+	}
+	
+	public void updateMinRow(){
+		boolean hasZero = hasZeroSpin(minRow);
+		if (hasZero){
+			do {
+				minRow--;
+				hasZero = hasZeroSpin(minRow);
+			} while (hasZero);
+		} else {
+			do {
+				minRow++;
+				hasZero = hasZeroSpin(minRow);
+			} while (!hasZero);
+			minRow--;
+		}
+	}
+	
+	public double calculateRoughness(){
+		double y, avg = 0.0, avg2 = 0.0;
+		int j;
+		for (int i = 0; i < nx; i++){
+			for (j = maxRow; j >= minRow; j--){
+				if (spin[i][j] != 0){
+					break;
+				}
+			}
+			y = yDiff(maxRow, j);
+			avg += y;
+			avg2 += y * y;
+		}
+		avg /= (double) nx;
+		avg2 /= (double) nx;
+		
+		return Math.sqrt(avg2 - avg * avg);
 	}
 
 	//vector related operations

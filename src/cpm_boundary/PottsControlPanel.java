@@ -193,7 +193,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			int avgInt = Integer.parseInt(txtAvgInt.getText());
 			
 			model = new CellPottsModel(
-					nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
+					nx, ny, q, temp, lambda, alpha, 1000, motility, rotateDiff,
 					fracOccupied, seed, numOfSweeps, nequil, true);
 			model.setAverageInterval(avgInt);
 			
@@ -201,7 +201,15 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			btnStop.setEnabled(true);
 			btnPause.setEnabled(true);
 			
-			runThread = new MyThread();
+			runThread = new MyThread(){
+				@Override
+				public void update(CellPottsModel model, int time) {
+					if (time == nequil){
+						model.setBeta(beta);
+					}
+				}
+			};
+			model.addDataListener(runThread);
 			runThread.start();
 
 		} else if (e.getSource() == btnStop){
@@ -221,7 +229,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 	}
 	
 	
-	class MyThread extends Thread {
+	class MyThread extends Thread implements DataListener {
 		@Override
 		public void run(){
 			model.initSpin();
@@ -238,5 +246,8 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			btnStop.setEnabled(false);
 			btnPause.setEnabled(false);
 		}
+
+		@Override
+		public void update(CellPottsModel model, int time) {}
 	}
 }
