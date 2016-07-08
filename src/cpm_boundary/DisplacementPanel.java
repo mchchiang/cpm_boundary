@@ -104,6 +104,7 @@ public class DisplacementPanel extends JPanel implements DataListener {
 		int x2 = x1 + (int) Math.round(l1*Math.cos(a));
 		int y2 = y1 + (int) Math.round(l1*Math.sin(a));
 		fgGraphics.drawLine(x1, y1, x2, y2);// tail
+		fgGraphics.setColor(Color.BLACK);
 		double l2 = 0.25*l1;
 		double am = a - qPI;
 		double ap = a + qPI;
@@ -153,6 +154,13 @@ public class DisplacementPanel extends JPanel implements DataListener {
 							arrowSize * 5, a);
 				}
 			}
+			
+			//draw boundary of interface
+			int min = model.getMinRow() * arrowSize;
+			int max = model.getMaxRow() * arrowSize;
+			fgGraphics.setColor(Color.RED);
+			fgGraphics.drawLine(0, min, width, min);
+			fgGraphics.drawLine(0, max, width, max);
 		}
 	}
 

@@ -14,7 +14,7 @@ import java.util.Random;
  * @author Michael Chiang
  *
  */
-public class CellPottsModel extends SpinModel {
+public class CellPottsModel extends SpinModel implements DataListener{
 
 	private int nx, ny;
 	private int q;	
@@ -619,7 +619,7 @@ public class CellPottsModel extends SpinModel {
 			//update the interface variables
 			updateMinRow();
 			updateMaxRow();
-			System.out.println("min: " + minRow + " max: " + maxRow);
+			//System.out.println("min: " + minRow + " max: " + maxRow);
 
 			if (n == nequil){
 				equilibrated = true;
@@ -1259,13 +1259,31 @@ public class CellPottsModel extends SpinModel {
 		return false;
 	}
 	
-	private boolean hasNonZeroSpin(int rowIndex){
+	/*private boolean hasNonZeroSpin(int rowIndex){
 		for (int i = 0; i < nx; i++){
 			if (spin[i][rowIndex] != 0){
 				return true;
 			}
 		}
 		return false;
+	}*/
+	
+	private boolean hasNonZeroSpin(int row){
+		ArrayList<Integer> nonZeroSpin = new ArrayList<Integer>();
+		int cellIndex;
+		for (int i = 0; i < nx; i++){
+			cellIndex = spin[i][row];
+			if (cellIndex != 0 && !nonZeroSpin.contains(cellIndex)){
+				nonZeroSpin.add(cellIndex);
+			}
+		}
+		for (int i = 0; i < nonZeroSpin.size(); i++){
+			if (hasNoNeighbour(nonZeroSpin.get(i))){
+				nonZeroSpin.remove(i);
+				i--;
+			}
+		}
+		return nonZeroSpin.size() > 0;
 	}
 	
 	public void updateMaxRow(){
@@ -1298,6 +1316,30 @@ public class CellPottsModel extends SpinModel {
 			} while (!hasZero);
 			minRow--;
 		}
+	}
+	
+	public boolean hasNoNeighbour(int cellIndex){
+		ArrayList<Vector2D> pos = spinPos.get(cellIndex);
+		int i, j;
+		for (Vector2D pt : pos){
+			i = pt.getX();
+			j = pt.getY();
+			if (spinFilter(spin[i][jup(j)], cellIndex) != 0 ||
+				spinFilter(spin[i][jdown(j)], cellIndex) != 0 ||
+				spinFilter(spin[iup(i)][j], cellIndex) != 0 ||
+				spinFilter(spin[idown(i)][j], cellIndex) != 0 ||
+				spinFilter(spin[iup(i)][jup(j)], cellIndex) != 0 ||
+				spinFilter(spin[iup(i)][jdown(j)], cellIndex) != 0 ||
+				spinFilter(spin[idown(i)][jup(j)], cellIndex) != 0 ||
+				spinFilter(spin[idown(i)][jdown(j)], cellIndex) != 0){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private int spinFilter(int spin, int expectedSpin){
+		return spin == expectedSpin ? 0 : spin;
 	}
 	
 	public double calculateRoughness(){
@@ -1644,6 +1686,14 @@ public class CellPottsModel extends SpinModel {
 	public int getAverageInterval(){
 		return avgInt;
 	}
+	
+	public int getMaxRow(){
+		return maxRow;
+	}
+	
+	public int getMinRow(){
+		return minRow;
+	}
 
 	@Override
 	public int getSpin(int i, int j){
@@ -1793,31 +1843,32 @@ public class CellPottsModel extends SpinModel {
 		}
 	}
 
-	/*public static void main (String [] args){
-		int nx = 300;
-		int ny = 300;
-		int q = 2000;
+	public static void main (String [] args){
+		int nx = 200;
+		int ny = 200;
+		int q = 500;
 		double temp = 1.0;
 		double lambda = 1.0;
 		double alpha = 2.0;
-		double beta = 5.0;
-		double motility = 0.0;
-		double fracOfMotileCells = 0.00;
-		double rotateDiff = 0.0;
-		int numOfSweeps = 501;
-		int nequil = 100;
+		double beta = 2.0;
+		double motility = 10.0;
+		double fracOfMotileCells = 0.1;
+		double fracOccupied = 0.5;
+		double rotateDiff = 0.1;
+		int numOfSweeps = 100500;
+		int nequil = 500;
 		int seed = -1;
 		int run = 1;
-		int measureTime = 500;
-		int avgInt = 200;
-		String type = "exp_growth_1.01";
+		//int measureTime = 500;
+		//int avgInt = 200;
+		//String type = "exp_growth_1.01";
 
 		//SpinReader reader = new SpinReader();
 		//reader.openReader("init_spin_1000_2.dat");
-		String filename = String.format("%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_fracMo_%.2f_t_%d_avgInt_%d_meas_%d_run_%d.dat",
-				nx, ny, q, alpha, lambda, motility, rotateDiff, fracOfMotileCells, numOfSweeps, avgInt, measureTime, run);
-		DataWriter avgDisWriter = new AverageDisplacementWriter(measureTime);
-		avgDisWriter.openWriter("avgDis_" + type + "_" + filename);
+		String filename = String.format("%d_%d_%d_a_%.1f_b_%.1f_lam_%.1f_P_%.1f_D_%.1f_fracMo_%.2f_fracOccup_%.2f_t_%d_run_%d.dat",
+				nx, ny, q, alpha, beta, lambda, motility, rotateDiff, fracOfMotileCells, fracOccupied, numOfSweeps, run);
+		DataWriter roughnessWriter = new RoughnessWriter();
+		roughnessWriter.openWriter("rough_" + filename);
 		//DataWriter r2Writer = new R2Writer();
 		//DataWriter ergWriter = new EnergyWriter();
 		//DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
@@ -1827,11 +1878,19 @@ public class CellPottsModel extends SpinModel {
 		//a2Writer.openWriter("a2_" + filename);
 		//statsWriter.openWriter("stats_" + filename);
 		CellPottsModel model = new CellPottsModel(
-				nx, ny, q, temp, lambda, alpha, beta, motility, 
-				rotateDiff, seed, numOfSweeps, nequil, false);
+				nx, ny, q, temp, lambda, alpha, 1000, motility, rotateDiff,
+				fracOccupied, seed, numOfSweeps, nequil, false){
+			@Override
+			public void update(CellPottsModel model, int time) {
+				if (time == nequil){
+					model.setBeta(beta);
+				}
+			}
+		};
 		//model.initSpin(reader.readSpins());
-		model.addDataListener(avgDisWriter);
-		model.setAverageInterval(avgInt);
+		model.addDataListener(roughnessWriter);
+		model.addDataListener(model);
+		//model.setAverageInterval(avgInt);
 		model.initSpin();
 		model.initPolarity();
 		model.initMotility(fracOfMotileCells);
@@ -1841,6 +1900,9 @@ public class CellPottsModel extends SpinModel {
 		//statsWriter.closeWriter();
 		//a2Writer.closeWriter();
 		//reader.closeReader();
-		avgDisWriter.closeWriter();
-	}*/
+		roughnessWriter.closeWriter();
+	}
+
+	@Override
+	public void update(CellPottsModel model, int time) {}
 }
