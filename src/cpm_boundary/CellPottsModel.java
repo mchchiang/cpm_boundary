@@ -79,10 +79,11 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	private ArrayList<Double> avgDY;
 	private ArrayList<Double> avgD;
 	private int avgInt = 1;
-	
+
 	//variables for computing roughness of interface
 	private int minRow = 0;
 	private int maxRow = 0;
+	private ArrayList<Vector2D> boundary;
 
 	//variables for calculating acceptance rate
 	private double acceptRate;
@@ -225,12 +226,12 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 	private void init(){
 		acceptRate = 0.0;
-		
+
 		maxRow = (int) (ny * fracOccupied) - 1;
 		minRow = maxRow;
-		
+
 		rand = new Random();
-		
+
 		area = new ArrayList<Double>();
 		areaTarget = new ArrayList<Double>();
 
@@ -258,6 +259,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		avgD = new ArrayList<Double>();
 
 		lastDivisionTime = new ArrayList<Integer>();
+
+		boundary = new ArrayList<Vector2D>();
 
 		spinPos = new ArrayList<ArrayList<Vector2D>>();
 
@@ -615,10 +618,10 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			}
 
 			updatePolarity();
-			
+
 			//update the interface variables
-			updateMinRow();
-			updateMaxRow();
+			//updateMinRow();
+			//updateMaxRow();
 			//System.out.println("min: " + minRow + " max: " + maxRow);
 
 			if (n == nequil){
@@ -627,6 +630,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			}
 
 			if (n > nequil){
+				updateBoundary();
 				updateR();
 				updateArea(n);
 				updateAverageDisplacement();
@@ -648,7 +652,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 		running = false;
 	}
-	
+
 	public synchronized void stop(){
 		if (paused){
 			resume();
@@ -744,7 +748,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		} 
 
 		if (Math.log(rand.nextDouble()) <= totalEnergy / temperature){
-			
+
 			setSpin(i, j, newSpin);
 			acceptRate = acceptRate + 1.0;
 		}
@@ -783,7 +787,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	public double motilityE(int i, int j, int newSpin, double muOld, double muNew){
 		double energy = 0.0;
 		int oldSpin = spin[i][j];
-		
+
 		double dxcmOld = calculateDXCM(oldSpin, i, true);
 		double dycmOld = calculateDYCM(oldSpin, j, true);
 		energy += muOld * dot(dxcmOld, dycmOld, px.get(spin[i][j]), py.get(spin[i][j]));
@@ -903,7 +907,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 		return new double [] {xDiff(cmNew[0], cm[0]), yDiff(cmNew[1], cm[1])};
 	}
-	
+
 	/**
 	 * Calculate the centre of mass (CM) for a particular cell
 	 * @param pos an array storing the lattice sites of the cell
@@ -1085,13 +1089,13 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			newSumY += ny * n;
 			newYCM = newSumY / (double) n;
 		}
-		
+
 		xcmNew.set(cellIndex, newXCM);
 		ycmNew.set(cellIndex, newYCM);
 		sumX.set(cellIndex, newSumX);
 		sumY.set(cellIndex, newSumY);
 	}
-	
+
 	/**
 	 * Calculate the change in the horizontal component of the centre of mass of 
 	 * a particular cell if a spin copy attempt is accepted
@@ -1121,7 +1125,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			newSumX = sum + x;
 		}
 		newXCM = newSumX / (double) n;
-		
+
 		if (newXCM > nx){
 			newSumX -= nx * n;
 			newXCM = newSumX / (double) n;
@@ -1160,9 +1164,9 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			n++;
 			newSumY = sum + y;
 		}
-		
+
 		newYCM = newSumY / (double) n;
-		
+
 		if (newYCM > ny){
 			newSumY -= ny * n;
 			newYCM = newSumY / (double) n;
@@ -1249,7 +1253,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 		return new double [] {a2, r4};
 	}
-	
+
 	private boolean hasZeroSpin(int rowIndex){
 		for (int i = 0; i < nx; i++){
 			if (spin[i][rowIndex] == 0){
@@ -1258,7 +1262,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		}
 		return false;
 	}
-	
+
 	/*private boolean hasNonZeroSpin(int rowIndex){
 		for (int i = 0; i < nx; i++){
 			if (spin[i][rowIndex] != 0){
@@ -1267,7 +1271,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		}
 		return false;
 	}*/
-	
+
 	private boolean hasNonZeroSpin(int row){
 		ArrayList<Integer> nonZeroSpin = new ArrayList<Integer>();
 		int cellIndex;
@@ -1285,7 +1289,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		}
 		return nonZeroSpin.size() > 0;
 	}
-	
+
 	public void updateMaxRow(){
 		boolean hasNonZero = hasNonZeroSpin(maxRow);
 		if (hasNonZero){
@@ -1301,7 +1305,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			} while (!hasNonZero);
 		}
 	}
-	
+
 	public void updateMinRow(){
 		boolean hasZero = hasZeroSpin(minRow);
 		if (hasZero){
@@ -1317,7 +1321,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			minRow--;
 		}
 	}
-	
+
 	public boolean hasNoNeighbour(int cellIndex){
 		ArrayList<Vector2D> pos = spinPos.get(cellIndex);
 		int i, j;
@@ -1325,23 +1329,184 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			i = pt.getX();
 			j = pt.getY();
 			if (spinFilter(spin[i][jup(j)], cellIndex) != 0 ||
-				spinFilter(spin[i][jdown(j)], cellIndex) != 0 ||
-				spinFilter(spin[iup(i)][j], cellIndex) != 0 ||
-				spinFilter(spin[idown(i)][j], cellIndex) != 0 ||
-				spinFilter(spin[iup(i)][jup(j)], cellIndex) != 0 ||
-				spinFilter(spin[iup(i)][jdown(j)], cellIndex) != 0 ||
-				spinFilter(spin[idown(i)][jup(j)], cellIndex) != 0 ||
-				spinFilter(spin[idown(i)][jdown(j)], cellIndex) != 0){
+					spinFilter(spin[i][jdown(j)], cellIndex) != 0 ||
+					spinFilter(spin[iup(i)][j], cellIndex) != 0 ||
+					spinFilter(spin[idown(i)][j], cellIndex) != 0 ||
+					spinFilter(spin[iup(i)][jup(j)], cellIndex) != 0 ||
+					spinFilter(spin[iup(i)][jdown(j)], cellIndex) != 0 ||
+					spinFilter(spin[idown(i)][jup(j)], cellIndex) != 0 ||
+					spinFilter(spin[idown(i)][jdown(j)], cellIndex) != 0){
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	private int spinFilter(int spin, int expectedSpin){
 		return spin == expectedSpin ? 0 : spin;
 	}
-	
+
+	public void updateBoundary(){
+		//printSpins();
+		boundary = new ArrayList<Vector2D>();
+		Vector2D [] pts = new Vector2D [4];
+		Vector2D startpt = findStartingPoint();
+		Vector2D direction = new Vector2D(1,0);
+		checkPeriodicBC(startpt);
+		Vector2D nextpt = new Vector2D(startpt);
+
+		pts[0] = new Vector2D (nextpt.getX(), nextpt.getY()-1);
+		pts[1] = new Vector2D (nextpt.getX()-1, nextpt.getY()-1);
+		pts[2] = new Vector2D (nextpt.getX()-1, nextpt.getY());
+		pts[3] = new Vector2D (nextpt.getX(), nextpt.getY());
+		
+		for (int i = 0; i < pts.length; i++){
+			checkPeriodicBC(pts[i]);
+		}
+
+		do {
+			boundary.add(nextpt);
+			switch (nextMove(pts)){
+			case 0: turnLeft(direction, pts); break;
+			case 1: goStraight(direction, pts); break;
+			case 2: turnRight(direction, pts); break;
+			}
+			Vector2D pt = new Vector2D(nextpt);
+			pt.add(direction);
+			checkPeriodicBC(pt);
+			nextpt = pt;
+		} while (!nextpt.equals(startpt));
+	}
+
+	public ArrayList<Vector2D> getBoundary(){
+		return boundary;
+	}
+
+	public Vector2D findStartingPoint(){
+		ArrayList<Integer> clusterCount = new ArrayList<Integer>();
+		ArrayList<Integer> startIndex = new ArrayList<Integer>();
+		int count = 0;
+		boolean insideCluster = false;
+
+		for (int i = ny-1; i >= 0; i--){
+			if (insideCluster){
+				if (spin[0][i] > 0){
+					count++;
+				} else {
+					insideCluster = false;
+					clusterCount.add(count);
+					count = 0;
+				}				
+			} else if (spin[0][i] > 0){
+				count++;
+				insideCluster = true;
+				startIndex.add(i);
+			}
+		}
+
+		//find largest cluster
+		int max = 0;
+		int index = 0;
+		int value;
+		for (int i = 0; i < clusterCount.size(); i++){
+			value = clusterCount.get(i);
+			if (value > max){
+				max = value;
+				index = i;
+			}
+		}
+		return new Vector2D(1, startIndex.get(index)+1);//use bottom pt as ref pt for lattice
+	}
+
+	public void turnLeft(Vector2D direction, Vector2D [] pts){
+		direction.rotate270();
+		Vector2D [] oldpts = new Vector2D [4];
+		for (int i = 0; i < oldpts.length; i++){
+			oldpts[i] = pts[i];
+		}
+		for (int i = oldpts.length-1; i >=- 0; i--){
+			if (i == 0){
+				pts[oldpts.length-1] = oldpts[i];
+				pts[oldpts.length-1].add(direction);
+				checkPeriodicBC(pts[oldpts.length-1]);
+			} else {
+				pts[i-1] = oldpts[i];
+				pts[i-1].add(direction);
+				checkPeriodicBC(pts[i-1]);
+			}
+		}
+	}
+
+	public void turnRight(Vector2D direction, Vector2D [] pts){
+		direction.rotate90();
+		Vector2D [] oldpts = new Vector2D [4];
+		for (int i = 0; i < oldpts.length; i++){
+			oldpts[i] = pts[i];
+		}
+		for (int i = 0; i < oldpts.length; i++){
+			if (i == oldpts.length-1){
+				pts[0] = oldpts[i];
+				pts[0].add(direction);
+				checkPeriodicBC(pts[0]);
+			} else {
+				pts[i+1] = oldpts[i];
+				pts[i+1].add(direction);
+				checkPeriodicBC(pts[i+1]);
+			}
+		}
+	}
+
+	public void goStraight(Vector2D direction, Vector2D [] pts){
+		for (int i = 0; i < pts.length; i++){
+			pts[i].add(direction);
+			checkPeriodicBC(pts[i]);
+		}
+	}
+
+	public void checkPeriodicBC(Vector2D v){
+		int x = v.getX();
+		int y = v.getY();
+		if (x >= nx) {
+			v.setX(x-nx);
+		} else if (x < 0){
+			v.setX(x+nx);
+		}
+		if (y >= ny) {
+			v.setY(y-ny);
+		} else if (y < 0){
+			v.setY(y+ny);
+		}
+	}
+
+	public int spinFilter(int spin){
+		return spin == 0 ? 0 : 1;
+	}
+
+	public int getSpin(Vector2D v){
+		return spin[v.getX()][v.getY()];
+	}
+
+	public int nextMove(Vector2D [] pts){
+		int topLeftSpin = spinFilter(getSpin(pts[0]));
+		int bottomLeftSpin = spinFilter(getSpin(pts[1]));
+		//int bottomRightSpin = spinFilter(getSpin(pts[2]));
+		int topRightSpin = spinFilter(getSpin(pts[3]));
+
+		if (topLeftSpin == topRightSpin){
+			if (topLeftSpin != bottomLeftSpin){
+				return 0;
+			} else {
+				return 2;
+			}
+		} else {
+			if (topLeftSpin == bottomLeftSpin){
+				return 1;
+			} else {
+				return 2;
+			}
+		}
+	}
+
 	public double calculateRoughness(){
 		double y, avg = 0.0, avg2 = 0.0;
 		int j;
@@ -1357,7 +1522,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		}
 		avg /= (double) nx;
 		avg2 /= (double) nx;
-		
+
 		return Math.sqrt(avg2 - avg * avg);
 	}
 
@@ -1686,11 +1851,11 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	public int getAverageInterval(){
 		return avgInt;
 	}
-	
+
 	public int getMaxRow(){
 		return maxRow;
 	}
-	
+
 	public int getMinRow(){
 		return minRow;
 	}
@@ -1730,7 +1895,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 				updateCM(oldSpin, i, j, true);
 				updateCM(newSpin, i, j, false);
 			}
-			
+
 			Vector2D pt = new Vector2D(i,j);
 
 			area.set(newSpin, area.get(newSpin)+1.0);
@@ -1738,7 +1903,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 			spinPos.get(oldSpin).remove(pt);
 			spinPos.get(newSpin).add(pt);
-			
+
 			spin[i][j] = newSpin;
 
 			if (notify){

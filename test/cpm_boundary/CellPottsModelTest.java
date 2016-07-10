@@ -2494,4 +2494,19 @@ public class CellPottsModelTest {
 		assertEquals("Didn't update the y cm for spin 9 correctly",
 				1.5, model.getYCM(9), tol);
 	}
+	
+	@Test
+	public void testFindStartingPoint1(){
+		int [][] spin = new int [][] {
+				{0,2,2,1,0,0,3,0},
+				{0,2,2,1,1,0,3,3}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(2, 8, 3, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		Vector2D pt = model.findStartingPoint();
+		assertEquals("Return wrong starting point", 4, pt.getY());
+	}
 }

@@ -53,7 +53,7 @@ public class DisplacementPanel extends JPanel implements DataListener {
 		fgGraphics = fg.createGraphics();
 		fgGraphics.setBackground(Color.WHITE);
 		fgGraphics.setColor(Color.BLACK);
-		
+
 		repaint();
 	}
 
@@ -124,7 +124,7 @@ public class DisplacementPanel extends JPanel implements DataListener {
 			addNewCell();
 			diff--;
 		}
-		
+
 		float h = 0.3f, s = 0.0f, b = 1.0f;
 		for (int i = 1; i < model.getTypesOfSpin(); i++){
 			s = (float) (model.getAvgD(i) / maxD);
@@ -147,20 +147,35 @@ public class DisplacementPanel extends JPanel implements DataListener {
 				y = model.getYCM(i);
 				dx = model.getAvgDX(i);
 				dy = model.getAvgDY(i);
-				
+
 				if (dx != 0.0 && dy != 0.0){
 					a = Math.atan2(dy, dx);
 					drawArrow((int) (x * arrowSize), (int) (y * arrowSize), 
 							arrowSize * 5, a);
 				}
 			}
-			
+
 			//draw boundary of interface
-			int min = model.getMinRow() * arrowSize;
+			/*int min = model.getMinRow() * arrowSize;
 			int max = model.getMaxRow() * arrowSize;
 			fgGraphics.setColor(Color.RED);
 			fgGraphics.drawLine(0, min, width, min);
-			fgGraphics.drawLine(0, max, width, max);
+			fgGraphics.drawLine(0, max, width, max);*/
+			fgGraphics.setColor(Color.RED);
+			ArrayList<Vector2D> boundary = model.getBoundary();
+			Vector2D pt;
+			Vector2D nextpt;
+			int nx = model.getNumOfColumns();
+			int ny = model.getNumOfRows();
+			for (int i = 0; i < boundary.size()-4; i++){
+				pt = boundary.get(i);
+				nextpt = boundary.get(i+1);
+				if (Math.abs(nextpt.getX() - pt.getX()) < nx-1 &&
+						Math.abs(nextpt.getY() - pt.getY()) < ny-1){
+					fgGraphics.drawLine(pt.getX() * arrowSize, pt.getY() * arrowSize, 
+							nextpt.getX() * arrowSize, nextpt.getY() * arrowSize);
+				}
+			}
 		}
 	}
 

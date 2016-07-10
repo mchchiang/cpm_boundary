@@ -50,6 +50,6 @@ public class EnergyPanel extends JPanel implements DataListener {
 
 	@Override
 	public void update(CellPottsModel model, int time) {
-		series.add(time, model.calculateRoughness());
+		series.add(time, model.getTotalEnergy());
 	}
 }
