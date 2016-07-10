@@ -1404,7 +1404,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			}
 		}
 
-		//find largest cluster
+		//find the largest cluster
 		int max = 0;
 		int index = 0;
 		int value;
@@ -1415,7 +1415,9 @@ public class CellPottsModel extends SpinModel implements DataListener{
 				index = i;
 			}
 		}
-		return new Vector2D(1, startIndex.get(index)+1);//use bottom pt as ref pt for lattice
+		
+		//use bottom point as the reference point
+		return new Vector2D(1, startIndex.get(index)+1);
 	}
 
 	public void turnLeft(Vector2D direction, Vector2D [] pts){
