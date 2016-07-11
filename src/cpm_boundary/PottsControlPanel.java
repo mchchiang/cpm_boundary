@@ -183,13 +183,13 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 			double temp = Double.parseDouble(txtTemp.getText());
 			double lambda = Double.parseDouble(txtLambda.getText());
 			double alpha = Double.parseDouble(txtAlpha.getText());
-			double beta = Double.parseDouble(txtBeta.getText());
+			final double beta = Double.parseDouble(txtBeta.getText());
 			double motility = Double.parseDouble(txtMotility.getText());
 			double rotateDiff = Double.parseDouble(txtRotateDiff.getText());
 			double fracOccupied = Double.parseDouble(txtFracOccupied.getText());
 			int seed = -1;
 			int numOfSweeps = Integer.parseInt(txtNumOfSteps.getText());
-			int nequil = Integer.parseInt(txtNEquil.getText());
+			final int nequil = Integer.parseInt(txtNEquil.getText());
 			int avgInt = Integer.parseInt(txtAvgInt.getText());
 			
 			model = new CellPottsModel(
