@@ -1,5 +1,6 @@
 package cpm_boundary;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -2010,6 +2011,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		int numOfSweeps = Integer.parseInt(args[11]);
 		int nequil = Integer.parseInt(args[12]);
 		int run = Integer.parseInt(args[13]);
+		String filepath = args[14];
 		/*int nx = 200;
 		int ny = 200;
 		int q = 500;
@@ -2031,10 +2033,10 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 		//SpinReader reader = new SpinReader();
 		//reader.openReader("init_spin_1000_2.dat");
-		String filename = String.format("%d_%d_%d_a_%.1f_b_%.1f_lam_%.1f_P_%.1f_D_%.1f_fracMo_%.2f_fracOccup_%.2f_t_%d_run_%d.dat",
+		String name = String.format("%d_%d_%d_a_%.1f_b_%.1f_lam_%.1f_P_%.1f_D_%.1f_fracMo_%.2f_fracOccup_%.2f_t_%d_run_%d.dat",
 				nx, ny, q, alpha, beta, lambda, motility, rotateDiff, fracOfMotileCells, fracOccupied, numOfSweeps, run);
 		DataWriter roughnessWriter = new RoughnessWriter();
-		roughnessWriter.openWriter("rough_" + filename);
+		roughnessWriter.openWriter(Paths.get(filepath, "rough_" + name).toString());
 		//DataWriter r2Writer = new R2Writer();
 		//DataWriter ergWriter = new EnergyWriter();
 		//DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
