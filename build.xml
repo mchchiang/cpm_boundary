@@ -10,7 +10,8 @@
 		<pathelement location="build/classes"/>
 		<pathelement location="build/test/classes"/>
 		<pathelement location="."/>
-		
+		<pathelement path="lib/jfreechart-1.0.19.jar"/>
+		<pathelement path="lib/jcommon-1.0.23.jar"/>
 		<fileset dir=".">
 			<include name="*.jar"/>
 		</fileset>
@@ -35,9 +36,6 @@
 	
     <target name="compile" depends="init" description="Compile code">
     	<javac srcdir="src" destdir="build/classes" classpathref="classpath">
-	  <classpath>
-	    <pathelement path="jfreechart-1.0.19/jfreechart-1.0.19-demo.jar"/>
-	  </classpath>
 	  <include name="**/*.java"/>
     	</javac>
 	</target>
