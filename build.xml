@@ -10,9 +10,10 @@
 		<pathelement location="build/classes"/>
 		<pathelement location="build/test/classes"/>
 		<pathelement location="."/>
-		<pathelement path="jfreechart-1.0.19/jfreechart-1.0.19-demo.jar"/>
+		
 		<fileset dir=".">
 			<include name="*.jar"/>
+			<include name="jfreechart-1.0.19/jfreechart-1.0.19-demo.jar"/>
 		</fileset>
 	</path>
 	
