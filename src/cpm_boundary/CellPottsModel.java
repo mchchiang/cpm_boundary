@@ -1,8 +1,13 @@
 package cpm_boundary;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 
@@ -82,6 +87,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 	//variables for computing roughness of interface
 	private ArrayList<Vector2D> boundary;
+	private int [] maxBoundaryValue;
 
 	//variables for calculating acceptance rate
 	private double acceptRate;
@@ -256,6 +262,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		lastDivisionTime = new ArrayList<Integer>();
 
 		boundary = new ArrayList<Vector2D>();
+		maxBoundaryValue = new int [nx];
 
 		spinPos = new ArrayList<ArrayList<Vector2D>>();
 
@@ -614,10 +621,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 			updatePolarity();
 
-			//update the interface variables
-			//updateMinRow();
-			//updateMaxRow();
-			//System.out.println("min: " + minRow + " max: " + maxRow);
+			//System.out.println(n);
 
 			if (n == nequil){
 				equilibrated = true;
@@ -1250,12 +1254,30 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	}
 	
 	public void updateBoundary(){
+		int [] indices = getStartingIndices();
+		Vector2D startpt;
+		for (int i = 0; i < indices.length; i++){
+			startpt = new Vector2D(1, indices[i]+1);
+			computeBoundary(startpt);
+			if (boundary.size() >= nx){
+				break;
+			}
+			//System.out.println(i);
+		}
+	}
+	
+	protected void computeBoundary(Vector2D startpt){
+		
 		boundary = new ArrayList<Vector2D>();
+		
 		Vector2D [] pts = new Vector2D [4];
-		Vector2D startpt = findStartingPoint();
 		Vector2D direction = new Vector2D(1,0);
 		checkPeriodicBC(startpt);
 		Vector2D nextpt = new Vector2D(startpt);
+		
+		for (int i = 0; i < nx; i++){
+			maxBoundaryValue[i] = 0;
+		}
 
 		pts[0] = new Vector2D (nextpt.getX(), nextpt.getY()-1);
 		pts[1] = new Vector2D (nextpt.getX()-1, nextpt.getY()-1);
@@ -1266,8 +1288,17 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			checkPeriodicBC(pts[i]);
 		}
 
+		int x, y;
+		//boolean infiniteLoop = false;
 		do {
+			x = nextpt.getX();
+			y = nextpt.getY();
+			if (y > maxBoundaryValue[x]){
+				maxBoundaryValue[x] = y;
+			}
+			
 			boundary.add(nextpt);
+			//System.out.println(nextpt);
 			switch (nextMove(pts)){
 			case 0: turnLeft(direction, pts); break;
 			case 1: goStraight(direction, pts); break;
@@ -1277,32 +1308,98 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			pt.add(direction);
 			checkPeriodicBC(pt);
 			nextpt = pt;
+			
+			/*if (infiniteLoop){
+				System.out.println(nextpt);
+			}
+			
+			if (boundary.size() == nx * 5){
+				infiniteLoop = true;
+				printSpins();
+				for (int i = 0; i < boundary.size(); i++){
+					System.out.println(boundary.get(i));
+				}
+			}*/
+			
 		} while (!nextpt.equals(startpt));
+		
 	}
 
 	public ArrayList<Vector2D> getBoundary(){
 		return boundary;
 	}
 
-	protected Vector2D findStartingPoint(){
-		ArrayList<Integer> clusterCount = new ArrayList<Integer>();
-		ArrayList<Integer> startIndex = new ArrayList<Integer>();
+	protected int [] getStartingIndices(){
+		//ArrayList<Integer> clusterCount = new ArrayList<Integer>();
+		//ArrayList<Integer> startIndex = new ArrayList<Integer>();
+		
+		Map<Integer, Integer> clusters = new LinkedHashMap<Integer,Integer>();
+		
 		int count = 0;
 		boolean insideCluster = false;
-
-		for (int i = ny-1; i >= 0; i--){
+		boolean topCellOccupied = false;
+		int topClusterIndex = -1;
+		
+		for (int i = 0; i < ny; i++){
 			if (insideCluster){
 				if (spin[0][i] > 0){
 					count++;
 				} else {
+					if (i == ny-1 && topCellOccupied){
+						clusters.put(topClusterIndex, 
+								clusters.get(topClusterIndex) + count);
+					} else {
+						if (topCellOccupied) topClusterIndex = i-1;
+						clusters.put(i-1, count);
+						count = 0;
+					}
+					insideCluster = false;
+				}
+			} else if (spin[0][i] > 0){
+				if (i == 0) topCellOccupied = true;
+				insideCluster = true;
+				count++;
+			}
+		}
+		
+		//sort the map by the largest cluster
+		List<Map.Entry<Integer, Integer>> list = 
+				new LinkedList<Map.Entry<Integer, Integer>>(clusters.entrySet());
+		Collections.sort(list, new Comparator<Map.Entry<Integer,Integer>>(){
+			@Override
+			public int compare(Entry<Integer, Integer> o1,
+					Entry<Integer, Integer> o2) {
+				return (o1.getValue()).compareTo(o2.getValue());
+			}
+		});
+		
+		int [] indices = new int [list.size()];
+		
+		int len = indices.length;
+		
+		for (int i = 0; i < len; i++){
+			indices[i] = list.get(len-1-i).getKey();
+		}
+		
+		return indices;
+
+		/*for (int i = ny-1; i >= 0; i--){
+			if (insideCluster){
+				if (spin[0][i] > 0){
+					count++;
+					if (i == 0){
+						clusterCount.add(count);
+					}
+				} else {
 					insideCluster = false;
 					clusterCount.add(count);
+					
 					count = 0;
 				}				
 			} else if (spin[0][i] > 0){
+				startIndex.add(i);
 				count++;
 				insideCluster = true;
-				startIndex.add(i);
 			}
 		}
 
@@ -1310,6 +1407,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		int max = 0;
 		int index = 0;
 		int value;
+		
 		for (int i = 0; i < clusterCount.size(); i++){
 			value = clusterCount.get(i);
 			if (value > max){
@@ -1319,7 +1417,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		}
 		
 		//use bottom point as the reference point
-		return new Vector2D(1, startIndex.get(index)+1);
+		return new Vector2D(1, startIndex.get(index)+1);*/
 	}
 
 	protected void turnLeft(Vector2D direction, Vector2D [] pts){
@@ -1411,7 +1509,16 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	}
 
 	public double calculateRoughness(){
-		return 0.0;
+		double y, avg = 0.0, avg2 = 0.0;
+ 		for (int i = 0; i < nx; i++){
+ 			y = maxBoundaryValue[i];
+ 			avg += y;
+ 			avg2 += y * y;
+ 		}
+ 		avg /= (double) nx;
+ 		avg2 /= (double) nx;
+ 
+ 		return Math.sqrt(avg2 - avg * avg);
 	}
 
 	//vector related operations
@@ -1889,7 +1996,21 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	}
 
 	public static void main (String [] args){
-		int nx = 200;
+		int nx = Integer.parseInt(args[0]);
+		int ny = Integer.parseInt(args[1]);
+		int q = Integer.parseInt(args[2]);
+		double temp = Double.parseDouble(args[3]);
+		double lambda = Double.parseDouble(args[4]);
+		double alpha = Double.parseDouble(args[5]);
+		double beta = Double.parseDouble(args[6]);
+		double motility = Double.parseDouble(args[7]);
+		double fracOfMotileCells = Double.parseDouble(args[8]);
+		double fracOccupied = Double.parseDouble(args[9]);
+		double rotateDiff = Double.parseDouble(args[10]);
+		int numOfSweeps = Integer.parseInt(args[11]);
+		int nequil = Integer.parseInt(args[12]);
+		int run = Integer.parseInt(args[13]);
+		/*int nx = 200;
 		int ny = 200;
 		int q = 500;
 		double temp = 1.0;
@@ -1901,9 +2022,9 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		double fracOccupied = 0.5;
 		double rotateDiff = 0.1;
 		int numOfSweeps = 100500;
-		int nequil = 500;
+		int nequil = 500;*/
 		int seed = -1;
-		int run = 1;
+		//int run = 1;
 		//int measureTime = 500;
 		//int avgInt = 200;
 		//String type = "exp_growth_1.01";

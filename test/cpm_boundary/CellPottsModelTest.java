@@ -2495,7 +2495,7 @@ public class CellPottsModelTest {
 				1.5, model.getYCM(9), tol);
 	}
 	
-	@Test
+	/*@Test
 	public void testFindStartingPoint1(){
 		int [][] spin = new int [][] {
 				{0,2,2,1,0,0,3,0},
@@ -2508,5 +2508,5 @@ public class CellPottsModelTest {
 		model.initSpin(spin);
 		Vector2D pt = model.findStartingPoint();
 		assertEquals("Return wrong starting point", 4, pt.getY());
-	}
+	}*/
 }
