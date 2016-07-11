@@ -2003,13 +2003,13 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		double temp = Double.parseDouble(args[3]);
 		double lambda = Double.parseDouble(args[4]);
 		double alpha = Double.parseDouble(args[5]);
-		double beta = Double.parseDouble(args[6]);
+		final double beta = Double.parseDouble(args[6]);
 		double motility = Double.parseDouble(args[7]);
 		double fracOfMotileCells = Double.parseDouble(args[8]);
 		double fracOccupied = Double.parseDouble(args[9]);
 		double rotateDiff = Double.parseDouble(args[10]);
 		int numOfSweeps = Integer.parseInt(args[11]);
-		int nequil = Integer.parseInt(args[12]);
+		final int nequil = Integer.parseInt(args[12]);
 		int run = Integer.parseInt(args[13]);
 		String filepath = args[14];
 		/*int nx = 200;
