@@ -147,10 +147,21 @@ public class PottsViewPanel extends JPanel implements Observer {
 	
 	//check if new cells are created and need new colours
 	public void updateColourMap(){
-		int diff = model.getTypesOfSpin() - colours.size();
+		int typesOfSpin = model.getTypesOfSpin();
+		int diff = typesOfSpin - colours.size();
 		if (diff > 0){
 			for (int i = 0; i < diff; i++){
 				colours.add(generateColour());
+			}
+		}
+		if (model instanceof CellPottsModel){
+			CellPottsModel cpm = (CellPottsModel) model;
+			if (cpm.getTime() == cpm.getNEquil()+1){
+				for (int i = 0; i < typesOfSpin; i++){
+					if (cpm.getMotility(i) > 0){
+						colours.set(i, Color.BLACK);
+					}
+				}
 			}
 		}
 	}

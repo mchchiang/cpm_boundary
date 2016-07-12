@@ -310,7 +310,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		spin = new int [nx][ny];
 
 		//initialising each of the Q cells as a square with length delta
-		cellArea = (double) (nx*ny*fracOccupied) / (double) q;
+		cellArea = (int) ((nx*ny*fracOccupied) / (double) q);
 
 		delta = (int) (Math.sqrt(cellArea));		
 
