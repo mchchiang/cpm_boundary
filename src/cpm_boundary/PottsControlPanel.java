@@ -196,6 +196,7 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 					nx, ny, q, temp, lambda, alpha, 1000, motility, rotateDiff,
 					fracOccupied, seed, numOfSweeps, nequil, true);
 			model.setAverageInterval(avgInt);
+			model.setFracOfMotileCells(Double.parseDouble(txtFracOfMotile.getText()));
 			
 			btnRun.setEnabled(false);
 			btnStop.setEnabled(true);
@@ -233,8 +234,6 @@ public class PottsControlPanel extends JPanel implements ActionListener {
 		@Override
 		public void run(){
 			model.initSpin();
-			model.initPolarity();
-			model.initMotility(Double.parseDouble(txtFracOfMotile.getText()));
 
 			view.setModel(model);
 			view.initImage();

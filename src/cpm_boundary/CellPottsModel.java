@@ -68,6 +68,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	private ArrayList<Double> py;
 	private ArrayList<Double> theta;
 	private double rotateDiff = 0.1;
+	private int numOfMotileCells = 0;
 
 	private List<ArrayList<Vector2D>> spinPos;
 
@@ -627,6 +628,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			if (n == nequil){
 				equilibrated = true;
 				initCM();
+				initPolarity();
+				initMotility(numOfMotileCells);
 			}
 
 			if (n > nequil){
@@ -1330,10 +1333,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		return boundary;
 	}
 
-	protected int [] getStartingIndices(){
-		//ArrayList<Integer> clusterCount = new ArrayList<Integer>();
-		//ArrayList<Integer> startIndex = new ArrayList<Integer>();
-		
+	protected int [] getStartingIndices(){		
 		Map<Integer, Integer> clusters = new LinkedHashMap<Integer,Integer>();
 		
 		int count = 0;
@@ -1383,42 +1383,6 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		}
 		
 		return indices;
-
-		/*for (int i = ny-1; i >= 0; i--){
-			if (insideCluster){
-				if (spin[0][i] > 0){
-					count++;
-					if (i == 0){
-						clusterCount.add(count);
-					}
-				} else {
-					insideCluster = false;
-					clusterCount.add(count);
-					
-					count = 0;
-				}				
-			} else if (spin[0][i] > 0){
-				startIndex.add(i);
-				count++;
-				insideCluster = true;
-			}
-		}
-
-		//find the largest cluster
-		int max = 0;
-		int index = 0;
-		int value;
-		
-		for (int i = 0; i < clusterCount.size(); i++){
-			value = clusterCount.get(i);
-			if (value > max){
-				max = value;
-				index = i;
-			}
-		}
-		
-		//use bottom point as the reference point
-		return new Vector2D(1, startIndex.get(index)+1);*/
 	}
 
 	protected void turnLeft(Vector2D direction, Vector2D [] pts){
@@ -1777,6 +1741,20 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	public double getLambda(){
 		return lambda;
 	}
+	
+	public void setFracOfMotileCells(double frac){
+		numOfMotileCells = (int) Math.round(q * frac);
+	}
+	
+	public void setNumOfMotileCells(int n){
+		if (n >= 0){
+			numOfMotileCells = n;
+		}
+	}
+	
+	public int getNumOfMotileCells(){
+		return numOfMotileCells;
+	}
 
 	/**
 	 * Set the cell motility strength
@@ -1846,6 +1824,13 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	 */
 	public int getAverageInterval(){
 		return avgInt;
+	}
+	
+	public double getAreaTarget(int cellIndex){
+		if (cellIndex >= 0 && cellIndex <= q){
+			return areaTarget.get(cellIndex);
+		}
+		return -1.0;
 	}
 
 	@Override
@@ -2060,8 +2045,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		model.addDataListener(model);
 		//model.setAverageInterval(avgInt);
 		model.initSpin();
-		model.initPolarity();
-		model.initMotility(fracOfMotileCells);
+		model.setFracOfMotileCells(fracOfMotileCells);
 		model.run();
 		//r2Writer.closeWriter();
 		//ergWriter.closeWriter();
