@@ -48,7 +48,9 @@ public class Correlation {
 		avgSq *= avgSq;
 		
 		for (int tau = 0; tau < y-startRow; tau++){
-			//System.out.println(tau);
+			if (tau % 10000 == 0){
+				System.out.println(tau);
+			}
 			sum = 0.0;
 			tmax = y - tau - startRow;
 			for (int t = 0; t < tmax; t++){
