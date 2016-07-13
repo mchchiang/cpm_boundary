@@ -2509,4 +2509,113 @@ public class CellPottsModelTest {
 		Vector2D pt = model.findStartingPoint();
 		assertEquals("Return wrong starting point", 4, pt.getY());
 	}*/
+	
+	@Test
+	public void testUpdateRoughness1(){
+		int spin [][] = new int [][] {
+				{1,1,4,4,4,0,0,0,0,1},
+				{1,1,1,4,4,4,0,0,0,0},
+				{1,1,1,0,4,0,0,0,5,5},
+				{5,5,0,0,0,0,0,0,0,5},
+				{5,5,5,0,2,2,0,0,0,0},
+				{6,6,6,3,2,2,2,0,0,0},
+				{6,6,3,3,3,0,2,0,0,6},
+				{7,7,3,3,0,0,0,0,6,6},
+				{7,7,4,0,4,0,0,0,6,0},
+				{1,1,4,4,0,0,0,0,0,0}
+		};
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(10, 10, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.updateBoundary();
+		ArrayList<Vector2D> pts = model.getBoundary();
+		int [] x = {1,1,2,2,3,3,2,2,3,3,4,4,5,5,4,4,4,5,5,6,7,7,6,6,7,7,8,8,9,9,0,0};
+		int [] y = {5,6,6,5,5,4,4,3,3,2,2,3,3,4,4,5,6,6,7,7,7,6,6,5,5,4,4,5,5,4,4,5};
+		for (int i = 0; i < pts.size(); i++){
+			Vector2D expectedPt = new Vector2D(x[i], y[i]);
+			assertEquals("Returned a wrong boundary point",
+					expectedPt, pts.get(i));
+		}
+	}
+	
+	@Test
+	public void testUpdateRoughness2(){
+		int spin [][] = new int [][] {
+				{0,0,0,1,1,1,2,0,0,0},
+				{0,0,0,0,1,1,5,6,0,6},
+				{6,0,0,0,0,5,5,6,6,6},
+				{0,0,0,0,5,5,5,6,6,6},
+				{4,0,0,5,0,5,5,5,4,4},
+				{0,4,0,0,0,3,3,4,4,4},
+				{0,0,0,0,3,3,3,3,4,0},
+				{0,0,0,1,3,3,3,0,0,0},
+				{0,0,1,1,1,2,2,2,0,0},
+				{0,0,0,1,1,2,2,2,2,0}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(10, 10, 6, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updateBoundary();
+		ArrayList<Vector2D> pts = model.getBoundary();
+		int [] x = {1,1,2,2,1,1,2,2,3,3,4,4,5,5,6,6,5,5,6,6,7,7,7,8,8,9,9,0,0,0};
+		int [] y = {7,8,8,9,9,0,0,1,1,0,0,1,1,2,2,1,1,0,0,9,9,8,7,7,8,8,9,9,8,7};
+		for (int i = 0; i < pts.size(); i++){
+			Vector2D expectedPt = new Vector2D(x[i], y[i]);
+			assertEquals("Returned a wrong boundary point",
+					expectedPt, pts.get(i));
+		}
+	}
+	
+	@Test
+	public void testCalculateRoughness1(){
+		int spin [][] = new int [][] {
+				{1,1,4,4,4,0,0,0,0,1},
+				{1,1,1,4,4,4,0,0,0,0},
+				{1,1,1,0,4,0,0,0,5,5},
+				{5,5,0,0,0,0,0,0,0,5},
+				{5,5,5,0,2,2,0,0,0,0},
+				{6,6,6,3,2,2,2,0,0,0},
+				{6,6,3,3,3,0,2,0,0,6},
+				{7,7,3,3,0,0,0,0,6,6},
+				{7,7,4,0,4,0,0,0,6,0},
+				{1,1,4,4,0,0,0,0,0,0}
+		};
+		double [] areaTarget = new double [] 
+				{8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(10, 10, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		
+		model.initSpin(spin);
+		model.updateBoundary();
+		assertEquals("Returned a wrong roughness value",
+				Math.sqrt(0.69), model.calculateRoughness(), tol);
+	}
+	
+	@Test
+	public void testCalculateRoughness2(){
+		int spin [][] = new int [][] {
+				{0,0,0,1,1,1,2,0,0,0},
+				{0,0,0,0,1,1,5,6,0,6},
+				{6,0,0,0,0,5,5,6,6,6},
+				{0,0,0,0,5,5,5,6,6,6},
+				{4,0,0,5,0,5,5,5,4,4},
+				{0,4,0,0,0,3,3,4,4,4},
+				{0,0,0,0,3,3,3,3,4,0},
+				{0,0,0,1,3,3,3,0,0,0},
+				{0,0,1,1,1,2,2,2,0,0},
+				{0,0,0,1,1,2,2,2,2,0}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(10, 10, 6, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updateBoundary();
+		assertEquals("Returned a wrong roughness value",
+				Math.sqrt(1.76), model.calculateRoughness(), tol);
+	}
 }

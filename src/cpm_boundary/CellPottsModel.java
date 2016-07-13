@@ -1272,7 +1272,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	
 	protected void computeBoundary(Vector2D startpt){
 		
-		boundary = new ArrayList<Vector2D>();
+		boundary = new ArrayList<Vector2D>(nx);
 		
 		Vector2D [] pts = new Vector2D [4];
 		Vector2D direction = new Vector2D(1,0);
@@ -1280,7 +1280,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		Vector2D nextpt = new Vector2D(startpt);
 		
 		for (int i = 0; i < nx; i++){
-			maxBoundaryValue[i] = 0;
+			maxBoundaryValue[i] = -ny;
 		}
 
 		pts[0] = new Vector2D (nextpt.getX(), nextpt.getY()-1);
@@ -1292,14 +1292,25 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			checkPeriodicBC(pts[i]);
 		}
 
-		int x, y;
+		int x, y, actualY;
+		int preY = nextpt.getY();
+		int count = 0;
 		//boolean infiniteLoop = false;
 		do {
 			x = nextpt.getX();
 			y = nextpt.getY();
-			if (y > maxBoundaryValue[x]){
-				maxBoundaryValue[x] = y;
+			
+			if (y-preY == -(ny-1)){
+				count++;
+			} else if (y-preY == (ny-1)){
+				count--;
 			}
+			actualY = y + ny * count;
+			
+			if (actualY > maxBoundaryValue[x]){
+				maxBoundaryValue[x] = actualY;
+			}
+			preY = y;
 			
 			boundary.add(nextpt);
 			//System.out.println(nextpt);
@@ -1309,7 +1320,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			case 2: turnRight(direction, pts); break;
 			}
 			Vector2D pt = new Vector2D(nextpt);
-			pt.add(direction);
+			pt.add(direction);			
 			checkPeriodicBC(pt);
 			nextpt = pt;
 			
@@ -1474,16 +1485,32 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	}
 
 	public double calculateRoughness(){
-		double y, avg = 0.0, avg2 = 0.0;
+		double y, avg1 = 0.0, avgSq1 = 0.0, avg2 = 0.0, avgSq2 = 0.0;
+		double sigma1, sigma2;
  		for (int i = 0; i < nx; i++){
  			y = maxBoundaryValue[i];
- 			avg += y;
- 			avg2 += y * y;
+ 			avg1 += y;
+ 			avgSq1 += y * y;
+ 			
+ 			//handle the case if the interface straddles the boundary
+ 			if (y <= ny/2.0){
+ 				y += ny;
+ 			}
+ 			avg2 += y;
+ 			avgSq2 += y * y;
  		}
- 		avg /= (double) nx;
+ 		avg1 /= (double) nx;
+ 		avgSq1 /= (double) nx;
  		avg2 /= (double) nx;
- 
- 		return Math.sqrt(avg2 - avg * avg);
+ 		avgSq2 /= (double) nx;
+ 		sigma1 = Math.sqrt(avgSq1 - avg1 * avg1);
+ 		sigma2 = Math.sqrt(avgSq2 - avg2 * avg2);
+ 		
+ 		if (sigma1 > sigma2){
+ 			return sigma2;
+ 		} else {
+ 			return sigma1;
+ 		}
 	}
 
 	//vector related operations
