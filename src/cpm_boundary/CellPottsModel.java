@@ -1272,7 +1272,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	
 	protected void computeBoundary(Vector2D startpt){
 		
-		boundary = new ArrayList<Vector2D>(nx);
+		boundary = new ArrayList<Vector2D>();
 		
 		Vector2D [] pts = new Vector2D [4];
 		Vector2D direction = new Vector2D(1,0);
@@ -1305,8 +1305,9 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			} else if (y-preY == (ny-1)){
 				count--;
 			}
-			actualY = y + ny * count;
 			
+			actualY = y + ny * count;
+			//System.out.println(actualY);
 			if (actualY > maxBoundaryValue[x]){
 				maxBoundaryValue[x] = actualY;
 			}
@@ -1336,7 +1337,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 				}
 			}*/
 			
-		} while (!nextpt.equals(startpt));
+		} while (!nextpt.equals(startpt) || (nextpt.equals(startpt) && boundary.size() == 4));
 		
 	}
 

@@ -7,8 +7,9 @@ public class Correlation {
 		int x = Integer.parseInt(args[0]);
 		int y = Integer.parseInt(args[1]);
 		int startRow = Integer.parseInt(args[2]);
-		String filename = args[3];
-		String outputFile = args[4];
+		int maxTau = Integer.parseInt(args[3]);
+		String filename = args[4];
+		String outputFile = args[5];
 
 		double [][] data = new double [y][x];
 
@@ -47,7 +48,7 @@ public class Correlation {
 		avgSq /= (double) (y-startRow);
 		avgSq *= avgSq;
 		
-		for (int tau = 0; tau < y-startRow; tau++){
+		for (int tau = 0; tau < maxTau && tau < y-startRow; tau++){
 			if (tau % 10000 == 0){
 				System.out.println(tau);
 			}
