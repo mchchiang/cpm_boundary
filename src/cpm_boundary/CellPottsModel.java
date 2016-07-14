@@ -1256,7 +1256,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 		return new double [] {a2, r4};
 	}
-	
+
 	public void updateBoundary(){
 		int [] indices = getStartingIndices();
 		Vector2D startpt;
@@ -1269,16 +1269,16 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			//System.out.println(i);
 		}
 	}
-	
+
 	protected void computeBoundary(Vector2D startpt){
-		
+
 		boundary = new ArrayList<Vector2D>();
-		
+
 		Vector2D [] pts = new Vector2D [4];
 		Vector2D direction = new Vector2D(1,0);
 		checkPeriodicBC(startpt);
 		Vector2D nextpt = new Vector2D(startpt);
-		
+
 		for (int i = 0; i < nx; i++){
 			maxBoundaryValue[i] = -ny;
 		}
@@ -1287,34 +1287,38 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		pts[1] = new Vector2D (nextpt.getX()-1, nextpt.getY()-1);
 		pts[2] = new Vector2D (nextpt.getX()-1, nextpt.getY());
 		pts[3] = new Vector2D (nextpt.getX(), nextpt.getY());
-		
+
 		for (int i = 0; i < pts.length; i++){
 			checkPeriodicBC(pts[i]);
 		}
 
 		int x, y, actualY;
+		int preX = 0;
 		int preY = nextpt.getY();
 		int count = 0;
-		//boolean infiniteLoop = false;
+
 		do {
 			x = nextpt.getX();
 			y = nextpt.getY();
-			
+
 			if (y-preY == -(ny-1)){
 				count++;
 			} else if (y-preY == (ny-1)){
 				count--;
 			}
-			
+
 			actualY = y + ny * count;
-			//System.out.println(actualY);
-			if (actualY > maxBoundaryValue[x]){
-				maxBoundaryValue[x] = actualY;
+
+			if (y == preY && xDiff(x,preX) == 1 && 
+					actualY > maxBoundaryValue[idown(x)]){
+				maxBoundaryValue[idown(x)] = actualY;
 			}
+
+			preX = x;
 			preY = y;
-			
+
 			boundary.add(nextpt);
-			//System.out.println(nextpt);
+
 			switch (nextMove(pts)){
 			case 0: turnLeft(direction, pts); break;
 			case 1: goStraight(direction, pts); break;
@@ -1324,21 +1328,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			pt.add(direction);			
 			checkPeriodicBC(pt);
 			nextpt = pt;
-			
-			/*if (infiniteLoop){
-				System.out.println(nextpt);
-			}
-			
-			if (boundary.size() == nx * 5){
-				infiniteLoop = true;
-				printSpins();
-				for (int i = 0; i < boundary.size(); i++){
-					System.out.println(boundary.get(i));
-				}
-			}*/
-			
 		} while (!nextpt.equals(startpt) || (nextpt.equals(startpt) && boundary.size() == 4));
-		
+
 	}
 
 	public ArrayList<Vector2D> getBoundary(){
@@ -1347,12 +1338,12 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 	protected int [] getStartingIndices(){		
 		Map<Integer, Integer> clusters = new LinkedHashMap<Integer,Integer>();
-		
+
 		int count = 0;
 		boolean insideCluster = false;
 		boolean topCellOccupied = false;
 		int topClusterIndex = -1;
-		
+
 		for (int i = 0; i < ny; i++){
 			if (insideCluster){
 				if (spin[0][i] > 0){
@@ -1374,7 +1365,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 				count++;
 			}
 		}
-		
+
 		//sort the map by the largest cluster
 		List<Map.Entry<Integer, Integer>> list = 
 				new LinkedList<Map.Entry<Integer, Integer>>(clusters.entrySet());
@@ -1385,15 +1376,15 @@ public class CellPottsModel extends SpinModel implements DataListener{
 				return (o1.getValue()).compareTo(o2.getValue());
 			}
 		});
-		
+
 		int [] indices = new int [list.size()];
-		
+
 		int len = indices.length;
-		
+
 		for (int i = 0; i < len; i++){
 			indices[i] = list.get(len-1-i).getKey();
 		}
-		
+
 		return indices;
 	}
 
@@ -1486,32 +1477,15 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	}
 
 	public double calculateRoughness(){
-		double y, avg1 = 0.0, avgSq1 = 0.0, avg2 = 0.0, avgSq2 = 0.0;
-		double sigma1, sigma2;
- 		for (int i = 0; i < nx; i++){
- 			y = maxBoundaryValue[i];
- 			avg1 += y;
- 			avgSq1 += y * y;
- 			
- 			//handle the case if the interface straddles the boundary
- 			if (y <= ny/2.0){
- 				y += ny;
- 			}
- 			avg2 += y;
- 			avgSq2 += y * y;
- 		}
- 		avg1 /= (double) nx;
- 		avgSq1 /= (double) nx;
- 		avg2 /= (double) nx;
- 		avgSq2 /= (double) nx;
- 		sigma1 = Math.sqrt(avgSq1 - avg1 * avg1);
- 		sigma2 = Math.sqrt(avgSq2 - avg2 * avg2);
- 		
- 		if (sigma1 > sigma2){
- 			return sigma2;
- 		} else {
- 			return sigma1;
- 		}
+		double y, avg = 0.0, avgSq = 0.0;
+		for (int i = 0; i < nx; i++){
+			y = maxBoundaryValue[i];
+			avg += y;
+			avgSq += y * y;
+		}
+		avg /= (double) nx;
+		avgSq /= (double) nx;
+		return Math.sqrt(avgSq - avg * avg);
 	}
 
 	//vector related operations
@@ -1769,17 +1743,17 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	public double getLambda(){
 		return lambda;
 	}
-	
+
 	public void setFracOfMotileCells(double frac){
 		numOfMotileCells = (int) Math.round(q * frac);
 	}
-	
+
 	public void setNumOfMotileCells(int n){
 		if (n >= 0){
 			numOfMotileCells = n;
 		}
 	}
-	
+
 	public int getNumOfMotileCells(){
 		return numOfMotileCells;
 	}
@@ -1853,7 +1827,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	public int getAverageInterval(){
 		return avgInt;
 	}
-	
+
 	public double getAreaTarget(int cellIndex){
 		if (cellIndex >= 0 && cellIndex <= q){
 			return areaTarget.get(cellIndex);
