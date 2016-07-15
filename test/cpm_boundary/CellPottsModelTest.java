@@ -2495,20 +2495,170 @@ public class CellPottsModelTest {
 				1.5, model.getYCM(9), tol);
 	}
 	
-	/*@Test
-	public void testFindStartingPoint1(){
+	@Test
+	public void testGetStartingIndices1(){
 		int [][] spin = new int [][] {
-				{0,2,2,1,0,0,3,0},
-				{0,2,2,1,1,0,3,3}
+				{1,1,1,2,2,2,0,0,0,0}
 		};
 		
 		double [] areaTarget = new double [] {8.0,8.0,8.0};
-		CellPottsModel model = new CellPottsModel(2, 8, 3, toList(areaTarget), 
+		CellPottsModel model = new CellPottsModel(1, 10, 2, toList(areaTarget), 
 				temperature, lambda, alpha, beta, motility, seed);
 		model.initSpin(spin);
-		Vector2D pt = model.findStartingPoint();
-		assertEquals("Return wrong starting point", 4, pt.getY());
-	}*/
+		int [] expectedIndices = new int [] {5};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices2(){
+		int [][] spin = new int [][] {
+				{1,1,1,1,1,1,0,0,0,0,2,2,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 2, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {5,11};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices3(){
+		int [][] spin = new int [][] {
+				{2,2,0,0,0,1,1,1,1,1,1,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 2, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {10,1};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices4(){
+		int [][] spin = new int [][] {
+				{0,0,0,0,0,1,1,3,2,2,2,0,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 3, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {10};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices5(){
+		int [][] spin = new int [][] {
+				{0,0,0,1,0,1,1,1,0,2,0,2,0,0,0}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 2, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {7,3,9,11};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices6(){
+		int [][] spin = new int [][] {
+				{0,0,0,1,1,1,1,1,0,0,0,2,2,2,2}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 2, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {7,14};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices7(){
+		int [][] spin = new int [][] {
+				{0,0,0,1,1,0,3,3,3,0,0,2,2,2,2}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 3, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {9,4,14};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices8(){
+		int [][] spin = new int [][] {
+				{2,2,0,0,0,0,1,1,1,0,0,0,2,2,2}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 2, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {1,8};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices9(){
+		int [][] spin = new int [][] {
+				{0,0,0,0,0,0,1,1,1,1,0,0,2,2,2}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 2, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {9,14};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices10(){
+		int [][] spin = new int [][] {
+				{0,0,0,0,0,0,1,1,1,0,0,2,2,2,2}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 2, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {14,8};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
+	
+	@Test
+	public void testGetStartingIndices11(){
+		int [][] spin = new int [][] {
+				{0,0,0,0,0,0,0,0,0,0,1,1,1,2,2}
+		};
+		
+		double [] areaTarget = new double [] {8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(1, 15, 2, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		int [] expectedIndices = new int [] {14};
+		int [] indices = model.getStartingIndices();
+		assertArrayEquals("Returned wrong starting indices", expectedIndices, indices);
+	}
 	
 	@Test
 	public void testUpdateRoughness1(){
