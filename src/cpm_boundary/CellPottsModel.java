@@ -415,9 +415,9 @@ public class CellPottsModel extends SpinModel {
 	}
 
 	public void updateArea(int time){
-		//int s = spin[nx/2][ny/2];
-		//areaTarget.set(s, areaTarget.get(s) * 1.01);
-		//growth.set(s, growthConst);
+		int s = spin[nx/2][ny/2];
+		areaTarget.set(s, areaTarget.get(s) * 1.01);
+		growth.set(s, growthConst);
 		/*if (area.get(s) > cellArea * 50){
 			splitCell(time, s);
 		}*/
