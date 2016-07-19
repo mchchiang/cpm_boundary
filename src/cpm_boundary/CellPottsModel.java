@@ -1266,12 +1266,17 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			if (boundary.size() >= nx){
 				break;
 			}
-			//System.out.println(i);
 		}
 	}
+	
+	/*private void printList(List<Vector2D> list){
+		for (int i = 0; i < list.size(); i++){
+			System.out.println(list.get(i));
+		}
+	}*/
 
 	protected void computeBoundary(Vector2D startpt){
-
+		boundary = null;
 		boundary = new ArrayList<Vector2D>();
 
 		Vector2D [] pts = new Vector2D [4];
@@ -1343,26 +1348,47 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		boolean insideCluster = false;
 		boolean topCellOccupied = false;
 		int topClusterIndex = -1;
-
-		for (int i = 0; i < ny; i++){
+		int s = spin[0][0];
+		if (s > 0){
+			topCellOccupied = true;
+			insideCluster = true;
+			count++;
+		}
+		for (int i = 1; i < ny-1; i++){
+			s = spin[0][i];
 			if (insideCluster){
-				if (spin[0][i] > 0){
+				if (s > 0){
 					count++;
 				} else {
-					if (i == ny-1 && topCellOccupied){
-						clusters.put(topClusterIndex, 
-								clusters.get(topClusterIndex) + count);
-					} else {
-						if (topCellOccupied) topClusterIndex = i-1;
-						clusters.put(i-1, count);
-						count = 0;
+					if (topCellOccupied && topClusterIndex == -1){
+						topClusterIndex = i-1;
 					}
+					clusters.put(i-1, count);
+					count = 0;
 					insideCluster = false;
 				}
-			} else if (spin[0][i] > 0){
-				if (i == 0) topCellOccupied = true;
+			} else if (s > 0){
 				insideCluster = true;
 				count++;
+			}
+		}
+		s = spin[0][ny-1];
+		if (insideCluster){
+			if (s > 0){
+				if (topCellOccupied){
+					clusters.put(topClusterIndex, 
+							clusters.get(topClusterIndex)+count+1);
+				} else {
+					clusters.put(ny-1, count+1);
+				}
+			} else {
+				clusters.put(ny-2, count);
+			}
+		} else if (s > 0) {
+			if (topCellOccupied){
+				clusters.put(topClusterIndex, clusters.get(topClusterIndex)+1);
+			} else {
+				clusters.put(ny-1, 1);
 			}
 		}
 
@@ -1485,6 +1511,14 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		}
 		avg /= (double) nx;
 		avgSq /= (double) nx;
+		/*double sigma = Math.sqrt(avgSq - avg * avg);
+		if (sigma > 5){
+			System.out.println(time);
+			printSpins();
+			System.out.println();
+			printList(boundary);
+			System.out.println();
+		}*/
 		return Math.sqrt(avgSq - avg * avg);
 	}
 
