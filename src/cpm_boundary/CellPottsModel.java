@@ -633,7 +633,9 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			}
 
 			if (n > nequil){
-				updateBoundary();
+				if (fracOccupied < 1.0){
+					updateBoundary();
+				}
 				updateR();
 				updateArea(n);
 				updateAverageDisplacement();
