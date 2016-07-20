@@ -10,6 +10,8 @@ public class Correlation {
 		int maxTau = Integer.parseInt(args[3]);
 		String filename = args[4];
 		String outputFile = args[5];
+		
+		if (maxTau > y-startRow) maxTau = y-startRow;
 
 		double [][] data = new double [y][x];
 
@@ -40,7 +42,7 @@ public class Correlation {
 
 		double sum;
 		int tmax;
-		double [] result = new double [y-startRow];
+		double [] result = new double [maxTau];
 		double avgSq = 0.0;
 		for (int i = 0; i < y-startRow; i++){
 			avgSq += data[i][1];
@@ -48,7 +50,7 @@ public class Correlation {
 		avgSq /= (double) (y-startRow);
 		avgSq *= avgSq;
 		
-		for (int tau = 0; tau < maxTau && tau < y-startRow; tau++){
+		for (int tau = 0; tau < maxTau; tau++){
 			if (tau % 10000 == 0){
 				System.out.println(tau);
 			}
