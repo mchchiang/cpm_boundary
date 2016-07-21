@@ -613,7 +613,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 				nextStep(n);	
 			}
 			
-			acceptedRate = acceptedSteps / (double) (n* nx*ny); 
+			acceptedRate = acceptedSteps / (double) ((long) n*nx*ny);//big value
 
 			//for pausing the simulation
 			synchronized(this){
@@ -626,25 +626,23 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			
 			//System.out.println(n);
 
-			if (n == nequil){
+			if (n == nequil/2){
 				equilibrated = true;
 				initCM();
 				initPolarity();
 				initMotility(numOfMotileCells);
 			}
 
-			if (n > nequil){
+			if (n > nequil/2){
 				if (fracOccupied < 1.0){
 					updateBoundary();
 				}
-				updateR();
-				//updateArea(n);
-				//updateAverageDisplacement();
 				updatePolarity();
 			}
 
 			if (n >= nequil && n <= numOfSweeps){
 				notifyDataListener(n);
+				updateR();
 			}
 
 			copyCMNewToCM();//must be done last (for there to be difference between xcm and xcmNew)
@@ -743,7 +741,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		double muOld = motility.get(oldSpin);
 		double muNew = motility.get(newSpin);
 
-		if ((muOld > 0.0 || muNew > 0.0) && n > nequil){
+		if ((muOld > 0.0 || muNew > 0.0) && n > nequil/2){
 			totalEnergy += motilityE(i, j, newSpin, muOld, muNew);
 		} 
 
