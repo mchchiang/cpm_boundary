@@ -16,6 +16,7 @@ public class EnergyPanel extends JPanel implements DataListener {
 	private XYSeriesCollection data = null;
 	private JFreeChart chart = null;
 	private ChartPanel chartPanel = null;
+	private JLabel lblAcceptRate;
 	
 	public void setModel(CellPottsModel model){
 		if (this.model != null){
@@ -29,6 +30,7 @@ public class EnergyPanel extends JPanel implements DataListener {
 	public void init(){
 		if (chartPanel != null){
 			this.remove(chartPanel);
+			this.remove(lblAcceptRate);
 		}
 		series = new XYSeries("Energy data");
 		data = new XYSeriesCollection();
@@ -43,13 +45,19 @@ public class EnergyPanel extends JPanel implements DataListener {
 				true,
 				false);
 		chartPanel = new ChartPanel(chart);
+		lblAcceptRate = new JLabel("Accept Rate: ");
 		this.setLayout(new BorderLayout());
 		this.add(chartPanel, BorderLayout.CENTER);
+		this.add(lblAcceptRate, BorderLayout.SOUTH);
 		this.validate();
 	}
 
 	@Override
 	public void update(CellPottsModel model, int time) {
-		series.add(time, model.calculateR2()[0]);
+		series.add(time, model.getTotalEnergy());
+		if (time % 10 == 0){
+			lblAcceptRate.setText(String.format("Accept Rate: %.5f",model.getAcceptRate()));
+			this.validate();
+		}
 	}
 }

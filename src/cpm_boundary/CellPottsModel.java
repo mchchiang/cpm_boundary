@@ -92,8 +92,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	private int [] maxBoundaryValue;
 
 	//variables for calculating acceptance rate
-	private double acceptRate;
-	private long diffSpinStep;
+	private long acceptedSteps;
+	private double acceptedRate;
 
 	//varaibles for generating random numbers
 	private int seed;
@@ -231,7 +231,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	}
 
 	private void init(){
-		acceptRate = 0.0;
+		acceptedSteps = 0;
+		acceptedRate = 0.0;
 
 		rand = new Random();
 
@@ -600,17 +601,19 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	 * 
 	 */
 	public void run() {
-		acceptRate = 0.0;
-		diffSpinStep = 0;
+		acceptedSteps = 0;
+		acceptedRate = 0.0;
 		equilibrated = false;
 		running = true;
 		paused = false;
 		time = 0;
 
-		for (int n = 0;  n < numOfSweeps && running; n++){
+		for (int n = 1;  n <= numOfSweeps && running; n++){
 			for (int k = 0; k < nx*ny; k++){
 				nextStep(n);	
 			}
+			
+			acceptedRate = acceptedSteps / (double) (n* nx*ny); 
 
 			//for pausing the simulation
 			synchronized(this){
@@ -620,9 +623,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 					} catch (InterruptedException e) {}
 				}
 			}
-
-			updatePolarity();
-
+			
 			//System.out.println(n);
 
 			if (n == nequil){
@@ -637,22 +638,18 @@ public class CellPottsModel extends SpinModel implements DataListener{
 					updateBoundary();
 				}
 				updateR();
-				updateArea(n);
-				updateAverageDisplacement();
+				//updateArea(n);
+				//updateAverageDisplacement();
+				updatePolarity();
 			}
 
-			if (n >= nequil && n < numOfSweeps-1){
+			if (n >= nequil && n <= numOfSweeps){
 				notifyDataListener(n);
 			}
 
 			copyCMNewToCM();//must be done last (for there to be difference between xcm and xcmNew)
 
 			time++;
-		}
-
-		if (running){
-			acceptRate /= (double) diffSpinStep;
-			notifyDataListener(numOfSweeps-1);
 		}
 
 		running = false;
@@ -691,8 +688,6 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 
 		//only perform calculations if the neighbours don't have the same spin
-		//if (!hasSameNeighbours(i,j)){
-		diffSpinStep++;
 
 		/*
 		 * randomly pick one of its neighbour's spin (including 
@@ -755,7 +750,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		if (Math.log(rand.nextDouble()) <= totalEnergy / temperature){
 
 			setSpin(i, j, newSpin);
-			acceptRate = acceptRate + 1.0;
+			acceptedSteps++;
 		}
 	}
 
@@ -1674,7 +1669,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	 * Return the acceptance rate of the current simulation
 	 */
 	public double getAcceptRate(){
-		return acceptRate;
+		return acceptedRate;
 	}
 
 	/**
@@ -2058,18 +2053,19 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		//reader.openReader("init_spin_1000_2.dat");
 		String name = String.format("%d_%d_%d_a_%.1f_b_%.1f_lam_%.1f_P_%.1f_D_%.1f_fracMo_%.2f_fracOccup_%.2f_t_%d_run_%d.dat",
 				nx, ny, q, alpha, beta, lambda, motility, rotateDiff, fracOfMotileCells, fracOccupied, numOfSweeps, run);
-		DataWriter roughnessWriter = new RoughnessWriter();
-		roughnessWriter.openWriter(Paths.get(filepath, "rough_" + name).toString());
-		//DataWriter r2Writer = new R2Writer();
-		//DataWriter ergWriter = new EnergyWriter();
-		//DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
+		String filename = Paths.get(filepath, name).toString();
+		//DataWriter roughnessWriter = new RoughnessWriter();
+		//roughnessWriter.openWriter(Paths.get(filepath, "rough_" + name).toString());
+		DataWriter r2Writer = new R2Writer();
+		DataWriter ergWriter = new EnergyWriter();
+		DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
 		//DataWriter a2Writer = new A2Writer();
-		//r2Writer.openWriter("r2_" + filename);
-		//ergWriter.openWriter("energy_" + filename);
+		r2Writer.openWriter("r2_" + filename);
+		ergWriter.openWriter("energy_" + filename);
 		//a2Writer.openWriter("a2_" + filename);
-		//statsWriter.openWriter("stats_" + filename);
+		statsWriter.openWriter("stats_" + filename);
 		CellPottsModel model = new CellPottsModel(
-				nx, ny, q, temp, lambda, alpha, 1000, motility, rotateDiff,
+				nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
 				fracOccupied, seed, numOfSweeps, nequil, false){
 			@Override
 			public void update(CellPottsModel model, int time) {
@@ -2079,18 +2075,19 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			}
 		};
 		//model.initSpin(reader.readSpins());
-		model.addDataListener(roughnessWriter);
-		model.addDataListener(model);
+		model.addDataListener(ergWriter);
+		model.addDataListener(r2Writer);
+		model.addDataListener(statsWriter);
 		//model.setAverageInterval(avgInt);
 		model.initSpin();
 		model.setFracOfMotileCells(fracOfMotileCells);
 		model.run();
-		//r2Writer.closeWriter();
-		//ergWriter.closeWriter();
-		//statsWriter.closeWriter();
+		r2Writer.closeWriter();
+		ergWriter.closeWriter();
+		statsWriter.closeWriter();
 		//a2Writer.closeWriter();
 		//reader.closeReader();
-		roughnessWriter.closeWriter();
+		//roughnessWriter.closeWriter();
 	}
 
 	@Override

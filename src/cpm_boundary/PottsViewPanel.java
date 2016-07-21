@@ -141,7 +141,7 @@ public class PottsViewPanel extends JPanel implements Observer {
 	 * @param j row index of the site
 	 */
 	public void drawSpin(int i, int j){
-		updateColourMap();
+		//updateColourMap();
 		fg.setRGB(i, j, colours.get(model.getSpin(i, j)).getRGB());
 	}
 	
