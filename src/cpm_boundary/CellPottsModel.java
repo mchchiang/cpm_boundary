@@ -1502,7 +1502,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		}
 	}
 
-	public double calculateRoughness(){
+	public double [] calculateRoughness(){
 		double y, avg = 0.0, avgSq = 0.0;
 		for (int i = 0; i < nx; i++){
 			y = maxBoundaryValue[i];
@@ -1519,7 +1519,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			printList(boundary);
 			System.out.println();
 		}*/
-		return Math.sqrt(avgSq - avg * avg);
+		return new double [] {Math.sqrt(avgSq - avg * avg), boundary.size()-nx};
 	}
 
 	//vector related operations

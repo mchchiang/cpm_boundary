@@ -12,7 +12,8 @@ import org.jfree.data.xy.*;
 public class EnergyPanel extends JPanel implements DataListener {
 	
 	private CellPottsModel model = null;
-	private XYSeries series = null;
+	private XYSeries series1 = null;
+	private XYSeries series2 = null;
 	private XYSeriesCollection data = null;
 	private JFreeChart chart = null;
 	private ChartPanel chartPanel = null;
@@ -30,9 +31,11 @@ public class EnergyPanel extends JPanel implements DataListener {
 		if (chartPanel != null){
 			this.remove(chartPanel);
 		}
-		series = new XYSeries("Energy data");
+		series1 = new XYSeries("Roughness data stdv");
+		series2 = new XYSeries("Roughness data diff");
 		data = new XYSeriesCollection();
-		data.addSeries(series);
+		data.addSeries(series1);
+		data.addSeries(series2);
 		chart = ChartFactory.createXYLineChart(
 				"Energy data",
 				"Time (MCS)",
@@ -50,6 +53,8 @@ public class EnergyPanel extends JPanel implements DataListener {
 
 	@Override
 	public void update(CellPottsModel model, int time) {
-		series.add(time, model.calculateRoughness());
+		double [] roughness = model.calculateRoughness();
+		series1.add(time, roughness[0]);
+		series2.add(time, roughness[1]);
 	}
 }

@@ -4,7 +4,8 @@ public class RoughnessWriter extends DataWriter {
 
 	@Override
 	public void writeData(CellPottsModel model, int time) {
-		writer.printf("%d %.5f\n", time, model.calculateRoughness());
+		double [] roughness = model.calculateRoughness();
+		writer.printf("%d %.5f %.5f\n", time, roughness[0], roughness[1]);
 	}
 
 }

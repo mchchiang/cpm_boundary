@@ -2918,7 +2918,7 @@ public class CellPottsModelTest {
 		model.initSpin(spin);
 		model.updateBoundary();
 		assertEquals("Returned a wrong roughness value",
-				Math.sqrt(2.09), model.calculateRoughness(), tol);
+				Math.sqrt(2.09), model.calculateRoughness()[0], tol);
 	}
 	
 	@Test
@@ -2942,7 +2942,7 @@ public class CellPottsModelTest {
 		model.initSpin(spin);
 		model.updateBoundary();
 		assertEquals("Returned a wrong roughness value",
-				Math.sqrt(2.64), model.calculateRoughness(), tol);
+				Math.sqrt(2.64), model.calculateRoughness()[0], tol);
 	}
 	
 	@Test
@@ -2963,7 +2963,7 @@ public class CellPottsModelTest {
 		model.initSpin(spin);
 		model.updateBoundary();
 		assertEquals("Returned a wrong ronghness value",
-				Math.sqrt(1.359375), model.calculateRoughness(), tol);
+				Math.sqrt(1.359375), model.calculateRoughness()[0], tol);
 	}
 	
 	@Test
@@ -2984,7 +2984,7 @@ public class CellPottsModelTest {
 		model.initSpin(spin);
 		model.updateBoundary();
 		assertEquals("Returned a wrong ronghness value",
-				Math.sqrt(1.359375), model.calculateRoughness(), tol);
+				Math.sqrt(1.359375), model.calculateRoughness()[0], tol);
 	}
 	
 	@Test
@@ -3003,7 +3003,7 @@ public class CellPottsModelTest {
 		model.initSpin(spin);
 		model.updateBoundary();
 		assertEquals("Returned a wrong ronghness value",
-				0, model.calculateRoughness(), tol);
+				0, model.calculateRoughness()[0], tol);
 	}
 	
 	@Test
@@ -3022,7 +3022,7 @@ public class CellPottsModelTest {
 		model.initSpin(spin);
 		model.updateBoundary();
 		assertEquals("Returned a wrong ronghness value",
-				0, model.calculateRoughness(), tol);
+				0, model.calculateRoughness()[0], tol);
 	}
 	
 	@Test
@@ -3043,7 +3043,7 @@ public class CellPottsModelTest {
 		model.initSpin(spin);
 		model.updateBoundary();
 		assertEquals("Returned a wrong ronghness value",
-				Math.sqrt(7.359375), model.calculateRoughness(), tol);
+				Math.sqrt(7.359375), model.calculateRoughness()[0], tol);
 	}
 
 }
