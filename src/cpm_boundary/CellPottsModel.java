@@ -2060,10 +2060,10 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		DataWriter ergWriter = new EnergyWriter();
 		DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
 		//DataWriter a2Writer = new A2Writer();
-		r2Writer.openWriter(Paths.get(filepath, "r2_", name).toString());
-		ergWriter.openWriter(Paths.get(filepath, "energy_", name).toString());
+		r2Writer.openWriter(Paths.get(filepath, "r2_" + name).toString());
+		ergWriter.openWriter(Paths.get(filepath, "energy_" + name).toString());
 		//a2Writer.openWriter("a2_" + filename);
-		statsWriter.openWriter(Paths.get(filepath, "stats_", name).toString());
+		statsWriter.openWriter(Paths.get(filepath, "stats_" + name).toString());
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
 				fracOccupied, seed, numOfSweeps, nequil, false){
