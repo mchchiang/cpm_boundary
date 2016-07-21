@@ -2053,17 +2053,17 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		//reader.openReader("init_spin_1000_2.dat");
 		String name = String.format("%d_%d_%d_a_%.1f_b_%.1f_lam_%.1f_P_%.1f_D_%.1f_fracMo_%.2f_fracOccup_%.2f_t_%d_run_%d.dat",
 				nx, ny, q, alpha, beta, lambda, motility, rotateDiff, fracOfMotileCells, fracOccupied, numOfSweeps, run);
-		String filename = Paths.get(filepath, name).toString();
+		//String filename = Paths.get(filepath, name).toString();
 		//DataWriter roughnessWriter = new RoughnessWriter();
 		//roughnessWriter.openWriter(Paths.get(filepath, "rough_" + name).toString());
 		DataWriter r2Writer = new R2Writer();
 		DataWriter ergWriter = new EnergyWriter();
 		DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
 		//DataWriter a2Writer = new A2Writer();
-		r2Writer.openWriter("jam_r2_" + filename);
-		ergWriter.openWriter("jam_energy_" + filename);
+		r2Writer.openWriter(Paths.get(filepath, "r2_", name).toString());
+		ergWriter.openWriter(Paths.get(filepath, "energy_", name).toString());
 		//a2Writer.openWriter("a2_" + filename);
-		statsWriter.openWriter("jam_stats_" + filename);
+		statsWriter.openWriter(Paths.get(filepath, "stats_", name).toString());
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
 				fracOccupied, seed, numOfSweeps, nequil, false){
