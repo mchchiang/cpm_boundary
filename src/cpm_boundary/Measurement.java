@@ -73,6 +73,7 @@ public class Measurement implements Runnable {
 			model.addDataListener(writers[i]);
 		}
 		model.initSpin();
+		model.setFracOfMotileCells(1.0);
 	}
 
 	@Override

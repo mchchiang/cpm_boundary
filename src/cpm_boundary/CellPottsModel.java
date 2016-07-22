@@ -402,12 +402,18 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	public void initMotility(int n){
 		int cellIndex;
 		if (n > q) n = q; 
-
-		for (int i = 0; i < n; i++){
-			do {
-				cellIndex = rand.nextInt(q)+1;
-			} while (motility.get(cellIndex) > 0.0);
-			motility.set(cellIndex, motilityConst);
+		
+		if (n == q){
+			for (int i = 1; i <= q; i++){
+				motility.set(i, motilityConst);
+			}
+		} else {
+			for (int i = 0; i < n; i++){
+				do {
+					cellIndex = rand.nextInt(q)+1;
+				} while (motility.get(cellIndex) > 0.0);
+				motility.set(cellIndex, motilityConst);
+			}
 		}
 	}
 
@@ -2064,14 +2070,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		statsWriter.openWriter(Paths.get(filepath, "stats_" + name).toString());
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
-				fracOccupied, seed, numOfSweeps, nequil, false){
-			@Override
-			public void update(CellPottsModel model, int time) {
-				if (time == nequil){
-					model.setBeta(beta);
-				}
-			}
-		};
+				fracOccupied, seed, numOfSweeps, nequil, false);
 		//model.initSpin(reader.readSpins());
 		model.addDataListener(ergWriter);
 		model.addDataListener(r2Writer);
