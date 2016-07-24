@@ -113,10 +113,12 @@ public class CPMParallelRun implements ThreadCompleteListener {
 		} else {
 			trial = 1;
 			motility += incMotility;
-			if (motility > maxMotility){
+			if (motility > maxMotility || 
+					Math.abs(motility - maxMotility) < 0.000001){
 				motility = startMotility;
 				alpha += incAlpha;
-				if (alpha > maxAlpha){
+				if (alpha > maxAlpha || 
+						Math.abs(alpha - maxAlpha) < 0.000001){
 					completeAllTrials = true;
 				}
 			}
