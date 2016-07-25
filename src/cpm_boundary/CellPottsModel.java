@@ -2060,29 +2060,33 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		//String filename = Paths.get(filepath, name).toString();
 		//DataWriter roughnessWriter = new RoughnessWriter();
 		//roughnessWriter.openWriter(Paths.get(filepath, "rough_" + name).toString());
-		DataWriter r2Writer = new R2Writer();
-		DataWriter ergWriter = new EnergyWriter();
-		DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
+		//DataWriter r2Writer = new R2Writer();
+		//DataWriter ergWriter = new EnergyWriter();
+		//DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
 		//DataWriter a2Writer = new A2Writer();
-		r2Writer.openWriter(Paths.get(filepath, "r2_" + name).toString());
-		ergWriter.openWriter(Paths.get(filepath, "energy_" + name).toString());
+		DataWriter spinWriter = new SpinWriter(numOfSweeps, q);
+		//r2Writer.openWriter(Paths.get(filepath, "r2_" + name).toString());
+		//ergWriter.openWriter(Paths.get(filepath, "energy_" + name).toString());
 		//a2Writer.openWriter("a2_" + filename);
-		statsWriter.openWriter(Paths.get(filepath, "stats_" + name).toString());
+		//statsWriter.openWriter(Paths.get(filepath, "stats_" + name).toString());
+		spinWriter.openWriter(Paths.get(filepath, "spin_" + name).toString());
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
 				fracOccupied, seed, numOfSweeps, nequil, false);
 		//model.initSpin(reader.readSpins());
-		model.addDataListener(ergWriter);
-		model.addDataListener(r2Writer);
-		model.addDataListener(statsWriter);
+		//model.addDataListener(ergWriter);
+		//model.addDataListener(r2Writer);
+		//model.addDataListener(statsWriter);
+		model.addDataListener(spinWriter);
 		//model.setAverageInterval(avgInt);
 		model.initSpin();
 		model.setFracOfMotileCells(fracOfMotileCells);
 		model.run();
-		r2Writer.closeWriter();
-		ergWriter.closeWriter();
-		statsWriter.closeWriter();
+		//r2Writer.closeWriter();
+		//ergWriter.closeWriter();
+		//statsWriter.closeWriter();
 		//a2Writer.closeWriter();
+		spinWriter.closeWriter();
 		//reader.closeReader();
 		//roughnessWriter.closeWriter();
 	}
