@@ -607,7 +607,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		paused = false;
 		time = 0;
 
-		for (int n = 0;  n < numOfSweeps && running; n++){
+		for (int n = 1;  n <= numOfSweeps && running; n++){
 			for (int k = 0; k < nx*ny; k++){
 				nextStep(n);	
 			}
@@ -621,8 +621,6 @@ public class CellPottsModel extends SpinModel implements DataListener{
 				}
 			}
 
-			updatePolarity();
-
 			//System.out.println(n);
 
 			if (n == nequil){
@@ -633,13 +631,12 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			}
 
 			if (n > nequil){
-				updateBoundary();
-				updateR();
-				updateArea(n);
-				updateAverageDisplacement();
+				updatePolarity();
+				//updateAverageDisplacement();
 			}
 
-			if (n >= nequil && n < numOfSweeps-1){
+			if (n >= nequil){
+				updateBoundary();
 				notifyDataListener(n);
 			}
 
