@@ -40,32 +40,43 @@ public class Correlation {
 		PrintWriter writer = new PrintWriter(
 				new BufferedWriter(new FileWriter(outputFile)));
 
-		double sum;
+		double sum1, sum2;
 		int tmax;
-		double [] result = new double [maxTau];
-		double avgSq = 0.0;
+		double [][] result = new double [2][maxTau];
+		double avgSq1 = 0.0;
+		double avgSq2 = 0.0;
 		for (int i = 0; i < y-startRow; i++){
-			avgSq += data[i][1];
+			avgSq1 += data[i][1];
+			avgSq2 += data[i][2];
 		}
-		avgSq /= (double) (y-startRow);
-		avgSq *= avgSq;
+		avgSq1 /= (double) (y-startRow);
+		avgSq2 /= (double) (y-startRow);
+		avgSq1 *= avgSq1;
+		avgSq2 *= avgSq2;
 		
 		for (int tau = 0; tau < maxTau; tau++){
 			if (tau % 10000 == 0){
 				System.out.println(tau);
 			}
-			sum = 0.0;
+			sum1 = 0.0;
+			sum2 = 0.0;
 			tmax = y - tau - startRow;
 			for (int t = 0; t < tmax; t++){
-				sum += data[t][1] * data[tau+t][1];
+				sum1 += data[t][1] * data[tau+t][1];
+				sum2 += data[t][2] * data[tau+t][2];
 			}
-			sum /= (double) tmax;
-			result[tau] = sum - avgSq;
+			sum1 /= (double) tmax;
+			sum2 /= (double) tmax;
+			result[0][tau] = sum1 - avgSq1;
+			result[1][tau] = sum2 - avgSq2;
 		}
 
-		double norm = result[0];
+		double norm1 = result[0][0];
+		double norm2 = result[1][0];
 		for (int tau = 0; tau < result.length; tau++){
-			writer.printf("%d %.5f %.5f\n", tau, result[tau], result[tau] / norm);	
+			writer.printf("%d %.5f %.5f %.5f %.5f\n", tau, 
+					result[0][tau], result[0][tau] / norm1,
+					result[1][tau], result[1][tau] / norm2);	
 		}
 
 		writer.close();
