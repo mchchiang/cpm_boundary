@@ -73,7 +73,7 @@ public class Correlation {
 
 		double norm1 = result[0][0];
 		double norm2 = result[1][0];
-		for (int tau = 0; tau < result.length; tau++){
+		for (int tau = 0; tau < result[0].length; tau++){
 			writer.printf("%d %.5f %.5f %.5f %.5f\n", tau, 
 					result[0][tau], result[0][tau] / norm1,
 					result[1][tau], result[1][tau] / norm2);	

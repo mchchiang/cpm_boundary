@@ -647,7 +647,6 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 		if (running){
 			acceptRate /= (double) diffSpinStep;
-			notifyDataListener(numOfSweeps-1);
 		}
 
 		running = false;
