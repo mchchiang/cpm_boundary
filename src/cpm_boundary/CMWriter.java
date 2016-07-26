@@ -11,13 +11,13 @@ package cpm_boundary;
 public class CMWriter extends DataWriter {
 
 	@Override
-	public void writeData(CellPottsModel model, int time) {
-		writer.println();
+	public void writeData(CellPottsModel model, int time) {	
 		int q = model.getTypesOfSpin();
 		writer.printf("%d ", time);
-		for (int i = 0; i < q; i++){
+		for (int i = 1; i < q; i++){
 			writer.printf("%.8f %.8f ", model.getXCM(i), model.getYCM(i));
-		}		
+		}	
+		writer.println();
 	}
 
 }
