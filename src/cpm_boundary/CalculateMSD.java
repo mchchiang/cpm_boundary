@@ -128,8 +128,9 @@ public class CalculateMSD {
 		int ny = Integer.parseInt(args[1]);
 		int cells = Integer.parseInt(args[2]);
 		int time = Integer.parseInt(args[3]);
-		String dataFile = args[4];
-		String outputFile = args[5];
-		new CalculateMSD(nx,ny,cells,time,time,dataFile,outputFile);
+		int maxPoints = Integer.parseInt(args[4]);
+		String dataFile = args[5];
+		String outputFile = args[6];
+		new CalculateMSD(nx,ny,cells,time,maxPoints,dataFile,outputFile);
 	}
 }
