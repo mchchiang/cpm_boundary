@@ -5,23 +5,24 @@ import java.util.ArrayList;
 
 public class CalculateMSDMultiThread implements ThreadCompleteListener{
 
-	private int nx, ny, time;
+	private int nx, ny, time, maxPoints;
 	private volatile double [][] data, msd;
 	private int numOfThreads;
 	private int completedThread;
 	private String outputFile;
 	
 	public CalculateMSDMultiThread(int nx, int ny, int cells, 
-			int time, int numOfThreads, String dataFile, 
+			int time, int maxPoints, int numOfThreads, String dataFile, 
 			String outputFile) throws IOException {
 
 		this.nx = nx;
 		this.ny = ny;
 		this.time = time;
+		this.maxPoints = maxPoints;
 		this.numOfThreads = numOfThreads;
 		this.outputFile = outputFile;
 
-		int x = cells * 2 + 3;
+		int x = cells * 2 + 1;
 		int y = time;
 
 		//retrieve cm data into array
@@ -57,13 +58,11 @@ public class CalculateMSDMultiThread implements ThreadCompleteListener{
 			numOfThreads = cells;
 		}
 		int cellsPerThread = (int) Math.round((double) cells / (double) numOfThreads);
-		int cellCount = 1;
-		int startCell = 0, endCell = 0;
-		
+		int startCell = 1;
+		int endCell = 1;
 		for (int i = 0; i < numOfThreads; i++){
-			startCell = cellCount;
 			if (i < numOfThreads-1){
-				endCell = cellCount + cellsPerThread - 1;
+				endCell = startCell + cellsPerThread-1;
 			} else {
 				endCell = cells;
 			}
@@ -71,7 +70,7 @@ public class CalculateMSDMultiThread implements ThreadCompleteListener{
 			job.addThreadCompleteListener(this);
 			Thread t =  new Thread(job);
 			t.start();
-			cellCount += cellsPerThread;
+			startCell += cellsPerThread;
 		}
 	}
 	
@@ -91,20 +90,28 @@ public class CalculateMSDMultiThread implements ThreadCompleteListener{
 		@Override
 		public void run() {
 			double sum = 0.0;
-			for (int j = 0; j < time; j++){
-				if (j % 1000 == 0 || j == time-1) {
-					System.out.println("Thread " + index + " - computing dt = " + j);
+			for (int dt = 0; dt < time; dt++){
+				if (dt % 1000 == 0 || dt == time-1) {
+					System.out.println("Thread " + index + " - computing dt = " + dt);
 				}
-				for (int k = startCell; k <= endCell; k++){
+				
+				int tmax;
+				if (maxPoints < time-dt){
+					tmax = maxPoints;
+				} else {
+					tmax = time-dt;
+				}
+				
+				for (int k = startCell-1; k < endCell; k++){
 					sum = 0.0;
-					if (j != 0){
-						for (int i = 0; i < time-j; i++){
-							sum += mag2(xDiff(data[i+j][k*2+1], data[i][k*2+1]),
-									yDiff(data[i+j][k*2+2], data[i][k*2+2]));
+					if (dt != 0){
+						for (int t = 0; t < tmax; t++){
+							sum += mag2(xDiff(data[t+dt][k*2+1], data[t][k*2+1]),
+									yDiff(data[t+dt][k*2+2], data[t][k*2+2]));
 						}
 					}
-					sum /= (time-j);
-					msd[j][k-1] = sum;
+					sum /= (double) tmax;
+					msd[dt][k] = sum;
 				}
 			}
 			this.notifyThreadCompleteListener();
@@ -214,9 +221,11 @@ public class CalculateMSDMultiThread implements ThreadCompleteListener{
 		int ny = Integer.parseInt(args[1]);
 		int cells = Integer.parseInt(args[2]);
 		int time = Integer.parseInt(args[3]);
-		int numOfThreads = Integer.parseInt(args[4]);
-		String dataFile = args[5];
-		String outputFile = args[6];
-		new CalculateMSDMultiThread(nx,ny,cells,time,numOfThreads,dataFile,outputFile);
+		int maxPoints = Integer.parseInt(args[4]);
+		int numOfThreads = Integer.parseInt(args[5]);
+		String dataFile = args[6];
+		String outputFile = args[7];
+		new CalculateMSDMultiThread(nx,ny,cells,time,maxPoints,
+				numOfThreads,dataFile,outputFile);
 	}
 }
