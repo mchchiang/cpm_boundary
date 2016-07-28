@@ -96,6 +96,8 @@ public class CPMParallelRun implements ThreadCompleteListener {
 		this.maxTrial = maxTrial;
 		this.outputFilePath = filepath;
 		
+		trial = startTrial;
+		
 		for (int i = 0; i < numOfThreads; i++){
 			if (completeAllTrials){
 				break;
@@ -113,7 +115,7 @@ public class CPMParallelRun implements ThreadCompleteListener {
 		if (trial == 1) writeCM = true;
 		Measurement experiment = new Measurement(nx, ny, q, temp, lambda, 
 				alpha, beta, motility, rotateDiff, numOfR2Int, r2Int,
-				numOfSweeps, nequil, (trial+startTrial), 
+				numOfSweeps, nequil, trial, 
 				outputFilePath, writeCM);
 		experiment.addThreadCompleteListener(this);
 		Thread t = new Thread(experiment);
@@ -130,10 +132,10 @@ public class CPMParallelRun implements ThreadCompleteListener {
 	}
 	
 	private void updateTrialNumber(){
-		if (trial < maxTrial){
+		if (trial < maxTrial+startTrial-1){
 			trial++;
 		} else {
-			trial = 1;
+			trial = startTrial;
 			motility += incMotility;
 			if (motility > maxMotility && !( 
 					Math.abs(motility - maxMotility) < 0.000001)){
