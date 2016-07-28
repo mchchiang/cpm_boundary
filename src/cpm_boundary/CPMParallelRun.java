@@ -23,6 +23,9 @@ public class CPMParallelRun implements ThreadCompleteListener {
 	private int trial = 1;
 	private int maxTrial = 1;
 	
+	private int r2Int = 0;
+	private int numOfR2Int = 1;
+	
 	private String outputFilePath;
 	
 	private boolean completeAllTrials = false;
@@ -54,6 +57,20 @@ public class CPMParallelRun implements ThreadCompleteListener {
 			double alpha, double maxAlpha, double incAlpha, double beta,
 			double motility, double maxMotility, double incMotility,
 			double rotateDiff, int n, int nequil, int maxTrial, int numOfThreads,
+			String filepath){
+		this(nx, ny, q, temp, lambda, alpha, maxAlpha, incAlpha, beta,
+			 motility, maxMotility, incMotility, rotateDiff, 0, 1,
+			 n, nequil, maxTrial, numOfThreads, filepath);
+	}
+	
+	
+	public CPMParallelRun(
+			int nx, int ny, int q,
+			double temp, double lambda,
+			double alpha, double maxAlpha, double incAlpha, double beta,
+			double motility, double maxMotility, double incMotility,
+			double rotateDiff, int numOfR2Int, int r2Int, 
+			int n, int nequil, int maxTrial, int numOfThreads,
 			String filepath){	
 		
 		this.nx = nx;
@@ -70,6 +87,8 @@ public class CPMParallelRun implements ThreadCompleteListener {
 		this.maxMotility = maxMotility;
 		this.incMotility = incMotility;
 		this.rotateDiff = rotateDiff;
+		this.numOfR2Int = numOfR2Int;
+		this.r2Int = r2Int;
 		this.numOfSweeps = n;
 		this.nequil = nequil;
 		this.maxTrial = maxTrial;
@@ -91,7 +110,8 @@ public class CPMParallelRun implements ThreadCompleteListener {
 		boolean writeCM = false;
 		if (trial == 1) writeCM = true;
 		Measurement experiment = new Measurement(nx, ny, q, temp, lambda, 
-				alpha, beta, motility, rotateDiff, numOfSweeps, nequil, trial, 
+				alpha, beta, motility, rotateDiff, numOfR2Int, r2Int,
+				numOfSweeps, nequil, trial, 
 				outputFilePath, writeCM);
 		experiment.addThreadCompleteListener(this);
 		Thread t = new Thread(experiment);
@@ -139,15 +159,17 @@ public class CPMParallelRun implements ThreadCompleteListener {
 		double maxMotility = Double.parseDouble(args[10]);
 		double incMotility = Double.parseDouble(args[11]);
 		double rotateDiff = Double.parseDouble(args[12]);
-		int numOfSweeps = Integer.parseInt(args[13]);
-		int nequil = Integer.parseInt(args[14]);
-		int maxTrial = Integer.parseInt(args[15]);
-		int numOfThreads = Integer.parseInt(args[16]);
-		String outputFilePath = args[17];
+		int numOfR2Int = Integer.parseInt(args[13]);
+		int r2Int = Integer.parseInt(args[14]);
+		int numOfSweeps = Integer.parseInt(args[15]);
+		int nequil = Integer.parseInt(args[16]);
+		int maxTrial = Integer.parseInt(args[17]);
+		int numOfThreads = Integer.parseInt(args[18]);
+		String outputFilePath = args[19];
 		new CPMParallelRun(nx, ny, q, temp, lambda,
 				startAlpha, maxAlpha, incAlpha, beta, 
 				startMotility, maxMotility, incMotility,
-				rotateDiff, numOfSweeps, nequil, maxTrial, numOfThreads,
-				outputFilePath);
+				rotateDiff, numOfR2Int, r2Int, numOfSweeps, nequil, 
+				maxTrial, numOfThreads,	outputFilePath);
 	}
 }

@@ -46,29 +46,41 @@ public class Measurement implements Runnable {
 	public Measurement(int nx, int ny, int q,
 			double temp, double lambda,
 			double alpha, double beta, double motility, double rotateDiff,
+			int numOfR2Int, int r2Int, 
 			int n, int nequil, int trial, String filepath, 	boolean writeCM){
 		
 		this.trial = trial;
 		
-		writers = new DataWriter [4];
-		writers[0] = new R2Writer();
-		writers[1] = new A2Writer();
-		writers[2] = new EnergyWriter();
-		writers[3] = new StatisticsWriter(n, nequil);
+		//writers = new DataWriter [4];
+		//writers[0] = new R2Writer();
+		//writers[1] = new A2Writer();
+		//writers[2] = new EnergyWriter();
+		//writers[3] = new StatisticsWriter(n, nequil);
 		
 		String name = String.format(
-				"%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_t_%d_run_%d.dat",
+				"%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_t_%d_run_%d",
 				nx, ny, q, alpha, lambda, motility, rotateDiff, n, trial);
 		
-		writers[0].openWriter(Paths.get(filepath, "r2_" + name).toString());
-		writers[1].openWriter(Paths.get(filepath, "a2_" + name).toString());
-		writers[2].openWriter(Paths.get(filepath, "energy_" + name).toString());
-		writers[3].openWriter(Paths.get(filepath, "stats_" + name).toString());
+		int maxIntDigit = ("" + (r2Int*(numOfR2Int-1)+nequil)).length();
+		
+		writers = new DataWriter[numOfR2Int];
+		for (int i = 0; i < numOfR2Int; i++){
+			writers[i] = new R2Writer(i);
+			writers[i].openWriter(Paths.get(filepath, 
+					String.format("r2_%s_startpt_%0" + maxIntDigit + "d.dat", 
+							name, i*r2Int+nequil)).toString());
+		}
+				
+		//writers[0].openWriter(Paths.get(filepath, "r2_" + name).toString());
+		//writers[1].openWriter(Paths.get(filepath, "a2_" + name).toString());
+		//writers[2].openWriter(Paths.get(filepath, "energy_" + name).toString());
+		//writers[3].openWriter(Paths.get(filepath, "stats_" + name).toString());
 		
 		
 		//Initialise the model
 		model = new CellPottsModel(nx, ny, q, temp, lambda, 
-				alpha, beta, motility, rotateDiff, -1, n, nequil, false);
+				alpha, beta, motility, rotateDiff, 1.0, 
+				numOfR2Int, r2Int, -1, n, nequil, false);
 		for (int i = 0; i < writers.length; i++){
 			model.addDataListener(writers[i]);
 		}

@@ -54,7 +54,7 @@ public class EnergyPanel extends JPanel implements DataListener {
 
 	@Override
 	public void update(CellPottsModel model, int time) {
-		series.add(time, model.calculateR2()[0]);
+		series.add(time, model.calculateR2(0)[0]);
 		if (time % 10 == 0){
 			lblAcceptRate.setText(String.format("Accept Rate: %.5f",model.getAcceptRate()));
 			this.validate();

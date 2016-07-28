@@ -60,8 +60,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	private ArrayList<Double> sumY;
 
 	//variables for measuring <R^2>
-	private ArrayList<Double> rx;
-	private ArrayList<Double> ry;
+	private ArrayList<ArrayList<Double>> rx;
+	private ArrayList<ArrayList<Double>> ry;
 
 	//variables for motility
 	private ArrayList<Double> px;
@@ -101,6 +101,11 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 	//whether to notify or not the observers about spin updates
 	private boolean notify = false;
+	
+	//for measuring r2 in multiple intervals
+	private int r2Int = 0;
+	private int numOfR2Int = 1;
+	private int [] r2StartPt;
 
 	//data listeners
 	private ArrayList<DataListener> dataListeners = new ArrayList<DataListener>();
@@ -127,21 +132,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			double lambda, double alpha, double beta, 
 			double motilityConst, double rotateDiff, int seed, 
 			int n, int nequil, boolean notify){
-		this.nx = nx;
-		this.ny = ny;
-		this.q = q;
-		this.seed = seed;
-		this.temperature = temp;
-		this.lambda = lambda;
-		this.motilityConst = motilityConst;
-		this.alpha = alpha;
-		this.beta = beta;
-		this.rotateDiff = rotateDiff;
-		this.fracOccupied = 1.0;
-		this.numOfSweeps = n;
-		this.nequil = nequil;
-		this.notify = notify;
-		init();
+		this(nx, ny, q, temp, lambda, alpha, beta, motilityConst, 
+				rotateDiff, 1.0, seed, n, nequil, notify);
 	}
 
 	/**
@@ -180,6 +172,29 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		this.numOfSweeps = n;
 		this.nequil = nequil;
 		this.notify = notify;
+		init();
+	}
+	
+	public CellPottsModel(int nx, int ny, int q, double temp, 
+			double lambda, double alpha, double beta, double motilityConst, 
+			double rotateDiff, double fracOccupied, int numOfR2Int, 
+			int r2Int, int seed, int n, int nequil, boolean notify){
+		this.nx = nx;
+		this.ny = ny;
+		this.q = q;
+		this.seed = seed;
+		this.temperature = temp;
+		this.lambda = lambda;
+		this.motilityConst = motilityConst;
+		this.alpha = alpha;
+		this.beta = beta;
+		this.rotateDiff = rotateDiff;
+		this.fracOccupied = fracOccupied;
+		this.numOfSweeps = n;
+		this.nequil = nequil;
+		this.notify = notify;
+		this.numOfR2Int = numOfR2Int;
+		this.r2Int = r2Int;
 		init();
 	}
 
@@ -246,8 +261,17 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		sumX = new ArrayList<Double>();
 		sumY = new ArrayList<Double>();
 
-		rx = new ArrayList<Double>();
-		ry = new ArrayList<Double>();
+		rx = new ArrayList<ArrayList<Double>>(numOfR2Int);
+		ry = new ArrayList<ArrayList<Double>>(numOfR2Int);
+		for (int i = 0; i < numOfR2Int; i++){
+			rx.add(new ArrayList<Double>());
+			ry.add(new ArrayList<Double>());
+		}
+		
+		r2StartPt = new int [numOfR2Int];
+		for (int i = 0; i < numOfR2Int; i++){
+			r2StartPt[i] = i * r2Int + nequil;
+		}
 
 		px = new ArrayList<Double>();
 		py = new ArrayList<Double>();
@@ -285,8 +309,10 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		ycmNew.add(0.0);
 		sumX.add(0.0);
 		sumY.add(0.0);
-		rx.add(0.0);
-		ry.add(0.0);
+		for (int i = 0; i < numOfR2Int; i++){
+			rx.get(i).add(0.0);
+			ry.get(i).add(0.0);
+		}
 		px.add(0.0);
 		py.add(0.0);
 		theta.add(0.0);
@@ -648,7 +674,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 			if (n >= nequil && n <= numOfSweeps){
 				notifyDataListener(n);
-				updateR();
+				updateR(n);
 			}
 
 			copyCMNewToCM();//must be done last (for there to be difference between xcm and xcmNew)
@@ -689,8 +715,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	public void nextStep(int n){
 		int i, j, p;
 		int oldSpin, newSpin;
-
-
+		
 		//only perform calculations if the neighbours don't have the same spin
 
 		/*
@@ -1195,10 +1220,18 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	/**
 	 * Update the position vector of all cells
 	 */
-	public void updateR(){
-		for (int i = 1; i <= q; i++){
-			rx.set(i, rx.get(i) + xDiff(xcmNew.get(i), xcm.get(i)));
-			ry.set(i, ry.get(i) + yDiff(ycmNew.get(i), ycm.get(i)));
+	public void updateR(int time){
+		ArrayList<Double> rxList;
+		ArrayList<Double> ryList;
+		for (int i = 0; i < numOfR2Int; i++){
+			if (time >= r2StartPt[i]){
+				rxList = rx.get(i);
+				ryList = ry.get(i);
+				for (int j = 1; j <= q; j++){
+					rxList.set(j, rxList.get(j) + xDiff(xcmNew.get(j), xcm.get(j)));
+					ryList.set(j, ryList.get(j) + yDiff(ycmNew.get(j), ycm.get(j)));
+				}
+			}
 		}
 	}
 
@@ -1207,14 +1240,16 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	 * @return an array storing the MSD (1st element) 
 	 * and the error (2nd element)
 	 */
-	public double [] calculateR2(){
+	public double [] calculateR2(int intervalIndex){
 		double r2 = 0.0;
 		double r2Sq = 0.0; //for computing the error of R^2
 		double value = 0.0;
 		int count = 0;
+		ArrayList<Double> rxList = rx.get(intervalIndex);
+		ArrayList<Double> ryList = ry.get(intervalIndex);
 		for (int i = 1; i <= q; i++){
 			if (area.get(i) > 0.000001){//only measure cells with non-zero area
-				value = mag2(rx.get(i), ry.get(i));
+				value = mag2(rxList.get(i), ryList.get(i));
 				r2 += value;
 				r2Sq += value * value;
 				count++;
@@ -1228,6 +1263,13 @@ public class CellPottsModel extends SpinModel implements DataListener{
 				{r2, Math.sqrt((r2Sq - r2 * r2) * ((double) count / (double) (count-1)))};
 
 	}
+	
+	public int getR2StartPoint(int intervalIndex){
+		if (intervalIndex >= 0 && intervalIndex < numOfR2Int){
+			return r2StartPt[intervalIndex];
+		}
+		return 0;
+	}
 
 	/**
 	 * Calculate the non-Gaussian parameter
@@ -1240,9 +1282,11 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		double r4 = 0.0;
 		double value = 0.0;
 		int count = 0;
+		ArrayList<Double> rxList = rx.get(0);
+		ArrayList<Double> ryList = ry.get(0);
 		for (int i = 1; i <= q; i++){
 			if (area.get(i) > 0.000001){
-				value = mag2(rx.get(i), ry.get(i));
+				value = mag2(rxList.get(i), ryList.get(i));
 				r2 += value;
 				value = value * value;
 				r4 += value;
@@ -2030,10 +2074,12 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		double fracOfMotileCells = Double.parseDouble(args[8]);
 		double fracOccupied = Double.parseDouble(args[9]);
 		double rotateDiff = Double.parseDouble(args[10]);
-		int numOfSweeps = Integer.parseInt(args[11]);
-		final int nequil = Integer.parseInt(args[12]);
-		int run = Integer.parseInt(args[13]);
-		String filepath = args[14];
+		int numOfR2Int = Integer.parseInt(args[11]);
+		int r2Int = Integer.parseInt(args[12]);
+		int numOfSweeps = Integer.parseInt(args[13]);
+		final int nequil = Integer.parseInt(args[14]);
+		int run = Integer.parseInt(args[15]);
+		String filepath = args[16];
 		/*int nx = 200;
 		int ny = 200;
 		int q = 500;
@@ -2055,7 +2101,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 
 		//SpinReader reader = new SpinReader();
 		//reader.openReader("init_spin_1000_2.dat");
-		String name = String.format("%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_t_%d_run_%d.dat",
+		String name = String.format("%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_t_%d_run_%d",
 				nx, ny, q, alpha, lambda, motility, rotateDiff, numOfSweeps, run);
 		//String filename = Paths.get(filepath, name).toString();
 		//DataWriter roughnessWriter = new RoughnessWriter();
@@ -2065,32 +2111,45 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		//DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
 		//DataWriter a2Writer = new A2Writer();
 		//DataWriter spinWriter = new SpinWriter(numOfSweeps, q);
-		DataWriter cmWriter = new CMWriter();
+		//DataWriter cmWriter = new CMWriter();
+		int maxIntDigit = ("" + (r2Int*(numOfR2Int-1)+nequil)).length();
+		DataWriter [] r2Writers = new R2Writer [numOfR2Int];
+		for (int i = 0; i < numOfR2Int; i++){
+			r2Writers[i] = new R2Writer(i);
+			r2Writers[i].openWriter(Paths.get(filepath, 
+					String.format("r2_%s_startpt_%0" + maxIntDigit + "d.dat", 
+							name, i*r2Int+nequil)).toString());
+		}
 		//r2Writer.openWriter(Paths.get(filepath, "r2_" + name).toString());
 		//ergWriter.openWriter(Paths.get(filepath, "energy_" + name).toString());
 		//a2Writer.openWriter("a2_" + filename);
 		//statsWriter.openWriter(Paths.get(filepath, "stats_" + name).toString());
 		//spinWriter.openWriter(Paths.get(filepath, "spin_" + name).toString());
-		cmWriter.openWriter(Paths.get(filepath, "cm_" + name).toString());
+		//cmWriter.openWriter(Paths.get(filepath, "cm_" + name).toString());
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
-				fracOccupied, seed, numOfSweeps, nequil, false);
+				fracOccupied, numOfR2Int, r2Int, seed, numOfSweeps, nequil, false);
 		//model.initSpin(reader.readSpins());
 		//model.addDataListener(ergWriter);
-		//model.addDataListener(r2Writer);
+		for (int i = 0; i < numOfR2Int; i++){
+			model.addDataListener(r2Writers[i]);
+		}
 		//model.addDataListener(statsWriter);
 		//model.addDataListener(spinWriter);
-		model.addDataListener(cmWriter);
+		//model.addDataListener(cmWriter);
 		//model.setAverageInterval(avgInt);
 		model.initSpin();
 		model.setFracOfMotileCells(fracOfMotileCells);
 		model.run();
+		for (int i = 0; i < numOfR2Int; i++){
+			r2Writers[i].closeWriter();
+		}
 		//r2Writer.closeWriter();
 		//ergWriter.closeWriter();
 		//statsWriter.closeWriter();
 		//a2Writer.closeWriter();
 		//spinWriter.closeWriter();
-		cmWriter.closeWriter();
+		//cmWriter.closeWriter();
 		//reader.closeReader();
 		//roughnessWriter.closeWriter();
 	}
