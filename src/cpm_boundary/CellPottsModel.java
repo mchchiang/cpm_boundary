@@ -86,6 +86,12 @@ public class CellPottsModel extends SpinModel implements DataListener{
 	private ArrayList<Double> avgDY;
 	private ArrayList<Double> avgD;
 	private int avgInt = 1;
+	
+	//variables for calculating perimeter to area ratio
+	private ArrayList<Double> perimeter;
+	private ArrayList<Double> perimeterToAreaRatio;
+	private double averagePerimeterToAreaRatio = 0;
+	private double stdevPerimeterToAreaRatio  = 0;
 
 	//variables for computing roughness of interface
 	private ArrayList<Vector2D> boundary;
@@ -261,6 +267,11 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		avgDX = new ArrayList<Double>();
 		avgDY = new ArrayList<Double>();
 		avgD = new ArrayList<Double>();
+		
+		perimeter = new ArrayList<Double>();
+		perimeterToAreaRatio = new ArrayList<Double>();
+		averagePerimeterToAreaRatio = 0;
+		stdevPerimeterToAreaRatio = 0;
 
 		lastDivisionTime = new ArrayList<Integer>();
 
@@ -298,6 +309,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		avgDX.add(0.0);
 		avgDY.add(0.0);
 		avgD.add(0.0);
+		perimeterToAreaRatio.add(0.0);
+		perimeter.add(0.0);
 		lastDivisionTime.add(nequil + (int) (nequil * rand.nextDouble()));
 		spinPos.add(new ArrayList<Vector2D>());
 	}
@@ -601,6 +614,45 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			}
 		}
 	}
+	
+	public void updatePerimeterToAreaRatio(){
+		for (int i = 1; i <= q; i++){
+			perimeter.set(i, 0.0);
+		}
+		
+		int s;
+		int p;
+		
+		for (int i = 0; i < nx; i++){
+			for (int j = 0; j < ny; j++){
+				s = spin[i][j];
+				p = 0;
+				if (spin[i][j] != spin[iup(i)][j]) p++;
+				if (spin[i][j] != spin[idown(i)][j]) p++;
+				if (spin[i][j] != spin[i][jup(j)]) p++;
+				if (spin[i][j] != spin[i][jdown(j)]) p++;
+				perimeter.set(s, perimeter.get(s)+p);
+			}
+		}
+		
+		double avg = 0.0;
+		double avgSq = 0.0;
+		double ratio = 0.0;
+		
+		for (int i = 1; i <= q; i++){
+			ratio = perimeter.get(i) / Math.sqrt(area.get(i));
+			perimeterToAreaRatio.set(i, ratio);
+			avg += ratio;
+			avgSq += ratio * ratio;
+		}
+		
+		avg /= (double) q;
+		avgSq /= (double) q;
+		
+		averagePerimeterToAreaRatio = avg;
+		stdevPerimeterToAreaRatio = Math.sqrt(avgSq - avg * avg);
+		
+	}
 
 	/**
 	 * Run the model
@@ -647,6 +699,7 @@ public class CellPottsModel extends SpinModel implements DataListener{
 			}
 
 			if (n >= nequil && n <= numOfSweeps){
+				updatePerimeterToAreaRatio();
 				notifyDataListener(n);
 				updateR();
 			}
@@ -1869,6 +1922,19 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		}
 		return -1.0;
 	}
+	
+	public double getPerimeterToAreaRatio(int cellIndex){
+		if (cellIndex >= 0 && cellIndex <= q){
+			return perimeterToAreaRatio.get(cellIndex);
+		}
+		return -1.0;
+	}
+	
+	public double [] getPerimeterToAreaRatio(){
+		return new double [] {averagePerimeterToAreaRatio,
+							  stdevPerimeterToAreaRatio,
+							  stdevPerimeterToAreaRatio / Math.sqrt(q)};
+	}
 
 	@Override
 	public int getSpin(int i, int j){
@@ -2065,13 +2131,15 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		//DataWriter statsWriter = new StatisticsWriter(numOfSweeps, nequil);
 		//DataWriter a2Writer = new A2Writer();
 		//DataWriter spinWriter = new SpinWriter(numOfSweeps, q);
-		DataWriter cmWriter = new CMWriter();
+		DataWriter ratioWriter = new PerimeterToAreaRatioWriter();
+		//DataWriter cmWriter = new CMWriter();
 		//r2Writer.openWriter(Paths.get(filepath, "r2_" + name).toString());
 		//ergWriter.openWriter(Paths.get(filepath, "energy_" + name).toString());
 		//a2Writer.openWriter("a2_" + filename);
 		//statsWriter.openWriter(Paths.get(filepath, "stats_" + name).toString());
 		//spinWriter.openWriter(Paths.get(filepath, "spin_" + name).toString());
-		cmWriter.openWriter(Paths.get(filepath, "cm_" + name).toString());
+		ratioWriter.openWriter(Paths.get(filepath, "ratio_" + name).toString());
+		//cmWriter.openWriter(Paths.get(filepath, "cm_" + name).toString());
 		CellPottsModel model = new CellPottsModel(
 				nx, ny, q, temp, lambda, alpha, beta, motility, rotateDiff,
 				fracOccupied, seed, numOfSweeps, nequil, false);
@@ -2080,7 +2148,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		//model.addDataListener(r2Writer);
 		//model.addDataListener(statsWriter);
 		//model.addDataListener(spinWriter);
-		model.addDataListener(cmWriter);
+		model.addDataListener(ratioWriter);
+		//model.addDataListener(cmWriter);
 		//model.setAverageInterval(avgInt);
 		model.initSpin();
 		model.setFracOfMotileCells(fracOfMotileCells);
@@ -2090,7 +2159,8 @@ public class CellPottsModel extends SpinModel implements DataListener{
 		//statsWriter.closeWriter();
 		//a2Writer.closeWriter();
 		//spinWriter.closeWriter();
-		cmWriter.closeWriter();
+		ratioWriter.closeWriter();
+		//cmWriter.closeWriter();
 		//reader.closeReader();
 		//roughnessWriter.closeWriter();
 	}

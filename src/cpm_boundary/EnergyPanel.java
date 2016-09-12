@@ -17,6 +17,8 @@ public class EnergyPanel extends JPanel implements DataListener {
 	private JFreeChart chart = null;
 	private ChartPanel chartPanel = null;
 	private JLabel lblAcceptRate;
+	private JLabel lblPerimeterToAreaRatio;
+	private JPanel dataPanel;
 	
 	public void setModel(CellPottsModel model){
 		if (this.model != null){
@@ -46,9 +48,13 @@ public class EnergyPanel extends JPanel implements DataListener {
 				false);
 		chartPanel = new ChartPanel(chart);
 		lblAcceptRate = new JLabel("Accept Rate: ");
+		lblPerimeterToAreaRatio = new JLabel("Perimeter to Area Ratio: ");
+		dataPanel = new JPanel();
+		dataPanel.add(lblAcceptRate);
+		dataPanel.add(lblPerimeterToAreaRatio);
 		this.setLayout(new BorderLayout());
 		this.add(chartPanel, BorderLayout.CENTER);
-		this.add(lblAcceptRate, BorderLayout.SOUTH);
+		this.add(dataPanel, BorderLayout.SOUTH);
 		this.validate();
 	}
 
@@ -57,6 +63,8 @@ public class EnergyPanel extends JPanel implements DataListener {
 		series.add(time, model.calculateR2()[0]);
 		if (time % 10 == 0){
 			lblAcceptRate.setText(String.format("Accept Rate: %.5f",model.getAcceptRate()));
+			lblPerimeterToAreaRatio.setText(
+					String.format("Perimeter to Area Ratio: %.5f", model.getPerimeterToAreaRatio()[0]));
 			this.validate();
 		}
 	}
