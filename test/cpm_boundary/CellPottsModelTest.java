@@ -3045,5 +3045,179 @@ public class CellPottsModelTest {
 		assertEquals("Returned a wrong ronghness value",
 				Math.sqrt(7.359375), model.calculateRoughness(), tol);
 	}
+	
+	@Test
+	public void testUpdatePerimeterToAreaRatio1(){
+		int spin [][] = new int [][] {
+				{2,2,5,5,5,7,7,7},
+				{1,1,3,5,5,7,7,1},
+				{1,1,1,3,3,3,7,1},
+				{1,6,6,3,3,3,4,4},
+				{4,6,6,6,3,4,4,4},
+				{4,6,6,6,6,4,4,4},
+				{2,2,6,5,5,5,7,2},
+				{2,2,5,5,5,7,7,2}
+		};
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updatePerimeterToAreaRatio();
+		assertEquals("Returned a wrong perimeter to area ratio",
+				7.0/Math.sqrt(2.0), model.getPerimeterToAreaRatio(1), tol);
+	}
+	
+	@Test
+	public void testUpdatePerimeterToAreaRatio2(){
+		int spin [][] = new int [][] {
+				{2,2,5,5,5,7,7,7},
+				{1,1,3,5,5,7,7,1},
+				{1,1,1,3,3,3,7,1},
+				{1,6,6,3,3,3,4,4},
+				{4,6,6,6,3,4,4,4},
+				{4,6,6,6,6,4,4,4},
+				{2,2,6,5,5,5,7,2},
+				{2,2,5,5,5,7,7,2}
+		};
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updatePerimeterToAreaRatio();
+		assertEquals("Returned a wrong perimeter to area ratio",
+				6.0/Math.sqrt(2.0), model.getPerimeterToAreaRatio(2), tol);
+	}
+	
+	@Test
+	public void testUpdatePerimeterToAreaRatio3(){
+		int spin [][] = new int [][] {
+				{2,2,5,5,5,7,7,7},
+				{1,1,3,5,5,7,7,1},
+				{1,1,1,3,3,3,7,1},
+				{1,6,6,3,3,3,4,4},
+				{4,6,6,6,3,4,4,4},
+				{4,6,6,6,6,4,4,4},
+				{2,2,6,5,5,5,7,2},
+				{2,2,5,5,5,7,7,2}
+		};
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updatePerimeterToAreaRatio();
+		assertEquals("Returned a wrong perimeter to area ratio",
+				8.0/Math.sqrt(2.0), model.getPerimeterToAreaRatio(3), tol);
+	}
+	
+	@Test
+	public void testUpdatePerimeterToAreaRatio4(){
+		int spin [][] = new int [][] {
+				{2,2,5,5,5,7,7,7},
+				{1,1,3,5,5,7,7,1},
+				{1,1,1,3,3,3,7,1},
+				{1,6,6,3,3,3,4,4},
+				{4,6,6,6,3,4,4,4},
+				{4,6,6,6,6,4,4,4},
+				{2,2,6,5,5,5,7,2},
+				{2,2,5,5,5,7,7,2}
+		};
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updatePerimeterToAreaRatio();
+		assertEquals("Returned a wrong perimeter to area ratio",
+				14.0/Math.sqrt(10.0), model.getPerimeterToAreaRatio(4), tol);
+	}
 
+	@Test
+	public void testUpdatePerimeterToAreaRatio5(){
+		int spin [][] = new int [][] {
+				{2,2,5,5,5,7,7,7},
+				{1,1,3,5,5,7,7,1},
+				{1,1,1,3,3,3,7,1},
+				{1,6,6,3,3,3,4,4},
+				{4,6,6,6,3,4,4,4},
+				{4,6,6,6,6,4,4,4},
+				{2,2,6,5,5,5,7,2},
+				{2,2,5,5,5,7,7,2}
+		};
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updatePerimeterToAreaRatio();
+		assertEquals("Returned a wrong perimeter to area ratio",
+				16.0/Math.sqrt(11.0), model.getPerimeterToAreaRatio(5), tol);
+	}
+	
+	@Test
+	public void testUpdatePerimeterToAreaRatio6(){
+		int spin [][] = new int [][] {
+				{2,2,5,5,5,7,7,7},
+				{1,1,3,5,5,7,7,1},
+				{1,1,1,3,3,3,7,1},
+				{1,6,6,3,3,3,4,4},
+				{4,6,6,6,3,4,4,4},
+				{4,6,6,6,6,4,4,4},
+				{2,2,6,5,5,5,7,2},
+				{2,2,5,5,5,7,7,2}
+		};
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updatePerimeterToAreaRatio();
+		assertEquals("Returned a wrong perimeter to area ratio",
+				16.0/Math.sqrt(10.0), model.getPerimeterToAreaRatio(6), tol);
+	}
+	
+	@Test
+	public void testUpdatePerimeterToAreaRatio7(){
+		int spin [][] = new int [][] {
+				{2,2,5,5,5,7,7,7},
+				{1,1,3,5,5,7,7,1},
+				{1,1,1,3,3,3,7,1},
+				{1,6,6,3,3,3,4,4},
+				{4,6,6,6,3,4,4,4},
+				{4,6,6,6,6,4,4,4},
+				{2,2,6,5,5,5,7,2},
+				{2,2,5,5,5,7,7,2}
+		};
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updatePerimeterToAreaRatio();
+		assertEquals("Returned a wrong perimeter to area ratio",
+				16.0/3.0, model.getPerimeterToAreaRatio(7), tol);
+	}
+	
+	@Test
+	public void testGetPerimeterToAreaRatio(){
+		int spin [][] = new int [][] {
+				{2,2,5,5,5,7,7,7},
+				{1,1,3,5,5,7,7,1},
+				{1,1,1,3,3,3,7,1},
+				{1,6,6,3,3,3,4,4},
+				{4,6,6,6,3,4,4,4},
+				{4,6,6,6,6,4,4,4},
+				{2,2,6,5,5,5,7,2},
+				{2,2,5,5,5,7,7,2}
+		};
+		double [] areaTarget = new double [] {8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0};
+		CellPottsModel model = new CellPottsModel(8, 8, 7, toList(areaTarget), 
+				temperature, lambda, alpha, beta, motility, seed);
+		model.initSpin(spin);
+		model.updatePerimeterToAreaRatio();
+		double [] ratiodata = model.getPerimeterToAreaRatio();
+		assertEquals("Returned the wrong average for perimeter to area ratio",
+				4.927655, ratiodata[0], tol);
+		assertEquals("Returned the wrong standard deviation "
+				+ "for perimeter to area ratio",
+				0.454287, ratiodata[1], tol);
+		assertEquals("Returned the wrong standard error "
+				+ "for perimeter to area ratio",
+				0.171704, ratiodata[2], tol);
+	}
 }
