@@ -50,20 +50,23 @@ public class Measurement implements Runnable {
 		
 		this.trial = trial;
 		
-		writers = new DataWriter [4];
+		/*writers = new DataWriter [4];
 		writers[0] = new R2Writer();
 		writers[1] = new A2Writer();
 		writers[2] = new EnergyWriter();
-		writers[3] = new StatisticsWriter(n, nequil);
+		writers[3] = new StatisticsWriter(n, nequil);*/
+		writers = new DataWriter[1];
+		writers[0] = new PerimeterToAreaRatioWriter();
 		
 		String name = String.format(
 				"%d_%d_%d_a_%.1f_lam_%.1f_P_%.1f_D_%.1f_t_%d_run_%d.dat",
 				nx, ny, q, alpha, lambda, motility, rotateDiff, n, trial);
 		
-		writers[0].openWriter(Paths.get(filepath, "r2_" + name).toString());
+		/*writers[0].openWriter(Paths.get(filepath, "r2_" + name).toString());
 		writers[1].openWriter(Paths.get(filepath, "a2_" + name).toString());
 		writers[2].openWriter(Paths.get(filepath, "energy_" + name).toString());
-		writers[3].openWriter(Paths.get(filepath, "stats_" + name).toString());
+		writers[3].openWriter(Paths.get(filepath, "stats_" + name).toString());*/
+		writers[0].openWriter(Paths.get(filepath, "ratio_" + name).toString());
 		
 		
 		//Initialise the model
